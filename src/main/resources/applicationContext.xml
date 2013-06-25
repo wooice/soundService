@@ -1,0 +1,45 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+ 
+	<context:component-scan base-package="com.sound" />
+ 
+ 	<bean id="mongo" class="com.mongodb.Mongo">  
+        <constructor-arg value="127.0.0.1"></constructor-arg>  
+        <constructor-arg value="27017"></constructor-arg>  
+    </bean>
+
+	<bean id="morphia" class="com.github.jmkgreen.morphia.Morphia">  
+    </bean>
+
+	<bean id="soundDAO" class="com.sound.dao.SoundDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+
+	<bean id="userDAO" class="com.sound.dao.UserDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+
+	<bean id="processFactory" class="com.sound.processor.factory.ProcessorFactory">
+	</bean>
+
+	<bean id="userService" class="com.sound.service.user.impl.UserService">
+	</bean>
+
+	<bean id="soundService" class="com.sound.service.sound.impl.SoundService">
+	</bean>
+
+	<bean id="fileService" class="com.sound.service.file.impl.FileService">
+	</bean>
+	
+	<bean id="remoteStorageService" class="com.sound.service.storage.impl.RemoteStorageService">
+	</bean>
+</beans>
