@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.configuration.PropertiesConfiguration;
+
 import com.sound.exception.RemoteStorageException;
 
 public interface RemoteStorageService {
@@ -17,4 +19,6 @@ public interface RemoteStorageService {
 	public void upload(File file) throws RemoteStorageException;
 	
 	public void delete(String fileName) throws RemoteStorageException;
+	
+	public PropertiesConfiguration getRemoteStorageConfig();
 }

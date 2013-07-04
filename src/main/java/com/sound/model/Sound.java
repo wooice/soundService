@@ -85,7 +85,7 @@ public class Sound{
 
 
 		@Embedded
-		private ScoundPoster poster;
+		private SoundPoster poster;
 
 		private String name;
 		
@@ -175,15 +175,15 @@ public class Sound{
 			this.duration = duration;
 		}
 
-		public ScoundPoster getPoster() {
+		public SoundPoster getPoster() {
 			return poster;
 		}
 
-		public void setPoster(ScoundPoster poster) {
+		public void setPoster(SoundPoster poster) {
 			this.poster = poster;
 		}
 
-		public class ScoundPoster
+		public class SoundPoster
 		{
 			@Serialized
 			private byte[] poster;

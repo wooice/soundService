@@ -196,6 +196,12 @@ public class RemoteStorageService implements
 
 	}
 
+
+	@Override
+	public PropertiesConfiguration getRemoteStorageConfig(){
+		return config;
+	}
+
 	private GetObjectRequest generateGetObjectRequest(String fileName) {
 		GetObjectRequest getObjectRequest = new GetObjectRequest(bucket,
 				fileName);

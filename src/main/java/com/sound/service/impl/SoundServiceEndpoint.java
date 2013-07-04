@@ -93,6 +93,8 @@ public class SoundServiceEndpoint {
 	@Path("/{soundId}")
 	public Response load(@PathParam("soundId") String soundId) {
 		soundService.load(soundId);
+		
+		Response.status(200).entity(null).build();
 
 		return null;
 	}

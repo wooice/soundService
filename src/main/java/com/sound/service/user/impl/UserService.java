@@ -1,10 +1,15 @@
 package com.sound.service.user.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.UserDAO;
 import com.sound.exception.UserException;
 import com.sound.model.User;
+import com.sound.model.UserAuth;
+import com.sound.model.UserAuth.ChangeHistory;
 
 public class UserService implements com.sound.service.user.itf.UserService {
 
@@ -53,6 +58,34 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
 		userDAO.save(user);
 
+		return user;
+	}
+
+	@Override
+	public User updatePassword(String emailAddress, String password, String ip) throws UserException{
+		User user =  this.getUserByEmail(emailAddress);
+
+		if (null == user)
+		{
+			throw new UserException("Cannot find user with email address : " + emailAddress);
+		}
+		
+		UserAuth auth = user.getAuth();
+		if (auth == null) {
+			auth = new UserAuth();
+			user.setAuth(auth);
+			auth.setHisoties(new ArrayList<ChangeHistory>());
+		}
+		auth.setId(user.getId());
+		auth.setPassword(password);
+		ChangeHistory history = new ChangeHistory();
+		history.setIp(ip);
+		history.setModifiedDate(new Date());
+		history.setPassword(password);
+		auth.getHisoties().add(history);
+		
+		userDAO.save(user);
+		
 		return user;
 	}
 
