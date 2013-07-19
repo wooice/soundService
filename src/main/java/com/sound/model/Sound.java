@@ -18,7 +18,7 @@ public class Sound{
 	@Embedded
 	private SoundProfile profile;
 
-	@Embedded
+	@Reference
 	private SoundData soundData;
 
 	@Reference
@@ -89,6 +89,8 @@ public class Sound{
 
 		private String name;
 		
+		private String description;
+		
 		/**
 		 * published, private, deleted
 		 */
@@ -108,7 +110,7 @@ public class Sound{
 		
 		private Date modifiedTime;
 
-		private int duration;
+		private boolean downloadable;
 		
 		public User getOwner() {
 			return owner;
@@ -142,6 +144,14 @@ public class Sound{
 			this.type = type;
 		}
 
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
 		public int getPlayed() {
 			return played;
 		}
@@ -166,15 +176,6 @@ public class Sound{
 			this.modifiedTime = modifiedTime;
 		}
 
-		
-		public int getDuration() {
-			return duration;
-		}
-
-		public void setDuration(int duration) {
-			this.duration = duration;
-		}
-
 		public SoundPoster getPoster() {
 			return poster;
 		}
@@ -182,8 +183,17 @@ public class Sound{
 		public void setPoster(SoundPoster poster) {
 			this.poster = poster;
 		}
+		
 
-		public class SoundPoster
+		public boolean isDownloadable() {
+			return downloadable;
+		}
+
+		public void setDownloadable(boolean downloadable) {
+			this.downloadable = downloadable;
+		}
+
+		public static class SoundPoster
 		{
 			@Serialized
 			private byte[] poster;
@@ -210,29 +220,40 @@ public class Sound{
 
 	public static class SoundData
 	{
-		// back up file in gfs
-		private String fileName;
-
+		@Id private ObjectId id;
+		
 		// meide route in resource server. 
-		private String route;
+		private String objectId;
+		
+		private String fileAlias;
 
+		private int duration;
+		
 		@Serialized
 		private float[][] wave;
-
-		public String getFileName() {
-			return fileName;
+		
+		public String getObjectId() {
+			return objectId;
 		}
 
-		public void setFileName(String fileName) {
-			this.fileName = fileName;
+		public void setObjectId(String objectId) {
+			this.objectId = objectId;
 		}
 
-		public String getRoute() {
-			return route;
+		public String getFileAlias() {
+			return fileAlias;
 		}
 
-		public void setRoute(String route) {
-			this.route = route;
+		public void setFileAlias(String fileAlias) {
+			this.fileAlias = fileAlias;
+		}
+		
+		public int getDuration() {
+			return duration;
+		}
+
+		public void setDuration(int duration) {
+			this.duration = duration;
 		}
 
 		public float[][] getWave() {
@@ -242,6 +263,15 @@ public class Sound{
 		public void setWave(float[][] wave) {
 			this.wave = wave;
 		}
+
+		public ObjectId getId() {
+			return id;
+		}
+
+		public void setId(ObjectId id) {
+			this.id = id;
+		}
+		
 	}
 
 }

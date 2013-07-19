@@ -89,4 +89,12 @@ public class UserService implements com.sound.service.user.itf.UserService {
 		return user;
 	}
 
+	public UserDAO getUserDAO() {
+		return userDAO;
+	}
+
+	public void setUserDAO(UserDAO userDAO) {
+		this.userDAO = userDAO;
+	}
+	
 }
