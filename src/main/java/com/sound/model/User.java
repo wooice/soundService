@@ -113,12 +113,21 @@ public class User {
 		@Embedded
 		private ProfileAvator avator;
 		private String alias;
+		private String password;
 		private String firstName;
 		private String lastName;
 		private String location;
 		private String description;
 		private int age;
 		private boolean gender;
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
 
 		public ProfileAvator getAvator() {
 			return avator;
