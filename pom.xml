@@ -52,7 +52,7 @@
 		<artifactId>spring-web</artifactId>
 		<version>3.2.2.RELEASE</version>
 	</dependency>
-
+	
 	<!-- Jersey + Spring -->
 	<dependency>
 		<groupId>com.sun.jersey.contribs</groupId>

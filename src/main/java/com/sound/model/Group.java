@@ -1,15 +1,21 @@
 package com.sound.model;
 
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 
-public class Group {
+@Entity(noClassnameStored= true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Group extends BaseModel{
 
 	@Id private ObjectId id;
 
 	private String name;
 
+	@JsonIgnore
 	public ObjectId getId() {
 		return id;
 	}
