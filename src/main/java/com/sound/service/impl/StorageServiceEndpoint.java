@@ -7,7 +7,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sound.dto.storage.OssAuthDto;
+import com.sound.model.OssAuth;
 
 
 @Component
@@ -20,13 +20,13 @@ public class StorageServiceEndpoint{
 
 	@GET
 	@Path("/ossauth")
-	public OssAuthDto getOSSAuth() {
-		OssAuthDto dto = loadOssAuthDto();
+	public OssAuth getOSSAuth() {
+		OssAuth dto = loadOssAuthDto();
 		return dto;
 	}
 
-	private OssAuthDto loadOssAuthDto() {
-		OssAuthDto dto = new OssAuthDto();
+	private OssAuth loadOssAuthDto() {
+		OssAuth dto = new OssAuth();
 		PropertiesConfiguration config = remoteStorageService.getRemoteStorageConfig();
 		dto.setAccessId(config.getString("ACCESS_ID"));
 		dto.setAccessPassword(config.getString("ACCESS_KEY"));

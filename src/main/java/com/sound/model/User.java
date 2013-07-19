@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
@@ -11,10 +13,13 @@ import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
 
-@Entity
-public class User {
+@Entity(noClassnameStored= true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class User extends BaseModel
+{
 
-	@Id private ObjectId id;
+	@Id 
+	private ObjectId id;
 
 	@Embedded
 	private UserProfile profile;
@@ -37,6 +42,7 @@ public class User {
 	@Reference(lazy=true)
 	private List<Group> groups;
 	
+	@JsonIgnore
 	public ObjectId getId() {
 		return id;
 	}
@@ -236,4 +242,6 @@ public class User {
 		}
 
 	}
+	
+	
 }

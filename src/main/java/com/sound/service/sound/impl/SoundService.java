@@ -1,7 +1,6 @@
 package com.sound.service.sound.impl;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
@@ -15,16 +14,11 @@ import com.sound.model.Sound;
 import com.sound.model.Sound.SoundData;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.Sound.SoundProfile.SoundPoster;
-import com.sound.model.SoundSocial;
-import com.sound.model.SoundSocial.SoundComment;
-import com.sound.model.SoundSocial.SoundLike;
-import com.sound.model.SoundSocial.SoundRepost;
 import com.sound.model.User;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
 import com.sound.model.file.LocalFile;
 import com.sound.model.file.LocalSoundFile;
-import com.sound.model.file.RemoteFile;
 import com.sound.processor.factory.ProcessorFactory;
 import com.sound.processor.itf.Converter;
 import com.sound.processor.itf.Extractor;
@@ -44,37 +38,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 	@Autowired
 	ProcessorFactory processFactory;
-
-	@Override
-	public void save(LocalSoundFile soundFile, RemoteFile remoteFile) {
-		User owner = userDAO.findByAlias(soundFile.getOwnerId());
-
-		Sound sound = new Sound();
-		Sound.SoundProfile soundProfile = new Sound.SoundProfile();
-		soundProfile.setName(soundFile.getFileName());
-		soundProfile.setCreatedTime(new Date());
-		soundProfile.setModifiedTime(new Date());
-		soundProfile.setOwner(owner);
-		soundProfile.setPlayed(0);
-		soundProfile.setPoster(null);
-		soundProfile.setType(SoundType.getTypeId(soundFile.getType()));
-		soundProfile.setStatus(SoundState.getStateId(soundFile.getStatus()));
-		sound.setProfile(soundProfile);
-
-		Sound.SoundData soundData = new Sound.SoundData();
-		soundData.setWave(soundFile.getWaveData());
-		soundData.setObjectId(remoteFile.getRemoteKey());
-		soundData.setFileAlias(soundFile.getFileName());
-		sound.setSoundData(soundData);
-
-		SoundSocial soundSocial = new SoundSocial();
-		soundSocial.setComments(new ArrayList<SoundComment>());
-		soundSocial.setLikes(new ArrayList<SoundLike>());
-		soundSocial.setReposts(new ArrayList<SoundRepost>());
-		sound.setSoundSocial(soundSocial);
-
-		soundDAO.save(sound);
-	}
 
 	@Override
 	public LocalSoundFile uniform(LocalSoundFile sound) throws SoundException {
@@ -137,8 +100,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	}
 
 	@Override
-	public Sound load(String soundId) {
-		return null;
+	public Sound load(String soundAlias) {
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		return sound;
 	}
 
 	@Override
@@ -146,7 +110,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	{
 		Sound sound = new Sound();
 		
-		SoundData soundData = soundDataDAO.findOneByRemoteId(remoteId);
+		SoundData soundData = soundDataDAO.findOne("objectId", remoteId);
 		sound.setSoundData(soundData);
 		
 		SoundProfile soundProfile = new SoundProfile();
@@ -160,7 +124,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		soundProfile.setStatus(SoundState.getStateId(status));
 		soundProfile.setType(SoundType.SOUND.getTypeId());
 		
-		User owner = userDAO.findByAlias(ownerAlias);
+		User owner = userDAO.findOne("profile.alias", ownerAlias);
 		soundProfile.setOwner(owner);
 		
 		SoundPoster soundPoster = new SoundPoster();
@@ -173,6 +137,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		soundDAO.save(sound);
 	}
 
+	
 	public SoundDAO getSoundDAO() {
 		return soundDAO;
 	}

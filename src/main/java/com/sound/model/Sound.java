@@ -4,14 +4,18 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
+import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
 
-
-public class Sound{
+@Entity(noClassnameStored= true) 
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Sound extends BaseModel{
 
 	@Id private ObjectId id;
 
@@ -30,6 +34,7 @@ public class Sound{
 	@Reference(lazy=true)
 	private List<Sound> sets;
 
+	@JsonIgnore
 	public ObjectId getId() {
 		return id;
 	}
@@ -82,7 +87,6 @@ public class Sound{
 	{
 		@Reference(lazy=true)
 		private User owner;
-
 
 		@Embedded
 		private SoundPoster poster;
@@ -273,5 +277,5 @@ public class Sound{
 		}
 		
 	}
-
+	
 }

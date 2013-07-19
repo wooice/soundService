@@ -4,11 +4,17 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
+import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 
-public class UserAuth {
+@Entity(noClassnameStored= true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class UserAuth extends BaseModel
+{
 
 	@Id private ObjectId id;
 
@@ -17,6 +23,7 @@ public class UserAuth {
 	@Embedded
 	private List<ChangeHistory> hisoties;
 
+	@JsonIgnore
 	public ObjectId getId() {
 		return id;
 	}

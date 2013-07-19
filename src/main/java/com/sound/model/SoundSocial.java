@@ -4,12 +4,17 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
+import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 
-public class SoundSocial
+@Entity(noClassnameStored= true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SoundSocial extends BaseModel
 {
 	@Id private ObjectId id;
 
@@ -22,6 +27,7 @@ public class SoundSocial
 	@Embedded
 	private List<SoundComment> comments;
 
+	@JsonIgnore
 	public ObjectId getId() {
 		return id;
 	}
