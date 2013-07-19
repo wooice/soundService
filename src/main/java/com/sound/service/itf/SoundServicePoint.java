@@ -19,6 +19,8 @@ public interface SoundServicePoint {
 	 * 	5. save uniform type sound data to resource server.
 	 */
 	public Response upload(InputStream uploadedInputStream, FormDataContentDisposition fileDetail, String fileName, String ownerId, String status);
+	
+	public Response save(String soundAlias, String ownerAlias, String status);
 
 	/**
 	 * Input: sound id

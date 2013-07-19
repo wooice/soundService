@@ -17,9 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sound.exception.SoundException;
-import com.sound.model.file.LocalSoundFile;
-import com.sound.model.file.RemoteFile;
+import com.sound.model.file.LocalFile;
 import com.sound.service.file.itf.FileService;
 import com.sound.service.sound.itf.SoundService;
 import com.sun.jersey.core.header.FormDataContentDisposition;
@@ -36,39 +34,52 @@ public class SoundServiceEndpoint {
 	SoundService soundService;
 
 	@PUT
-	@Path("/upload")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response upload(
-			@FormDataParam("file") InputStream uploadedInputStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetail) {
-		byte[] soundData = null;
-		try {
-			soundData = IOUtils.toByteArray(uploadedInputStream);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new RuntimeException("can't fetch file content.");
-		}
-		System.out.println(fileDetail.getName());
-		LocalSoundFile sound = new LocalSoundFile();
-		sound.setContent(soundData);
-		sound.setType(fileDetail.getType());
-		sound.setFileName(fileDetail.getName());
-		try {
-			sound = soundService.uniform(sound);
-			RemoteFile remoteFile = fileService.upload(sound);
-			soundService.save(sound, remoteFile);
-		} catch (SoundException e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	@PUT
 	@Path("/save")
-	public Response save(@FormParam("title") String title,
-			@FormParam("description") String description) {
-		return null;
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response saveProfile(
+			@FormDataParam("file") InputStream uploadedInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetail,
+			@FormDataParam("objectId") String objectId, 
+			@FormDataParam("soundAlias") String soundAlias, 
+			@FormDataParam("description") String description, 
+			@FormDataParam("ownerAlias") String ownerAlias, 
+			@FormDataParam("status") String status)
+	{
+
+		if (null == objectId)
+		{
+			return Response.status(500).entity("sound object id can't be null").build(); 
+		}
+
+		if (null == soundAlias)
+		{
+			return Response.status(500).entity("sound alias can't be null").build(); 
+		}
+		
+		byte[] soundData = null;
+		try 
+		{
+			soundData = IOUtils.toByteArray(uploadedInputStream);
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+			return Response.status(500).entity("poster upload failed.").build(); 
+		}
+
+		LocalFile poster = new LocalFile();
+		poster.setContent(soundData);
+		poster.setType(fileDetail.getType());
+		poster.setFileName(fileDetail.getName());
+		
+		try
+		{
+			soundService.saveProfile(objectId, soundAlias, description, ownerAlias, status, poster);
+		}
+		catch(Exception e)
+		{
+			return Response.status(500).entity(e.getMessage()).build();
+		}
+		return Response.status(200).entity("true").build();
 	}
 
 	@PUT
