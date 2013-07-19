@@ -48,12 +48,13 @@ public class UserServiceEndpoint{
 	@Path("/create")
 	public Response create(
 			@FormParam("userAlias") String userAlias , 
-			@FormParam("emailAddress") String emailAddress
+			@FormParam("emailAddress") String emailAddress,
+			@FormParam("password") String password
 	)
 	{
 		try
 		{
-			userService.createUser(userAlias, emailAddress);
+			userService.createUser(userAlias, emailAddress, password);
 		}
 		catch (UserException e) 
 		{

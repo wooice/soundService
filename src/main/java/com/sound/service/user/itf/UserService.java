@@ -7,7 +7,7 @@ public interface UserService {
 
 	public User getUserByEmail(String userAlias);
 
-	public User createUser(String userAlias, String emailAddress) throws UserException;
+	public User createUser(String userAlias, String emailAddress, String password) throws UserException;
 	
 	public User updatePassword(String emailAddress, String password, String ip) throws UserException;
 
