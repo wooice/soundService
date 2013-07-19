@@ -2,6 +2,7 @@ package com.sound.service.sound.itf;
 
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
+import com.sound.model.file.LocalFile;
 import com.sound.model.file.LocalSoundFile;
 import com.sound.model.file.RemoteFile;
 
@@ -14,6 +15,8 @@ public interface SoundService {
 	 * 	4. save ziped origin sound data into gridfs as back up.
 	 */
 	public void save(LocalSoundFile sound, RemoteFile remoteFile);
+
+	public void saveProfile(String objectId, String soundAlias, String description, String ownerAlias, String status, LocalFile poster) throws SoundException;
 
 	public LocalSoundFile uniform(LocalSoundFile sound) throws SoundException;
 	

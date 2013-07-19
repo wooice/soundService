@@ -8,9 +8,13 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.SoundDAO;
+import com.sound.dao.SoundDataDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
+import com.sound.model.Sound.SoundData;
+import com.sound.model.Sound.SoundProfile;
+import com.sound.model.Sound.SoundProfile.SoundPoster;
 import com.sound.model.SoundSocial;
 import com.sound.model.SoundSocial.SoundComment;
 import com.sound.model.SoundSocial.SoundLike;
@@ -18,6 +22,7 @@ import com.sound.model.SoundSocial.SoundRepost;
 import com.sound.model.User;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
+import com.sound.model.file.LocalFile;
 import com.sound.model.file.LocalSoundFile;
 import com.sound.model.file.RemoteFile;
 import com.sound.processor.factory.ProcessorFactory;
@@ -33,6 +38,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 	@Autowired
 	UserDAO userDAO;	
+	
+	@Autowired
+	SoundDataDAO soundDataDAO;
 
 	@Autowired
 	ProcessorFactory processFactory;
@@ -44,7 +52,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		Sound sound = new Sound();
 		Sound.SoundProfile soundProfile = new Sound.SoundProfile();
 		soundProfile.setName(soundFile.getFileName());
-		soundProfile.setDuration(soundFile.getDuration());
 		soundProfile.setCreatedTime(new Date());
 		soundProfile.setModifiedTime(new Date());
 		soundProfile.setOwner(owner);
@@ -56,8 +63,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 		Sound.SoundData soundData = new Sound.SoundData();
 		soundData.setWave(soundFile.getWaveData());
-		soundData.setRoute(remoteFile.getRemoteKey());
-		soundData.setFileName(soundFile.getFileName());
+		soundData.setObjectId(remoteFile.getRemoteKey());
+		soundData.setFileAlias(soundFile.getFileName());
 		sound.setSoundData(soundData);
 
 		SoundSocial soundSocial = new SoundSocial();
@@ -132,6 +139,70 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	@Override
 	public Sound load(String soundId) {
 		return null;
+	}
+
+	@Override
+	public void saveProfile(String remoteId, String soundAlias, String description, String ownerAlias, String status, LocalFile poster) throws SoundException 
+	{
+		Sound sound = new Sound();
+		
+		SoundData soundData = soundDataDAO.findOneByRemoteId(remoteId);
+		sound.setSoundData(soundData);
+		
+		SoundProfile soundProfile = new SoundProfile();
+		
+		soundProfile.setCreatedTime(new Date());
+		soundProfile.setDownloadable(false);
+		soundProfile.setModifiedTime(new Date());
+		soundProfile.setName(soundAlias);
+		soundProfile.setDescription(description);
+		soundProfile.setPlayed(0);
+		soundProfile.setStatus(SoundState.getStateId(status));
+		soundProfile.setType(SoundType.SOUND.getTypeId());
+		
+		User owner = userDAO.findByAlias(ownerAlias);
+		soundProfile.setOwner(owner);
+		
+		SoundPoster soundPoster = new SoundPoster();
+		soundPoster.setExtension(poster.getType());
+		soundPoster.setPoster(poster.getContent());
+		soundProfile.setPoster(soundPoster);
+		
+		sound.setProfile(soundProfile);
+		
+		soundDAO.save(sound);
+	}
+
+	public SoundDAO getSoundDAO() {
+		return soundDAO;
+	}
+
+	public void setSoundDAO(SoundDAO soundDAO) {
+		this.soundDAO = soundDAO;
+	}
+
+	public UserDAO getUserDAO() {
+		return userDAO;
+	}
+
+	public void setUserDAO(UserDAO userDAO) {
+		this.userDAO = userDAO;
+	}
+
+	public SoundDataDAO getSoundDataDAO() {
+		return soundDataDAO;
+	}
+
+	public void setSoundDataDAO(SoundDataDAO soundDataDAO) {
+		this.soundDataDAO = soundDataDAO;
+	}
+
+	public ProcessorFactory getProcessFactory() {
+		return processFactory;
+	}
+
+	public void setProcessFactory(ProcessorFactory processFactory) {
+		this.processFactory = processFactory;
 	}
 
 }

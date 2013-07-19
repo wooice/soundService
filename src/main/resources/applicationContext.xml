@@ -27,14 +27,25 @@
         <constructor-arg ref="morphia"></constructor-arg>  
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
+	
+	<bean id="soundDataDAO" class="com.sound.dao.SoundDataDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
 
 	<bean id="processFactory" class="com.sound.processor.factory.ProcessorFactory">
 	</bean>
 
 	<bean id="userService" class="com.sound.service.user.impl.UserService">
+		<property name="userDAO" ref="userDAO" />
 	</bean>
 
 	<bean id="soundService" class="com.sound.service.sound.impl.SoundService">
+		<property name="soundDAO" ref="soundDAO" />
+		<property name="userDAO" ref="userDAO" />
+		<property name="soundDataDAO" ref="soundDataDAO" />
+		<property name="processFactory" ref="processFactory" />
 	</bean>
 
 	<bean id="fileService" class="com.sound.service.file.impl.FileService">
