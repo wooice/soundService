@@ -89,7 +89,6 @@ public class Sound extends BaseModel{
 		private User owner;
 
 		@Embedded
-		@JsonIgnore
 		private SoundPoster poster;
 
 		private String name;
@@ -181,6 +180,7 @@ public class Sound extends BaseModel{
 			this.modifiedTime = modifiedTime;
 		}
 
+		@JsonIgnore
 		public SoundPoster getPoster() {
 			return poster;
 		}
