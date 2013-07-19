@@ -32,7 +32,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 	}
 
 	@Override
-	public User createUser(String userAlias, String emailAddress) throws UserException
+	public User createUser(String userAlias, String emailAddress, String password) throws UserException
 	{
 		User user = this.getUserByAlias(userAlias);
 
@@ -51,6 +51,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 		user = new User();
 		User.UserProfile profile = new User.UserProfile();
 		profile.setAlias(userAlias);
+		profile.setPassword(password);
 		User.UserEmail email = new User.UserEmail();
 		email.setEmailAddress(emailAddress);
 		user.setProfile(profile);
