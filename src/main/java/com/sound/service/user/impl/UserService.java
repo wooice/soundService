@@ -19,14 +19,14 @@ public class UserService implements com.sound.service.user.itf.UserService {
 	@Override
 	public User getUserByAlias(String userAlias)
 	{
-		User user = userDAO.findByAlias(userAlias);
+		User user = userDAO.findOne("profile.alias", userAlias);
 
 		return user;
 	}
 
 	@Override
 	public User getUserByEmail(String emailAddress) {
-		User user = userDAO.findByEmail(emailAddress);
+		User user = userDAO.findOne("emails.emailAddress", emailAddress);
 
 		return user;
 	}

@@ -10,6 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -17,6 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.model.Sound;
 import com.sound.model.file.LocalFile;
 import com.sound.service.file.itf.FileService;
 import com.sound.service.sound.itf.SoundService;
@@ -33,6 +35,26 @@ public class SoundServiceEndpoint {
 	@Autowired
 	SoundService soundService;
 
+	@GET
+	@Path("/{soundAlias}")
+	@Produces("text/plain")
+	public String loadSound(
+			@PathParam("soundAlias") String soundAlias
+			)
+	{
+		Sound sound = null;
+		try
+		{
+			sound = soundService.load(soundAlias);
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e.getMessage()); 
+		}
+		
+		return sound.toString();
+	}
+	
 	@PUT
 	@Path("/save")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -73,8 +95,9 @@ public class SoundServiceEndpoint {
 		poster.setContent(soundData);
 		if (null != fileDetail)
 		{
-			poster.setType(fileDetail.getType());
-			poster.setFileName(fileDetail.getName());
+			String[] parts = fileDetail.getName().split(".");
+			poster.setType(parts[1]);
+			poster.setFileName(parts[0]);
 		}
 		
 		try
@@ -102,16 +125,6 @@ public class SoundServiceEndpoint {
 	@Path("/{soundId}")
 	public Response delete(@PathParam("soundId") String soundId) {
 		soundService.delete(soundId);
-
-		return null;
-	}
-
-	@GET
-	@Path("/{soundId}")
-	public Response load(@PathParam("soundId") String soundId) {
-		soundService.load(soundId);
-		
-		Response.status(200).entity(null).build();
 
 		return null;
 	}
