@@ -8,12 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sound.dto.storage.OssAuthDto;
-import com.sound.service.itf.StorageServicePoint;
 
 
 @Component
 @Path("/storage")
-public class StorageServiceEndpoint implements StorageServicePoint{
+public class StorageServiceEndpoint{
 	
 	@Autowired
 	com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
