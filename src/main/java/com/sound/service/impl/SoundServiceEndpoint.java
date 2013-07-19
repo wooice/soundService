@@ -59,7 +59,10 @@ public class SoundServiceEndpoint {
 		byte[] soundData = null;
 		try 
 		{
-			soundData = IOUtils.toByteArray(uploadedInputStream);
+			if (null != uploadedInputStream)
+			{
+				soundData = IOUtils.toByteArray(uploadedInputStream);
+			}
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
@@ -68,8 +71,11 @@ public class SoundServiceEndpoint {
 
 		LocalFile poster = new LocalFile();
 		poster.setContent(soundData);
-		poster.setType(fileDetail.getType());
-		poster.setFileName(fileDetail.getName());
+		if (null != fileDetail)
+		{
+			poster.setType(fileDetail.getType());
+			poster.setFileName(fileDetail.getName());
+		}
 		
 		try
 		{
