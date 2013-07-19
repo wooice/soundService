@@ -89,6 +89,7 @@ public class Sound extends BaseModel{
 		private User owner;
 
 		@Embedded
+		@JsonIgnore
 		private SoundPoster poster;
 
 		private String name;
