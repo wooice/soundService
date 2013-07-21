@@ -27,6 +27,19 @@ public enum SoundState {
 		return null;
 	}
 	
+	public static String getStateName(Integer statusId)
+	{
+		for (SoundState state: SoundState.values())
+		{
+			if (state.getStatusId() == statusId)
+			{
+				return state.getStatusName();
+			}
+		}
+
+		return null;
+	}
+	
 	public int getStatusId() {
 		return statusId;
 	}

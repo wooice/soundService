@@ -26,6 +26,19 @@ public enum SoundType {
 		return null;
 	}
 
+	public static String getTypeName(Integer typeId)
+	{
+		for (SoundType type: SoundType.values())
+		{
+			if (type.getTypeId() == typeId)
+			{
+				return type.getTypeName();
+			}
+		}
+
+		return null;
+	}
+	
 	public int getTypeId() {
 		return typeId;
 	}

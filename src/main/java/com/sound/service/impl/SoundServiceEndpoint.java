@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -59,12 +60,12 @@ public class SoundServiceEndpoint {
 
 		if (null == objectId)
 		{
-			return Response.status(500).entity("sound object id can't be null").build(); 
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("sound object id can't be null").build(); 
 		}
 
 		if (null == soundAlias)
 		{
-			return Response.status(500).entity("sound alias can't be null").build(); 
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("sound alias can't be null").build(); 
 		}
 		
 		try
@@ -73,9 +74,9 @@ public class SoundServiceEndpoint {
 		}
 		catch(Exception e)
 		{
-			return Response.status(500).entity(e.getMessage()).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
-		return Response.status(200).entity("true").build();
+		return Response.status(Status.OK).entity("true").build();
 	}
 
 	@PUT
@@ -85,15 +86,15 @@ public class SoundServiceEndpoint {
 			@FormParam("SetId") String setId) {
 		soundService.addToSet(soundId, setId);
 
-		return null;
+		return Response.status(Status.OK).entity("true").build();
 	}
 
 	@DELETE
-	@Path("/{soundId}")
-	public Response delete(@PathParam("soundId") String soundId) {
-		soundService.delete(soundId);
+	@Path("/{soundAlias}")
+	public Response delete(@PathParam("soundAlias") String soundAlias) {
+		soundService.delete(soundAlias);
 
-		return null;
+		return Response.status(Status.OK).entity("true").build();
 	}
 
 }

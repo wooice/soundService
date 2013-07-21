@@ -12,7 +12,7 @@ public interface SoundService {
 	
 	public void addToSet(String soundId, String setId);
 
-	public void delete(String soundId);
+	public void delete(String soundAlias);
 
 	public Sound load(String soundId);
 }
