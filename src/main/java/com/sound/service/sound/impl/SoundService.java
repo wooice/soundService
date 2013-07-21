@@ -17,7 +17,6 @@ import com.sound.model.Sound.SoundProfile.SoundPoster;
 import com.sound.model.User;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
-import com.sound.model.file.LocalFile;
 import com.sound.model.file.LocalSoundFile;
 import com.sound.processor.factory.ProcessorFactory;
 import com.sound.processor.itf.Converter;
@@ -106,7 +105,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	}
 
 	@Override
-	public void saveProfile(String remoteId, String soundAlias, String description, String ownerAlias, String status, LocalFile poster) throws SoundException 
+	public void saveProfile(String remoteId, String soundAlias, String description, String ownerAlias, String status, String posterId) throws SoundException 
 	{
 		Sound sound = new Sound();
 		
@@ -128,8 +127,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		soundProfile.setOwner(owner);
 		
 		SoundPoster soundPoster = new SoundPoster();
-		soundPoster.setExtension(poster.getType());
-		soundPoster.setPoster(poster.getContent());
+		soundPoster.setPosterId(posterId);
 		soundProfile.setPoster(soundPoster);
 		
 		sound.setProfile(soundProfile);

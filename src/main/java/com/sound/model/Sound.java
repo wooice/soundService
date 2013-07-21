@@ -180,7 +180,6 @@ public class Sound extends BaseModel{
 			this.modifiedTime = modifiedTime;
 		}
 
-		@JsonIgnore
 		public SoundPoster getPoster() {
 			return poster;
 		}
@@ -200,17 +199,17 @@ public class Sound extends BaseModel{
 
 		public static class SoundPoster
 		{
-			@Serialized
-			private byte[] poster;
+			//Id of stored poster
+			private String posterId;
 
 			private String extension;
 
-			public byte[] getPoster() {
-				return poster;
+			public String getPosterId() {
+				return posterId;
 			}
 
-			public void setPoster(byte[] poster) {
-				this.poster = poster;
+			public void setPosterId(String posterId) {
+				this.posterId = posterId;
 			}
 
 			public String getExtension() {
