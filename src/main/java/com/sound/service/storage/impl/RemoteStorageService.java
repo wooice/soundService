@@ -279,8 +279,11 @@ public class RemoteStorageService implements
 		request.setFileName(fileName);
 		request.setContentType(contentType);
 		request.setDate(date);
-		request.setAuthorization(constructPutSignature(HttpMethod.PUT.name(),
-				date, contentType, fileName));
+		request.setAuthorization("OSS "
+				+ config.getString("ACCESS_ID")
+				+ ":"
+				+ constructPutSignature(HttpMethod.PUT.name(), date,
+						contentType, fileName));
 		return request;
 	}
 
@@ -289,21 +292,13 @@ public class RemoteStorageService implements
 		String date = DATE_FORMATTER.format(new Date());
 		GetFileRequest request = new GetFileRequest();
 		request.setHost(bucket + HOST_SUFFIX);
-		System.out.println(request.getHost());
 		request.setDate(date);
-		System.out.println(date);
 		request.setFileName(fileName);
-
-		System.out.println(fileName);
-		request.setAuthorization("OSS " + config.getString("ACCESS_ID") + ":" + constructGetSignature(HttpMethod.GET.name(),
-				date, null, HTTP.CONTENT_TYPE));
-
-		System.out.println(request.getAuthorization());
-
-		URL test = client.generatePresignedUrl(bucket, "test-file", new Date(
-				System.currentTimeMillis() + 100000000l));
-		System.out.println(test.getPath());
-		System.out.println(test.toString());
+		request.setAuthorization("OSS "
+				+ config.getString("ACCESS_ID")
+				+ ":"
+				+ constructGetSignature(HttpMethod.GET.name(), date, null,
+						HTTP.CONTENT_TYPE));
 		return request;
 	}
 
