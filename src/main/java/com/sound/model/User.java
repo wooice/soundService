@@ -12,6 +12,7 @@ import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
+import com.sound.model.enums.GenderEnum;
 
 @Entity(noClassnameStored= true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -127,6 +128,7 @@ public class User extends BaseModel
 		private int age;
 		private boolean gender;
 
+		@JsonIgnore
 		public String getPassword() {
 			return password;
 		}
@@ -191,12 +193,12 @@ public class User extends BaseModel
 			this.age = age;
 		}
 
-		public boolean isGender() {
-			return gender;
+		public String getGender() {
+			return GenderEnum.getGenderName(gender);
 		}
 
-		public void setGender(boolean gender) {
-			this.gender = gender;
+		public void setGender(String gender) {
+			this.gender = GenderEnum.getGenderValue(gender);
 		}
 
 		public class ProfileAvator

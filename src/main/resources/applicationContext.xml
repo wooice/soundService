@@ -41,10 +41,14 @@
 		<property name="userDAO" ref="userDAO" />
 	</bean>
 
+	<bean id="soundDataService" class="com.sound.service.sound.impl.SoundDataService">
+		<property name="soundDataDAO" ref="soundDataDAO" />
+	</bean>
+
 	<bean id="soundService" class="com.sound.service.sound.impl.SoundService">
 		<property name="soundDAO" ref="soundDAO" />
 		<property name="userDAO" ref="userDAO" />
-		<property name="soundDataDAO" ref="soundDataDAO" />
+		<property name="soundDataService" ref="soundDataService" />
 		<property name="processFactory" ref="processFactory" />
 	</bean>
 
