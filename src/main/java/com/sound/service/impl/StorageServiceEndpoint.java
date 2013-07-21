@@ -31,7 +31,7 @@ public class StorageServiceEndpoint {
 	}
 
 	@GET
-	@Path("/downloadurl/{file}")
+	@Path("/downloadurl/{file}/{type}")
 	public Response getDownloadUrl(@PathParam("file") String file,
 			@PathParam("type") String type) {
 		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
@@ -43,7 +43,7 @@ public class StorageServiceEndpoint {
 	}
 
 	@GET
-	@Path("/uploadurl/{file}")
+	@Path("/uploadurl/{file}/{type}")
 	public Response getUploadUrl(@PathParam("file") String file,
 			@PathParam("type") String type) {
 		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
