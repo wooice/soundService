@@ -3,7 +3,8 @@ package com.sound.model;
 public class OssAuth {
 	private String accessId;
 	private String accessPassword;
-	private String bucket;
+	private String soundBucket;
+	private String imageBucket;
 
 	public String getAccessId() {
 		return accessId;
@@ -21,18 +22,20 @@ public class OssAuth {
 		this.accessPassword = accessPassword;
 	}
 
-	public String getBucket() {
-		return bucket;
+	public String getImageBucket() {
+		return imageBucket;
 	}
 
-	public void setBucket(String bucket) {
-		this.bucket = bucket;
+	public void setImageBucket(String imageBucket) {
+		this.imageBucket = imageBucket;
 	}
 
-	@Override
-	public String toString() {
-		return "Oss [accessId=" + accessId + ", accessPassword="
-				+ accessPassword + ", bucket=" + bucket + "]";
+	public String getSoundBucket() {
+		return soundBucket;
+	}
+
+	public void setSoundBucket(String soundBucket) {
+		this.soundBucket = soundBucket;
 	}
 
 }
