@@ -3,16 +3,16 @@ package com.sound.service.storage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-
-import com.sound.exception.RemoteStorageException;
-import com.sound.service.storage.impl.RemoteStorageService;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import com.sound.exception.RemoteStorageException;
+import com.sound.model.enums.FileType;
+import com.sound.service.storage.impl.RemoteStorageService;
+
 public class RemoteStorageServiceTest extends TestCase {
-	private static final String TestFileName = "test-file.txt";
+	private static final String TestFileName = "test-file";
 
 	private com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
 
@@ -25,7 +25,7 @@ public class RemoteStorageServiceTest extends TestCase {
 		File file = new File(TestFileName);
 		try {
 			file.createNewFile();
-			remoteStorageService.upload(file);
+			remoteStorageService.upload(file, FileType.SOUND);
 		} catch (RemoteStorageException e) {
 			e.printStackTrace();
 			fail("Upload error");
@@ -39,20 +39,10 @@ public class RemoteStorageServiceTest extends TestCase {
 		}
 	}
 
-	public void testListOwnedFiles() {
-		try {
-			List<String> files = remoteStorageService.listOwnedFiles("test");
-			Assert.assertNotNull(files);
-		} catch (RemoteStorageException e) {
-			e.printStackTrace();
-			fail("List Error");
-		}
-	}
-
 	public void testDownloadToFile() {
 		try {
 			remoteStorageService.downloadToFile(TestFileName, TestFileName
-					+ ".local");
+					+ ".local", FileType.SOUND);
 			File local = new File(TestFileName + ".local");
 			Assert.assertTrue(local.exists());
 		} catch (RemoteStorageException e) {
@@ -70,7 +60,8 @@ public class RemoteStorageServiceTest extends TestCase {
 	public void testDownloadToMemory() {
 		InputStream is = null;
 		try {
-			is = remoteStorageService.downloadToMemory(TestFileName);
+			is = remoteStorageService.downloadToMemory(TestFileName,
+					FileType.SOUND);
 			Assert.assertNotNull(is);
 		} catch (RemoteStorageException e) {
 			e.printStackTrace();
@@ -87,7 +78,7 @@ public class RemoteStorageServiceTest extends TestCase {
 
 	public void testDelete() {
 		try {
-			remoteStorageService.delete(TestFileName);
+			remoteStorageService.delete(TestFileName, FileType.SOUND);
 		} catch (RemoteStorageException e) {
 			e.printStackTrace();
 			fail("Delete error");
