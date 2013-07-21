@@ -90,6 +90,11 @@ public class UserService implements com.sound.service.user.itf.UserService {
 		return user;
 	}
 
+	public void deleteByAlias(String userAlias)
+	{
+		userDAO.deleteByProperty("profile.alias", userAlias);
+	}
+
 	public UserDAO getUserDAO() {
 		return userDAO;
 	}

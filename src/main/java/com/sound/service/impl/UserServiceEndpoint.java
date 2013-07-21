@@ -6,6 +6,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,7 @@ public class UserServiceEndpoint{
 		User user = userService.getUserByAlias(userAlias);
 		String result = (null == user)? "true" : "false";
 
-		return Response.status(200).entity(result).build();
+		return Response.status(Status.OK).entity(result).build();
 	}
 
 	@GET
@@ -41,7 +42,7 @@ public class UserServiceEndpoint{
 		User user = userService.getUserByEmail(emailAddress);
 		String result = (null == user)? "true" : "false";
 
-		return Response.status(200).entity(result).build();
+		return Response.status(Status.OK).entity(result).build();
 	}
 
 	@PUT
@@ -59,10 +60,10 @@ public class UserServiceEndpoint{
 		catch (UserException e) 
 		{
 			e.printStackTrace();
-			return Response.status(500).entity(e.getMessage()).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 
-		return Response.status(200).entity("true").build();
+		return Response.status(Status.OK).entity("true").build();
 	}
 
 }

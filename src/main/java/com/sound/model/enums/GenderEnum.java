@@ -13,7 +13,7 @@ public enum GenderEnum {
 		this.gender = gender;
 	}
 
-	public boolean getGenderValue(String genderName)
+	public static boolean getGenderValue(String genderName)
 	{
 		for(GenderEnum gender: GenderEnum.values())
 		{
@@ -26,7 +26,7 @@ public enum GenderEnum {
 		return true;
 	}
 
-	public String getGenderName(boolean genderValue)
+	public static String getGenderName(boolean genderValue)
 	{
 		for(GenderEnum gender: GenderEnum.values())
 		{
