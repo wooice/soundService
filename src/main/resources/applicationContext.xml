@@ -33,7 +33,13 @@
         <constructor-arg ref="morphia"></constructor-arg>  
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
-
+	
+	<bean id="soundActivityDAO" class="com.sound.dao.SoundActivityDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
 	<bean id="processFactory" class="com.sound.processor.factory.ProcessorFactory">
 	</bean>
 
@@ -50,6 +56,12 @@
 		<property name="userDAO" ref="userDAO" />
 		<property name="soundDataService" ref="soundDataService" />
 		<property name="processFactory" ref="processFactory" />
+	</bean>
+	
+	<bean id="soundSocialService" class="com.sound.service.sound.impl.SoundSocialService">
+		<property name="userDAO" ref="userDAO" />
+		<property name="SoundSocialDAO" ref="SoundSocialDAO" />
+		<property name="SoundActivityDAO" ref="SoundActivityDAO" />
 	</bean>
 
 	<bean id="fileService" class="com.sound.service.file.impl.FileService">
