@@ -12,6 +12,8 @@ import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
+import com.sound.model.enums.SoundState;
+import com.sound.model.enums.SoundType;
 
 @Entity(noClassnameStored= true) 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -132,20 +134,20 @@ public class Sound extends BaseModel{
 			this.name = name;
 		}
 
-		public int getStatus() {
-			return status;
+		public String getStatus() {
+			return SoundState.getStateName(status);
 		}
 
-		public void setStatus(int status) {
-			this.status = status;
+		public void setStatus(String status) {
+			this.status = SoundState.getStateId(status);
 		}
 
-		public int getType() {
-			return type;
+		public String getType() {
+			return SoundType.getTypeName(this.type);
 		}
 
-		public void setType(int type) {
-			this.type = type;
+		public void setType(String type) {
+			this.type = SoundType.getTypeId(type);
 		}
 
 		public String getDescription() {
@@ -180,7 +182,6 @@ public class Sound extends BaseModel{
 			this.modifiedTime = modifiedTime;
 		}
 
-		@JsonIgnore
 		public SoundPoster getPoster() {
 			return poster;
 		}
@@ -200,17 +201,17 @@ public class Sound extends BaseModel{
 
 		public static class SoundPoster
 		{
-			@Serialized
-			private byte[] poster;
+			//Id of stored poster
+			private String posterId;
 
 			private String extension;
 
-			public byte[] getPoster() {
-				return poster;
+			public String getPosterId() {
+				return posterId;
 			}
 
-			public void setPoster(byte[] poster) {
-				this.poster = poster;
+			public void setPosterId(String posterId) {
+				this.posterId = posterId;
 			}
 
 			public String getExtension() {
@@ -223,6 +224,8 @@ public class Sound extends BaseModel{
 		}
 	}
 
+	@Entity(noClassnameStored= true) 
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class SoundData
 	{
 		@Id private ObjectId id;
@@ -230,8 +233,6 @@ public class Sound extends BaseModel{
 		// meide route in resource server. 
 		private String objectId;
 		
-		private String fileAlias;
-
 		private int duration;
 		
 		@Serialized
@@ -243,14 +244,6 @@ public class Sound extends BaseModel{
 
 		public void setObjectId(String objectId) {
 			this.objectId = objectId;
-		}
-
-		public String getFileAlias() {
-			return fileAlias;
-		}
-
-		public void setFileAlias(String fileAlias) {
-			this.fileAlias = fileAlias;
 		}
 		
 		public int getDuration() {
@@ -269,6 +262,7 @@ public class Sound extends BaseModel{
 			this.wave = wave;
 		}
 
+		@JsonIgnore
 		public ObjectId getId() {
 			return id;
 		}

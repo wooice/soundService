@@ -31,9 +31,11 @@ public class StorageServiceEndpoint {
 	}
 
 	@GET
-	@Path("/downloadurl/{file}/{type}")
-	public Response getDownloadUrl(@PathParam("file") String file,
-			@PathParam("type") String type) {
+	@Path("/downloadurl/{type}/{file}")
+	public Response getDownloadUrl(
+			@PathParam("type") String type,
+			@PathParam("file") String file
+			) {
 		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
 			return Response.status(Status.BAD_REQUEST).entity(null).build();
 		}
@@ -43,9 +45,11 @@ public class StorageServiceEndpoint {
 	}
 
 	@GET
-	@Path("/uploadurl/{file}/{type}")
-	public Response getUploadUrl(@PathParam("file") String file,
-			@PathParam("type") String type) {
+	@Path("/uploadurl/{type}/{file}")
+	public Response getUploadUrl(
+			@PathParam("type") String type,
+			@PathParam("file") String file
+			) {
 		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
 			return Response.status(Status.BAD_REQUEST).entity(null).build();
 		}

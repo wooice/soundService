@@ -13,5 +13,6 @@ public interface UserService {
 
 	public User getUserByAlias(String userAlias);
 	
+	public void deleteByAlias(String userAlias);
 
 }
