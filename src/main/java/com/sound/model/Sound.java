@@ -25,14 +25,14 @@ public class Sound extends BaseModel {
 
 	@Embedded
 	private SoundProfile profile;
+	
+	@Embedded
+	private SoundSocial soundSocial;
 
 	@Reference
 	private SoundData soundData;
 
-	@Reference
-	private SoundSocial soundSocial;
-
-	@Reference(lazy = true)
+	@Reference(lazy=true)
 	private List<Sound> innerSounds;
 
 	@Reference(lazy = true)
@@ -289,5 +289,39 @@ public class Sound extends BaseModel {
 		}
 
 	}
+	
+	public static class SoundSocial
+	{
+		private Integer likesCount;
+		
+		private Integer reportsCount;
+		
+		private Integer commentsCount;
 
+		public Integer getLikesCount() {
+			return likesCount;
+		}
+
+		public void setLikesCount(Integer likesCount) {
+			this.likesCount = likesCount;
+		}
+
+		public Integer getReportsCount() {
+			return reportsCount;
+		}
+
+		public void setReportsCount(Integer reportsCount) {
+			this.reportsCount = reportsCount;
+		}
+
+		public Integer getCommentsCount() {
+			return commentsCount;
+		}
+
+		public void setCommentsCount(Integer commentsCount) {
+			this.commentsCount = commentsCount;
+		}
+		
+	}
+	
 }
