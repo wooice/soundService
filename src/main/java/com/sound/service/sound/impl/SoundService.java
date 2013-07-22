@@ -99,8 +99,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 	@Override
 	public Sound load(String soundAlias) {
-		Sound sound = soundDAO.findOne("profile.name", soundAlias);
-		return sound;
+		return soundDAO.findOne("profile.name", soundAlias);
 	}
 
 	@Override
