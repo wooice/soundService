@@ -1,5 +1,6 @@
 package com.sound.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,11 +16,12 @@ import com.github.jmkgreen.morphia.annotations.Serialized;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
 
-@Entity(noClassnameStored= true) 
+@Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Sound extends BaseModel{
+public class Sound extends BaseModel {
 
-	@Id private ObjectId id;
+	@Id
+	private ObjectId id;
 
 	@Embedded
 	private SoundProfile profile;
@@ -33,8 +35,11 @@ public class Sound extends BaseModel{
 	@Reference(lazy=true)
 	private List<Sound> innerSounds;
 
-	@Reference(lazy=true)
+	@Reference(lazy = true)
 	private List<Sound> sets;
+
+	@Reference(lazy = true)
+	private List<Tag> tags;
 
 	@JsonIgnore
 	public ObjectId getId() {
@@ -85,18 +90,32 @@ public class Sound extends BaseModel{
 		this.sets = sets;
 	}
 
-	public static class SoundProfile
-	{
-		@Reference(lazy=true)
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+
+	public void addTags(List<Tag> tags) {
+		if (this.tags == null) {
+			tags = new ArrayList<Tag>();
+		}
+		tags.addAll(tags);
+	}
+
+	public static class SoundProfile {
+		@Reference(lazy = true)
 		private User owner;
 
 		@Embedded
 		private SoundPoster poster;
 
 		private String name;
-		
+
 		private String description;
-		
+
 		/**
 		 * published, private, deleted
 		 */
@@ -111,13 +130,13 @@ public class Sound extends BaseModel{
 		 * times played
 		 */
 		private int played;
-		
+
 		private Date createdTime;
-		
+
 		private Date modifiedTime;
 
 		private boolean downloadable;
-		
+
 		public User getOwner() {
 			return owner;
 		}
@@ -189,7 +208,6 @@ public class Sound extends BaseModel{
 		public void setPoster(SoundPoster poster) {
 			this.poster = poster;
 		}
-		
 
 		public boolean isDownloadable() {
 			return downloadable;
@@ -199,9 +217,8 @@ public class Sound extends BaseModel{
 			this.downloadable = downloadable;
 		}
 
-		public static class SoundPoster
-		{
-			//Id of stored poster
+		public static class SoundPoster {
+			// Id of stored poster
 			private String posterId;
 
 			private String extension;
@@ -224,20 +241,20 @@ public class Sound extends BaseModel{
 		}
 	}
 
-	@Entity(noClassnameStored= true) 
+	@Entity(noClassnameStored = true)
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class SoundData
-	{
-		@Id private ObjectId id;
-		
-		// meide route in resource server. 
+	public static class SoundData {
+		@Id
+		private ObjectId id;
+
+		// meide route in resource server.
 		private String objectId;
-		
+
 		private int duration;
-		
+
 		@Serialized
 		private float[][] wave;
-		
+
 		public String getObjectId() {
 			return objectId;
 		}
@@ -245,7 +262,7 @@ public class Sound extends BaseModel{
 		public void setObjectId(String objectId) {
 			this.objectId = objectId;
 		}
-		
+
 		public int getDuration() {
 			return duration;
 		}
@@ -270,7 +287,7 @@ public class Sound extends BaseModel{
 		public void setId(ObjectId id) {
 			this.id = id;
 		}
-		
+
 	}
 	
 	public static class SoundSocial

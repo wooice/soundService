@@ -14,5 +14,4 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId>{
 	{
 		super(mongo, morphia, dbName);
 	}
-	
 }

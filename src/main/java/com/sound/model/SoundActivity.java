@@ -3,11 +3,19 @@ package com.sound.model;
 import java.util.Date;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import com.github.jmkgreen.morphia.annotations.Embedded;
+import com.github.jmkgreen.morphia.annotations.Entity;
+import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 
+@Entity
 public class SoundActivity {
 
+	@Id
+	private ObjectId id;
+	
 	@Reference
 	private Sound sound;
 	
@@ -16,6 +24,14 @@ public class SoundActivity {
 
 	private Date createdTime;
 	
+	public ObjectId getId() {
+		return id;
+	}
+
+	public void setId(ObjectId id) {
+		this.id = id;
+	}
+
 	public Sound getSound() {
 		return sound;
 	}

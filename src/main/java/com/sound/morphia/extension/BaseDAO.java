@@ -1,6 +1,7 @@
 package com.sound.morphia.extension;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.List;
 import java.util.Map;
 
 import com.github.jmkgreen.morphia.Morphia;
@@ -28,6 +29,26 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		this.deleteByQuery(q);
 	}
 	
+	public List<T> find(String key, String value)
+	{
+		Query<T> query = this.ds.createQuery(clazz);
+		query.field(key).equal(value);
+		
+		return this.find(query).asList();
+	}
+	
+	public List<T> find(Map<String, String> cratiaries)
+	{
+		Query<T> query = this.ds.createQuery(clazz);
+		
+		for(String key: cratiaries.keySet())
+		{
+			query.field(key).equal(cratiaries.get(key));
+		}
+		
+		return this.find(query).asList();
+	}
+	
 	public T findOne(Map<String, String> cratiaries)
 	{
 		Query<T> query = ds.createQuery(clazz);
@@ -38,6 +59,22 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		}
 		
 		return this.findOne(query);
+	}
+	
+	public List<T> findByPattern(String property, String pattern, boolean ignoreCase)
+	{
+		Query<T> query = this.ds.createQuery(this.clazz);
+		
+		if (ignoreCase)
+		{
+			query.field(property).containsIgnoreCase(pattern);
+		}
+		else
+		{
+			query.field(property).contains(pattern);
+		}
+		
+		return this.find(query).asList();
 	}
 	
 	public void increase(String key, String value, String property)
