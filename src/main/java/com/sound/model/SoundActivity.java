@@ -4,30 +4,26 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 
-@Entity(noClassnameStored= true)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class SoundSocial extends BaseModel
-{
-	@Id private ObjectId id;
+@Entity
+public class SoundActivity {
 
-	@Embedded
-	private List<SoundLike> likes;
+	@Id
+	private ObjectId id;
+	
+	@Reference
+	private Sound sound;
+	
+	@Reference
+	private User owner;
 
-	@Embedded
-	private List<SoundRepost> reposts;
-
-	@Embedded
-	private List<SoundComment> comments;
-
-	@JsonIgnore
+	private Date createdTime;
+	
 	public ObjectId getId() {
 		return id;
 	}
@@ -36,81 +32,54 @@ public class SoundSocial extends BaseModel
 		this.id = id;
 	}
 
-	public List<SoundComment> getComments() {
-		return comments;
+	public Sound getSound() {
+		return sound;
 	}
 
-	public void setComments(List<SoundComment> comments) {
-		this.comments = comments;
+	public void setSound(Sound sound) {
+		this.sound = sound;
 	}
 
-	public List<SoundLike> getLikes() {
-		return likes;
+	public User getOwner() {
+		return owner;
 	}
 
-	public void setLikes(List<SoundLike> likes) {
-		this.likes = likes;
+	public void setOwner(User owner) {
+		this.owner = owner;
 	}
 
-	public List<SoundRepost> getReposts() {
-		return reposts;
+	public Date getCreatedTime() {
+		return createdTime;
 	}
 
-	public void setReposts(List<SoundRepost> reposts) {
-		this.reposts = reposts;
+	public void setCreatedTime(Date createdTime) {
+		this.createdTime = createdTime;
 	}
-
-	public static class SoundActivity
-	{
-		@Reference(lazy=true)
-		private User owner;
-
-		private Date createdTime;
-
-		public User getOwner() {
-			return owner;
-		}
-
-		public void setOwner(User owner) {
-			this.owner = owner;
-		}
-
-		public Date getCreatedTime() {
-			return createdTime;
-		}
-
-		public void setCreatedTime(Date createdTime) {
-			this.createdTime = createdTime;
-		}
-	}
-
+	
 	public static class SoundComment extends SoundActivity
 	{
 		private String comment;
 
-		private long pointAt;
+		private float pointAt;
 
+		@Embedded
 		private List<SoundCommentReply> replies;
 		
 		public String getComment() {
 			return comment;
 		}
 
-
 		public void setComment(String comment) {
 			this.comment = comment;
 		}
-
-
-		public long getPointAt() {
+ 
+		public float getPointAt() {
 			return pointAt;
 		}
 
-
-		public void setPointAt(long pointAt) {
+		public void setPointAt(float pointAt) {
 			this.pointAt = pointAt;
 		}
-
 
 		public List<SoundCommentReply> getReplies() {
 			return replies;
@@ -120,7 +89,6 @@ public class SoundSocial extends BaseModel
 		public void setReplies(List<SoundCommentReply> replies) {
 			this.replies = replies;
 		}
-
 
 		public class SoundCommentReply extends SoundActivity
 		{
