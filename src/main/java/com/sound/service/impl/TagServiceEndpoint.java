@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,9 +34,9 @@ public class TagServiceEndpoint {
 	SoundService soundService;
 
 	@PUT
-	@Path("/create/{tag}")
-	public Response createTag(@PathParam("tag") String label) {
-		if (StringUtils.isBlank(label))
+	@Path("/create/{userAlias}/{tag}")
+	public Response createTag(@PathParam("tag") String label, @PathParam("userAlias") String userAlias) {
+		if (StringUtils.isBlank(label) || StringUtils.isBlank(userAlias))
 		{
 			return Response
 					.status(Response.Status.BAD_REQUEST)
@@ -45,7 +46,7 @@ public class TagServiceEndpoint {
 		
 		try 
 		{
-			tagService.getOrCreate(label);
+			tagService.getOrCreate(label, userAlias);
 
 		} catch (SoundException e) {
 			e.printStackTrace();
@@ -61,12 +62,12 @@ public class TagServiceEndpoint {
 	@POST
 	@Path("/attach")
 	public Response attachTagsToSound(@FormParam("soundId") String soundId,
-			@FormParam("tags") List<String> tagLabels) {
-		if (StringUtils.isBlank(soundId))
+			@FormParam("tags") List<String> tagLabels, @FormParam("userAlias") String userAlias) {
+		if (StringUtils.isBlank(soundId) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
 		{
 			return Response
 					.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot attach Tag because input sound id is invalid")
+					.entity("Cannot attach Tag because input is invalid")
 					.build();
 		}
 		
@@ -80,7 +81,7 @@ public class TagServiceEndpoint {
 		
 		try 
 		{
-			tagService.attachToSound(soundId, tagLabels);
+			tagService.attachToSound(soundId, tagLabels, userAlias);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response
@@ -95,12 +96,12 @@ public class TagServiceEndpoint {
 	@PUT
 	@Path("/detach")
 	public Response detachTagsFromSound(@FormParam("soundId") String soundId,
-			@FormParam("tags") List<String> tagLabels) {
-		if (StringUtils.isBlank(soundId))
+			@FormParam("tags") List<String> tagLabels, @FormParam("userAlias") String userAlias) {
+		if (StringUtils.isBlank(soundId) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
 		{
 			return Response
 					.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot detach Tag because input sound id is invalid")
+					.entity("Cannot attach Tag because input is invalid")
 					.build();
 		}
 		
@@ -114,7 +115,7 @@ public class TagServiceEndpoint {
 		
 		try 
 		{
-			tagService.detachFromSound(soundId, tagLabels);
+			tagService.detachFromSound(soundId, tagLabels, userAlias);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
