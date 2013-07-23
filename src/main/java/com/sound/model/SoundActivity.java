@@ -108,8 +108,21 @@ public class SoundActivity {
 	{
 	}
 
-	public static class SoundRepost extends SoundActivity
+	public static class SoundRecord extends SoundActivity
 	{
+		public static final String CREATE = "create";
+		
+		public static final String REPOST = "repost";
+		
+		private String recordType;
+
+		public String getRecordType() {
+			return recordType;
+		}
+
+		public void setRecordType(String recordType) {
+			this.recordType = recordType;
+		}
 	}
 
 	public static class SoundShare extends SoundActivity
