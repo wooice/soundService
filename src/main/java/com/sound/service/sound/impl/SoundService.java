@@ -7,12 +7,14 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.SoundDAO;
+import com.sound.dao.SoundRecordDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Sound.SoundData;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.Sound.SoundProfile.SoundPoster;
+import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.User;
 import com.sound.model.enums.SoundType;
 import com.sound.model.file.LocalSoundFile;
@@ -32,6 +34,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	
 	@Autowired
 	SoundDataService soundDataService;
+	
+	@Autowired
+	SoundRecordDAO soundRecordDAO;
 
 	@Autowired
 	ProcessorFactory processFactory;
@@ -95,6 +100,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	@Override
 	public void delete(String soundAlias) {
 		soundDAO.deleteByProperty("profile.name", soundAlias);
+		//Delete create sound activity.
+		soundRecordDAO.deleteByProperty("sound.profile.name", soundAlias);
 	}
 
 	@Override
@@ -131,6 +138,14 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		sound.setProfile(soundProfile);
 		
 		soundDAO.save(sound);
+		
+		//Add activity for create new sound.
+		SoundRecord soundRecord = new SoundRecord();
+		soundRecord.setOwner(owner);
+		soundRecord.setRecordType(SoundRecord.CREATE);
+		soundRecord.setSound(sound);
+		soundRecord.setCreatedTime(new Date());
+		soundRecordDAO.save(soundRecord);
 	}
 
 	// ---------setters & getters ----------
@@ -141,6 +156,14 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 	public void setSoundDAO(SoundDAO soundDAO) {
 		this.soundDAO = soundDAO;
+	}
+
+	public SoundRecordDAO getSoundRecordDAO() {
+		return soundRecordDAO;
+	}
+
+	public void setSoundRecordDAO(SoundRecordDAO soundRecordDAO) {
+		this.soundRecordDAO = soundRecordDAO;
 	}
 
 	public UserDAO getUserDAO() {

@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.SoundDAO;
 import com.sound.dao.SoundLikeDAO;
-import com.sound.dao.SoundRepostDAO;
+import com.sound.dao.SoundRecordDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundLike;
+import com.sound.model.SoundActivity.SoundRecord;
 
 public class SoundSocialService implements com.sound.service.sound.itf.SoundSocialService{
 
@@ -26,7 +27,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	SoundLikeDAO soundLikeDAO;
 	
 	@Autowired
-	SoundRepostDAO soundRepostDAO;
+	SoundRecordDAO soundRecordDAO;
 	
 	@Override
 	public Integer like(String soundAlias, String userAlias) throws SoundException {
@@ -70,6 +71,47 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 		return soundDAO.findOne("profile.name", soundAlias).getSoundSocial().getLikesCount() - 1;
 	}
 
+	@Override
+	public void report(String soundAlias, String userAlias)
+			throws SoundException {
+		Map<String, String> cratiaries = new HashMap<String, String>();
+		cratiaries.put("sound.profile.name", soundAlias);
+		cratiaries.put("user.profile.alias", userAlias);
+		cratiaries.put("recordType", SoundRecord.REPOST);
+		SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
+		
+		if (null != reposted)
+		{
+			throw new SoundException("The user " + userAlias +" has reposted sound " + soundAlias);
+		}
+		
+		SoundRecord repost = new SoundRecord();
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		repost.setSound(sound);
+		repost.setOwner(userDAO.findOne("profile.alias", userAlias));
+		repost.setCreatedTime(new Date());
+		soundRecordDAO.save(repost);
+		soundDAO.increase("profile.name", soundAlias, "reportsCount");
+	}
+
+	@Override
+	public void unReport(String soundAlias, String userAlias)
+			throws SoundException {
+		Map<String, String> cratiaries = new HashMap<String, String>();
+		cratiaries.put("sound.profile.name", soundAlias);
+		cratiaries.put("user.profile.alias", userAlias);
+		cratiaries.put("recordType", SoundRecord.REPOST);
+		SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
+		
+		if (null == reposted)
+		{
+			throw new SoundException("The user " + userAlias +" hasn't reposted sound " + soundAlias);
+		}
+		
+		soundRecordDAO.delete(reposted);
+		soundDAO.decrease("profile.name", soundAlias, "reportsCount");
+	}
+	
 	public SoundDAO getSoundDAO() {
 		return soundDAO;
 	}
@@ -94,12 +136,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 		this.soundLikeDAO = soundLikeDAO;
 	}
 
-	public SoundRepostDAO getSoundRepostDAO() {
-		return soundRepostDAO;
+	public SoundRecordDAO getSoundRecordDAO() {
+		return soundRecordDAO;
 	}
 
-	public void setSoundRepostDAO(SoundRepostDAO soundRepostDAO) {
-		this.soundRepostDAO = soundRepostDAO;
+	public void setSoundRecordDAO(SoundRecordDAO soundRecordDAO) {
+		this.soundRecordDAO = soundRecordDAO;
 	}
 
 }

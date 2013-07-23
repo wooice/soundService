@@ -8,4 +8,8 @@ public interface SoundSocialService {
 	
 	public Integer unlike(String soundAlias, String userAlias)  throws SoundException;
 	
+	public void report(String soundAlias, String userAlias)  throws SoundException;
+	
+	public void unReport(String soundAlias, String userAlias)  throws SoundException;
+	
 }
