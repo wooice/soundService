@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.SoundDAO;
 import com.sound.dao.TagDAO;
-import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
 
