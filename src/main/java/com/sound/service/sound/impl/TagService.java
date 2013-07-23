@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.SoundDAO;
 import com.sound.dao.TagDAO;
-import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
 
@@ -46,12 +45,7 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 
 	@Override
 	public void attachToSound(String soundAlias, List<String> tagLabels)
-			throws SoundException {
-		if (soundAlias == null || tagLabels == null) {
-			throw new SoundException(
-					"SoundId and tags should not be null when attach tags to sound");
-		}
-
+	{
 		List<Tag> tags = new ArrayList<Tag>();
 
 		Sound sound = soundDAO.findOne("profile.name", soundAlias);
