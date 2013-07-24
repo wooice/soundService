@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -59,11 +58,11 @@ public class TagServiceEndpoint {
 				.entity("true").build();
 	}
 
-	@POST
+	@PUT
 	@Path("/attach")
-	public Response attachTagsToSound(@FormParam("soundId") String soundId,
+	public Response attachTagsToSound(@FormParam("soundAlias") String soundAlias,
 			@FormParam("tags") List<String> tagLabels, @FormParam("userAlias") String userAlias) {
-		if (StringUtils.isBlank(soundId) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
+		if (StringUtils.isBlank(soundAlias) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
 		{
 			return Response
 					.status(Response.Status.BAD_REQUEST)
@@ -81,7 +80,7 @@ public class TagServiceEndpoint {
 		
 		try 
 		{
-			tagService.attachToSound(soundId, tagLabels, userAlias);
+			tagService.attachToSound(soundAlias, tagLabels, userAlias);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response
@@ -95,9 +94,9 @@ public class TagServiceEndpoint {
 
 	@PUT
 	@Path("/detach")
-	public Response detachTagsFromSound(@FormParam("soundId") String soundId,
+	public Response detachTagsFromSound(@FormParam("soundAlias") String soundAlias,
 			@FormParam("tags") List<String> tagLabels, @FormParam("userAlias") String userAlias) {
-		if (StringUtils.isBlank(soundId) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
+		if (StringUtils.isBlank(soundAlias) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
 		{
 			return Response
 					.status(Response.Status.BAD_REQUEST)
@@ -115,7 +114,7 @@ public class TagServiceEndpoint {
 		
 		try 
 		{
-			tagService.detachFromSound(soundId, tagLabels, userAlias);
+			tagService.detachFromSound(soundAlias, tagLabels, userAlias);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -129,7 +128,7 @@ public class TagServiceEndpoint {
 	}
 
 	@GET
-	@Path("/match/{pattern}}")
+	@Path("/match/{pattern}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getTagsContains(@PathParam("pattern") String pattern) {
 		if (StringUtils.isBlank(pattern))

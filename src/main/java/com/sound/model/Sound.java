@@ -37,7 +37,7 @@ public class Sound extends BaseModel {
 
 	@Reference(lazy = true)
 	private List<Sound> sets;
-
+	
 	@Reference(lazy = true)
 	private List<Tag> tags;
 
@@ -100,9 +100,9 @@ public class Sound extends BaseModel {
 
 	public void addTags(List<Tag> tags) {
 		if (this.tags == null) {
-			tags = new ArrayList<Tag>();
+			this.tags = new ArrayList<Tag>();
 		}
-		tags.addAll(tags);
+		this.tags.addAll(tags);
 	}
 
 	public static class SoundProfile {

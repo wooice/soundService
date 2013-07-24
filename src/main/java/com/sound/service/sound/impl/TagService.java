@@ -87,7 +87,12 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 
 	@Override
 	public List<Sound> getSoundsWithTag(String label) {
-		return soundDAO.find("tags.label", label);
+		Tag tag = tagDAO.findOne("label", label);
+		if (tag == null) {
+			return new ArrayList<Sound>();
+		}
+		return soundDAO.fetchEntitiesPropertyContains("tags", tag);
+	
 	}
 
 	public SoundDAO getSoundDAO() {
