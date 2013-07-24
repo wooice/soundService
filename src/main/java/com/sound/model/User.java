@@ -18,7 +18,6 @@ import com.sound.model.enums.GenderEnum;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User extends BaseModel
 {
-
 	@Id 
 	private ObjectId id;
 
@@ -33,12 +32,6 @@ public class User extends BaseModel
 
 	@Reference(lazy=true)
 	private UserAuth auth;
-
-	@Reference(lazy=true)
-	private List<User> following;
-
-	@Reference(lazy=true)
-	private List<User> followed;
 
 	@Reference(lazy=true)
 	private List<Group> groups;
@@ -58,22 +51,6 @@ public class User extends BaseModel
 
 	public void setProfile(UserProfile profile) {
 		this.profile = profile;
-	}
-
-	public List<User> getFollowing() {
-		return following;
-	}
-
-	public void setFollowing(List<User> following) {
-		this.following = following;
-	}
-
-	public List<User> getFollowed() {
-		return followed;
-	}
-
-	public void setFollowed(List<User> followed) {
-		this.followed = followed;
 	}
 
 	public List<Group> getGroups() {
@@ -227,6 +204,40 @@ public class User extends BaseModel
 		}
 	}
 
+	public static class UserSocial
+	{
+
+		private Long following;
+
+		private Long followed;
+		
+		private Long groups;
+
+		public Long getFollowing() {
+			return following;
+		}
+
+		public void setFollowing(Long following) {
+			this.following = following;
+		}
+
+		public Long getFollowed() {
+			return followed;
+		}
+
+		public void setFollowed(Long followed) {
+			this.followed = followed;
+		}
+
+		public Long getGroups() {
+			return groups;
+		}
+
+		public void setGroups(Long groups) {
+			this.groups = groups;
+		}
+	}
+	
 	public static class UserExternal
 	{
 	}
