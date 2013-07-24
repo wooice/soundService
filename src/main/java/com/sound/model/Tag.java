@@ -17,10 +17,10 @@ public class Tag extends BaseModel {
 	private ObjectId id;
 
 	private String label;
-	
+
 	private Date createdDate;
-	
-	@Reference(lazy=true)
+
+	@Reference(lazy = true)
 	private User createdUser;
 
 	@JsonIgnore
@@ -56,4 +56,16 @@ public class Tag extends BaseModel {
 		this.createdUser = createdUser;
 	}
 	
+	@Override
+	public int hashCode() {
+		return label.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Tag) {
+			return ((Tag) o).getLabel().equals(label);
+		}
+		return false;
+	}
 }
