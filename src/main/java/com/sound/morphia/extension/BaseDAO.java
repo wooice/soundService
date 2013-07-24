@@ -1,6 +1,7 @@
 package com.sound.morphia.extension;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -89,5 +90,21 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		Query<T> updateQuery = ds.createQuery(this.clazz).field(key).equal(value);
 		UpdateOperations<T> ops = ds.createUpdateOperations(this.clazz).dec(property);
 		this.update(updateQuery, ops); 
+	}
+	
+	public void updateProperty(String key, String value, String property, Object object)
+	{
+		Query<T> updateQuery = ds.createQuery(this.clazz).field(key).equal(value);
+		UpdateOperations<T> ops = ds.createUpdateOperations(this.clazz).set(property, object);
+		this.update(updateQuery, ops); 
+	}
+	
+	public List<T> fetchEntitiesPropertyContains(String property, Object target) {
+		List<T> result = new ArrayList<T>();
+		Query<T> query = createQuery().field(property).hasThisOne(target);
+		for (T t : query.fetch()) {
+			result.add(t);
+		}
+		return result;
 	}
 }

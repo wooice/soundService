@@ -1,14 +1,17 @@
 package com.sound.service.sound.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.SoundDAO;
 import com.sound.dao.TagDAO;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
+import com.sound.service.user.itf.UserService;
 
 public class TagService implements com.sound.service.sound.itf.TagService {
 	@Autowired
@@ -17,17 +20,21 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	@Autowired
 	TagDAO tagDAO;
 
+	@Autowired
+	UserService userService;
+
 	@Override
-	public Tag getOrCreate(String label) {
+	public Tag getOrCreate(String label, String userAlias) {
 		Tag tag = tagDAO.findOne("label", label);
 
-		if (tag != null && tag.getId() != null) 
-		{
+		if (tag != null && tag.getId() != null) {
 			return tag;
 		}
 
 		tag = new Tag();
 		tag.setLabel(label);
+		tag.setCreatedUser(userService.getUserByAlias(userAlias));
+		tag.setCreatedDate(new Date());
 		tagDAO.save(tag);
 
 		return tag;
@@ -39,40 +46,53 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	}
 
 	@Override
-	public List<Tag> listAll(){
+	public List<Tag> listAll() {
 		return tagDAO.find().asList();
 	}
 
 	@Override
-	public void attachToSound(String soundAlias, List<String> tagLabels)
-	{
+	public void attachToSound(String soundAlias, List<String> tagLabels, String userAlias) {
 		List<Tag> tags = new ArrayList<Tag>();
+		for (String label : tagLabels) {
+			tags.add(this.getOrCreate(label, userAlias));
+		}
 
 		Sound sound = soundDAO.findOne("profile.name", soundAlias);
-		for (String label : tagLabels) {
-			tags.add(this.getOrCreate(label));
-		}
 		sound.addTags(tags);
-		soundDAO.save(sound);
+		
+		soundDAO.updateProperty("profile.name", soundAlias, "tags", sound.getTags());
 	}
 
 	@Override
-	public void detachFromSound(String soundAlias, List<String> tagLabels)
-	{
+	public void detachFromSound(String soundAlias, List<String> tagLabels, String userAlias) {
 		List<Tag> tags = new ArrayList<Tag>();
 		for (String label : tagLabels) {
-			tags.add(this.getOrCreate(label));
+			tags.add(this.getOrCreate(label, userAlias));
 		}
 
 		Sound sound = soundDAO.findOne("profile.name", soundAlias);
 		sound.getTags().removeAll(tags);
-		soundDAO.save(sound);
+		
+		soundDAO.updateProperty("profile.name", soundAlias, "tags", sound.getTags());
+		deleteOrphanTags(tags);
+	}
+
+	private void deleteOrphanTags(List<Tag> tags) {
+		for (Tag tag : tags) {
+			if(CollectionUtils.isEmpty(getSoundsWithTag(tag.getLabel()))) {
+				tagDAO.delete(tag);
+			}
+		}
 	}
 
 	@Override
-	public List<Sound> getSoundsWithTag(String label)
-	{
-		return soundDAO.find("tags.label", label);
+	public List<Sound> getSoundsWithTag(String label) {
+		Tag tag = tagDAO.findOne("label", label);
+		if (tag == null) {
+			return new ArrayList<Sound>();
+		}
+		return soundDAO.fetchEntitiesPropertyContains("tags", tag);
+	
 	}
 
 	public SoundDAO getSoundDAO() {
@@ -90,5 +110,13 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	public void setTagDAO(TagDAO tagDAO) {
 		this.tagDAO = tagDAO;
 	}
-	
+
+	public UserService getUserService() {
+		return userService;
+	}
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
 }
