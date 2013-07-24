@@ -15,7 +15,7 @@ import com.sound.service.sound.itf.SoundSocialService;
 
 @Component
 @Path("/soundActivity")
-public class SoundSocialServiceEndPoint {
+public class SoundSocialServiceEndpoint {
 
 	@Autowired
 	SoundSocialService soundSocialService;
@@ -33,11 +33,15 @@ public class SoundSocialServiceEndPoint {
 		{
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(null).build();
 		}
+		catch (Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to like sound " + soundAlias).build();
+		}
 		return Response.status(Status.OK).entity("true").build();
 	}
 
 	@DELETE
-	@Path("/unlike")
+	@Path("/like")
 	public Response unlike(
 			@FormParam("soundAlias") String soundAlias,
 			@FormParam("soundAlias") String userAlias
@@ -49,6 +53,10 @@ public class SoundSocialServiceEndPoint {
 		} catch (SoundException e) 
 		{
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(null).build();
+		}
+		catch (Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to unlike sound " + soundAlias).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}

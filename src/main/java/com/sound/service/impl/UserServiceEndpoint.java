@@ -27,7 +27,15 @@ public class UserServiceEndpoint{
 		@PathParam("userAlias") String userAlias
 	) 
 	{
-		User user = userService.getUserByAlias(userAlias);
+		User user = null;
+		
+		try
+		{
+			user = userService.getUserByAlias(userAlias);
+		}catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get user by alias " + userAlias).build();
+		}
 		String result = (null == user)? "true" : "false";
 
 		return Response.status(Status.OK).entity(result).build();
@@ -39,7 +47,15 @@ public class UserServiceEndpoint{
 		@PathParam("emailAddress") String emailAddress
 	) 
 	{
-		User user = userService.getUserByEmail(emailAddress);
+		User user = null;
+		try
+		{
+			user = userService.getUserByEmail(emailAddress);
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to check emailaddress " + emailAddress).build();
+		}
 		String result = (null == user)? "true" : "false";
 
 		return Response.status(Status.OK).entity(result).build();
@@ -61,6 +77,10 @@ public class UserServiceEndpoint{
 		{
 			e.printStackTrace();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to create user " + userAlias).build();
 		}
 
 		return Response.status(Status.OK).entity("true").build();

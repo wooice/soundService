@@ -39,8 +39,18 @@ public class StorageServiceEndpoint {
 		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
 			return Response.status(Status.BAD_REQUEST).entity(null).build();
 		}
-		URL url = remoteStorageService.generateDownloadUrl(file,
-				FileType.getFileType(type));
+		
+		URL url = null;
+		try
+		{
+			url = remoteStorageService.generateDownloadUrl(file,
+					FileType.getFileType(type));
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get download url of type " + type + " and file " + file).build();
+		}
+		
 		return Response.status(Status.OK).entity(url.toString()).build();
 	}
 
@@ -53,8 +63,17 @@ public class StorageServiceEndpoint {
 		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
 			return Response.status(Status.BAD_REQUEST).entity(null).build();
 		}
-		URL url = remoteStorageService.generateUploadUrl(file,
-				FileType.getFileType(type));
+		
+		URL url = null;
+		try
+		{
+			url = remoteStorageService.generateUploadUrl(file,
+					FileType.getFileType(type));
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get upload url of type " + type + " and file " + file).build();
+		}
 		return Response.status(Status.OK).entity(url.toString()).build();
 	}
 

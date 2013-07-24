@@ -6,13 +6,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.service.file.itf.FileService;
 import com.sound.service.sound.itf.SoundService;
@@ -29,8 +29,7 @@ public class SoundServiceEndpoint {
 
 	@GET
 	@Path("/{soundAlias}")
-	@Produces("text/plain")
-	public String loadSound(
+	public Response loadSound(
 			@PathParam("soundAlias") String soundAlias
 			)
 	{
@@ -39,12 +38,12 @@ public class SoundServiceEndpoint {
 		{
 			sound = soundService.load(soundAlias);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			throw new RuntimeException(e.getMessage()); 
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sound " + soundAlias).build();
 		}
 		
-		return sound.toString();
+		return Response.status(Status.OK).entity(sound.toString()).build();
 	}
 	
 	@PUT
@@ -72,9 +71,13 @@ public class SoundServiceEndpoint {
 		{
 			soundService.saveProfile(objectId, soundAlias, description, ownerAlias, status, posterId);
 		}
-		catch(Exception e)
+		catch(SoundException e)
 		{
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to save sound " + soundAlias).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -92,8 +95,15 @@ public class SoundServiceEndpoint {
 	@DELETE
 	@Path("/{soundAlias}")
 	public Response delete(@PathParam("soundAlias") String soundAlias) {
-		soundService.delete(soundAlias);
-
+		
+		try
+		{
+			soundService.delete(soundAlias);
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to delete sound " + soundAlias).build();
+		}
 		return Response.status(Status.OK).entity("true").build();
 	}
 
