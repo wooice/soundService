@@ -6,14 +6,18 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.sound.dao.SoundCommentDAO;
 import com.sound.dao.SoundDAO;
 import com.sound.dao.SoundLikeDAO;
 import com.sound.dao.SoundRecordDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
+import com.sound.exception.UserException;
 import com.sound.model.Sound;
+import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.User;
 
 public class SoundSocialService implements com.sound.service.sound.itf.SoundSocialService{
 
@@ -28,6 +32,9 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	
 	@Autowired
 	SoundRecordDAO soundRecordDAO;
+	
+	@Autowired
+	SoundCommentDAO soundCommentDAO;
 	
 	@Override
 	public Integer like(String soundAlias, String userAlias) throws SoundException {
@@ -112,6 +119,31 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 		soundDAO.decrease("profile.name", soundAlias, "reportsCount");
 	}
 	
+	@Override
+	public void comment(String soundAlias, String userAlias, String comment,  Float pointAt)
+			throws SoundException, UserException {
+		SoundComment soundComment = new SoundComment();
+		
+		User user = userDAO.findOne("profile.name", userAlias);
+		if(null == user)
+		{
+			throw new UserException("User " + userAlias + " not found.");
+		}
+		soundComment.setOwner(user);
+		
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		if (null == sound)
+		{
+			throw new SoundException("Sound " + soundAlias + " not found.");
+		}
+		soundComment.setSound(sound);
+		soundComment.setCreatedTime(new Date());
+		soundComment.setPointAt(pointAt);
+		
+		soundCommentDAO.save(soundComment);
+		soundDAO.increase("profile.name", soundAlias, "commentsCount");
+	}
+	
 	public SoundDAO getSoundDAO() {
 		return soundDAO;
 	}
@@ -142,6 +174,14 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
 	public void setSoundRecordDAO(SoundRecordDAO soundRecordDAO) {
 		this.soundRecordDAO = soundRecordDAO;
+	}
+
+	public SoundCommentDAO getSoundCommentDAO() {
+		return soundCommentDAO;
+	}
+
+	public void setSoundCommentDAO(SoundCommentDAO soundCommentDAO) {
+		this.soundCommentDAO = soundCommentDAO;
 	}
 
 }
