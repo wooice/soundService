@@ -1,6 +1,7 @@
 package com.sound.service.sound.itf;
 
 import com.sound.exception.SoundException;
+import com.sound.exception.UserException;
 
 public interface SoundSocialService {
 
@@ -11,4 +12,6 @@ public interface SoundSocialService {
 	public void report(String soundAlias, String userAlias)  throws SoundException;
 	
 	public void unReport(String soundAlias, String userAlias)  throws SoundException;
+	
+	public void comment(String soundAlias, String userAlias, String comment, Float pointAt) throws SoundException, UserException;
 }
