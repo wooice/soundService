@@ -52,6 +52,12 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
+	<bean id="soundCommentDAO" class="com.sound.dao.SoundCommentDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
 	<bean id="tagDAO" class="com.sound.dao.TagDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  
@@ -82,6 +88,7 @@
 		<property name="soundDAO" ref="soundDAO" />
 		<property name="soundLikeDAO" ref="soundLikeDAO" />
 		<property name="soundRecordDAO" ref="soundRecordDAO" />
+		<property name="soundCommentDAO" ref="soundCommentDAO" />
 	</bean>
 	
 	<bean id="userSocialService" class="com.sound.service.user.impl.UserSocialService">

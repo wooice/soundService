@@ -47,10 +47,18 @@ public class TagServiceEndpoint {
 		{
 			tagService.getOrCreate(label, userAlias);
 
-		} catch (SoundException e) {
+		} 
+		catch (SoundException e) 
+		{
 			e.printStackTrace();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity("Cannot Create Tag because server internal error")
+					.entity(e.getMessage())
+					.build();
+		}
+		catch (Exception e)
+		{
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity("Failed to create tag " + label)
 					.build();
 		}
 		
