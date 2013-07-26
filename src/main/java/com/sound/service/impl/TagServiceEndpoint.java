@@ -3,6 +3,7 @@ package com.sound.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -12,8 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,15 +33,10 @@ public class TagServiceEndpoint {
 
 	@PUT
 	@Path("/create/{userAlias}/{tag}")
-	public Response createTag(@PathParam("tag") String label, @PathParam("userAlias") String userAlias) {
-		if (StringUtils.isBlank(label) || StringUtils.isBlank(userAlias))
-		{
-			return Response
-					.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot Create Tag because input tag label is invalid")
-					.build();
-		}
-		
+	public Response createTag(
+			@PathParam("tag") @NotNull String label, 
+			@PathParam("userAlias") @NotNull String userAlias) 
+	{
 		try 
 		{
 			tagService.getOrCreate(label, userAlias);
@@ -68,24 +62,11 @@ public class TagServiceEndpoint {
 
 	@PUT
 	@Path("/attach")
-	public Response attachTagsToSound(@FormParam("soundAlias") String soundAlias,
-			@FormParam("tags") List<String> tagLabels, @FormParam("userAlias") String userAlias) {
-		if (StringUtils.isBlank(soundAlias) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
-		{
-			return Response
-					.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot attach Tag because input is invalid")
-					.build();
-		}
-		
-		if (tagLabels == null || tagLabels.isEmpty())
-		{
-			return Response
-					.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot attach Tag because input tag list is invalid")
-					.build();
-		}
-		
+	public Response attachTagsToSound(
+			@FormParam("soundAlias") @NotNull String soundAlias,
+			@FormParam("tags") @NotNull List<String> tagLabels, 
+			@FormParam("userAlias") @NotNull String userAlias) 
+	{
 		try 
 		{
 			tagService.attachToSound(soundAlias, tagLabels, userAlias);
@@ -102,24 +83,10 @@ public class TagServiceEndpoint {
 
 	@PUT
 	@Path("/detach")
-	public Response detachTagsFromSound(@FormParam("soundAlias") String soundAlias,
-			@FormParam("tags") List<String> tagLabels, @FormParam("userAlias") String userAlias) {
-		if (StringUtils.isBlank(soundAlias) || CollectionUtils.isEmpty(tagLabels) || StringUtils.isBlank(userAlias))
-		{
-			return Response
-					.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot attach Tag because input is invalid")
-					.build();
-		}
-		
-		if (tagLabels == null || tagLabels.isEmpty())
-		{
-			return Response
-						.status(Response.Status.BAD_REQUEST)
-						.entity("Cannot detach Tag because input tag list is invalid")
-						.build();
-		}
-		
+	public Response detachTagsFromSound(
+			@FormParam("soundAlias") @NotNull String soundAlias,
+			@FormParam("tags") @NotNull List<String> tagLabels, 
+			@FormParam("userAlias") @NotNull String userAlias) {
 		try 
 		{
 			tagService.detachFromSound(soundAlias, tagLabels, userAlias);
@@ -138,14 +105,9 @@ public class TagServiceEndpoint {
 	@GET
 	@Path("/match/{pattern}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTagsContains(@PathParam("pattern") String pattern) {
-		if (StringUtils.isBlank(pattern))
-		{
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot get tags because pattern is invalid")
-					.build();
-		}
-		
+	public Response getTagsContains(
+			@PathParam("pattern") @NotNull String pattern) 
+	{
 		List<String> tagLabels = null;
 		try {
 			List<Tag> tags = tagService.listTagsContains(pattern);
@@ -168,14 +130,9 @@ public class TagServiceEndpoint {
 	@GET
 	@Path("/sounds/{label}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getSoundsByTag(@PathParam("label") String tagLabel) {
-		if (StringUtils.isBlank(tagLabel))
-		{
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity("Cannot get sounds by tag because tag is invalid")
-					.build();
-		}
-		
+	public Response getSoundsByTag(
+			@PathParam("label") @NotNull String tagLabel) 
+	{
 		List<Sound> sounds = null;
 		try {
 			sounds = tagService.getSoundsWithTag(tagLabel);

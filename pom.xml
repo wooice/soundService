@@ -95,6 +95,13 @@
 			<artifactId>mongo-java-driver</artifactId>
 			<version>2.11.1</version>
 		</dependency>
+		
+	<!-- validation -->
+	<dependency>
+	    <groupId>javax.validation</groupId>
+	    <artifactId>validation-api</artifactId>
+	    <version>1.1.0.Final</version>
+	</dependency>	
 
 	<!-- apache commons-io -->
 	<dependency>
