@@ -2,6 +2,7 @@ package com.sound.service.impl;
 
 import java.net.URL;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -9,7 +10,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,13 +33,10 @@ public class StorageServiceEndpoint {
 	@GET
 	@Path("/downloadurl/{type}/{file}")
 	public Response getDownloadUrl(
-			@PathParam("type") String type,
-			@PathParam("file") String file
-			) {
-		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
-			return Response.status(Status.BAD_REQUEST).entity(null).build();
-		}
-		
+			@PathParam("type") @NotNull String type,
+			@PathParam("file") @NotNull String file
+			) 
+	{
 		URL url = null;
 		try
 		{
@@ -57,13 +54,10 @@ public class StorageServiceEndpoint {
 	@GET
 	@Path("/uploadurl/{type}/{file}")
 	public Response getUploadUrl(
-			@PathParam("type") String type,
-			@PathParam("file") String file
-			) {
-		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
-			return Response.status(Status.BAD_REQUEST).entity(null).build();
-		}
-		
+			@PathParam("type") @NotNull String type,
+			@PathParam("file") @NotNull String file
+			) 
+	{
 		URL url = null;
 		try
 		{

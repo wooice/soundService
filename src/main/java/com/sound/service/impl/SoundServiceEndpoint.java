@@ -1,5 +1,6 @@
 package com.sound.service.impl;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -30,7 +31,7 @@ public class SoundServiceEndpoint {
 	@GET
 	@Path("/{soundAlias}")
 	public Response loadSound(
-			@PathParam("soundAlias") String soundAlias
+			@PathParam("soundAlias") @NotNull String soundAlias
 			)
 	{
 		Sound sound = null;
@@ -49,11 +50,11 @@ public class SoundServiceEndpoint {
 	@PUT
 	@Path("/save")
 	public Response saveProfile(
-			@FormParam("objectId") String objectId, 
-			@FormParam("soundAlias") String soundAlias, 
+			@FormParam("objectId") @NotNull String objectId, 
+			@FormParam("soundAlias") @NotNull String soundAlias, 
 			@FormParam("description") String description, 
-			@FormParam("ownerAlias") String ownerAlias, 
-			@FormParam("status") String status,
+			@FormParam("ownerAlias") @NotNull String ownerAlias, 
+			@FormParam("status") @NotNull String status,
 			@FormParam("posterId") String posterId)
 	{
 
@@ -84,8 +85,8 @@ public class SoundServiceEndpoint {
 
 	@PUT
 	@Path("/addToSet")
-	public Response addToSet(@FormParam("userId") String userId,
-			@FormParam("soundId") String soundId,
+	public Response addToSet(@FormParam("userId") @NotNull String userId,
+			@FormParam("soundId") @NotNull String soundId,
 			@FormParam("SetId") String setId) {
 		soundService.addToSet(soundId, setId);
 
