@@ -1,5 +1,6 @@
 package com.sound.service.impl;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.PUT;
@@ -24,8 +25,8 @@ public class SoundSocialServiceEndpoint {
 	@PUT
 	@Path("/like")
 	public Response like(
-			@FormParam("soundAlias") String soundAlias,
-			@FormParam("userAlias") String userAlias
+			@FormParam("soundAlias") @NotNull String soundAlias,
+			@FormParam("userAlias") @NotNull String userAlias
 			)
 	{
 		try {
@@ -44,8 +45,8 @@ public class SoundSocialServiceEndpoint {
 	@DELETE
 	@Path("/like")
 	public Response unlike(
-			@FormParam("soundAlias") String soundAlias,
-			@FormParam("userAlias") String userAlias
+			@FormParam("soundAlias") @NotNull String soundAlias,
+			@FormParam("userAlias") @NotNull String userAlias
 			)
 	{
 		try 
@@ -65,9 +66,9 @@ public class SoundSocialServiceEndpoint {
 	@PUT
 	@Path("/comment")
 	public Response comment(
-			@FormParam("soundAlias") String soundAlias,
-			@FormParam("userAlias") String userAlias,
-			@FormParam("comment") String comment,
+			@FormParam("soundAlias") @NotNull String soundAlias,
+			@FormParam("userAlias") @NotNull String userAlias,
+			@FormParam("comment") @NotNull String comment,
 			@FormParam("pointAt") Float pointAt
 			)
 	{

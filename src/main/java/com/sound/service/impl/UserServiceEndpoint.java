@@ -1,5 +1,6 @@
 package com.sound.service.impl;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -24,7 +25,7 @@ public class UserServiceEndpoint{
 	@GET
 	@Path("/{userAlias}/checkAlias")
 	public Response checkAlias(
-		@PathParam("userAlias") String userAlias
+		@PathParam("userAlias") @NotNull String userAlias
 	) 
 	{
 		User user = null;
@@ -44,7 +45,7 @@ public class UserServiceEndpoint{
 	@GET
 	@Path("/{emailAddress}/checkEmail")
 	public Response checkEmail(
-		@PathParam("emailAddress") String emailAddress
+		@PathParam("emailAddress") @NotNull String emailAddress
 	) 
 	{
 		User user = null;
@@ -64,9 +65,9 @@ public class UserServiceEndpoint{
 	@PUT
 	@Path("/create")
 	public Response create(
-			@FormParam("userAlias") String userAlias , 
-			@FormParam("emailAddress") String emailAddress,
-			@FormParam("password") String password
+			@FormParam("userAlias") @NotNull String userAlias , 
+			@FormParam("emailAddress") @NotNull String emailAddress,
+			@FormParam("password") @NotNull String password
 	)
 	{
 		try
