@@ -21,6 +21,6 @@ public interface SoundService {
 	
 	public List<SoundRecord> getSoundsByUser(String userAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
 	
-	public List<SoundRecord> getObservingUser(String userAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
+	public List<SoundRecord> getObservingSounds(String userAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
 	
 }

@@ -64,6 +64,12 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
+	<bean id="groupDAO" class="com.sound.dao.GroupDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
 	<bean id="processFactory" class="com.sound.processor.factory.ProcessorFactory">
 	</bean>
 
@@ -94,6 +100,7 @@
 	<bean id="userSocialService" class="com.sound.service.user.impl.UserSocialService">
 		<property name="userDAO" ref="userDAO" />
 		<property name="userConnectDAO" ref="userConnectDAO" />
+		<property name="groupDAO" ref="groupDAO" />
 	</bean>
 	
 	<bean id="tagService" class="com.sound.service.sound.impl.TagService">

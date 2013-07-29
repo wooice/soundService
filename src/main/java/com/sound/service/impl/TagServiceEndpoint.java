@@ -34,8 +34,8 @@ public class TagServiceEndpoint {
 	@PUT
 	@Path("/create/{userAlias}/{tag}")
 	public Response createTag(
-			@PathParam("tag") @NotNull String label, 
-			@PathParam("userAlias") @NotNull String userAlias) 
+			@NotNull @PathParam("tag") String label, 
+			@NotNull @PathParam("userAlias") String userAlias) 
 	{
 		try 
 		{
@@ -61,11 +61,11 @@ public class TagServiceEndpoint {
 	}
 
 	@PUT
-	@Path("/attach")
+	@Path("/{userAlias}/attach/{soundAlias}")
 	public Response attachTagsToSound(
-			@FormParam("soundAlias") @NotNull String soundAlias,
-			@FormParam("tags") @NotNull List<String> tagLabels, 
-			@FormParam("userAlias") @NotNull String userAlias) 
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @FormParam("tags") List<String> tagLabels, 
+			@NotNull @PathParam("userAlias") String userAlias) 
 	{
 		try 
 		{
@@ -82,11 +82,11 @@ public class TagServiceEndpoint {
 	}
 
 	@PUT
-	@Path("/detach")
+	@Path("/{userAlias}/detach/{soundAlias}")
 	public Response detachTagsFromSound(
-			@FormParam("soundAlias") @NotNull String soundAlias,
-			@FormParam("tags") @NotNull List<String> tagLabels, 
-			@FormParam("userAlias") @NotNull String userAlias) {
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @FormParam("tags") List<String> tagLabels, 
+			@NotNull @PathParam("userAlias") String userAlias) {
 		try 
 		{
 			tagService.detachFromSound(soundAlias, tagLabels, userAlias);
@@ -106,7 +106,7 @@ public class TagServiceEndpoint {
 	@Path("/match/{pattern}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getTagsContains(
-			@PathParam("pattern") @NotNull String pattern) 
+			@NotNull @PathParam("pattern") String pattern) 
 	{
 		List<String> tagLabels = null;
 		try {
@@ -131,7 +131,7 @@ public class TagServiceEndpoint {
 	@Path("/sounds/{label}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getSoundsByTag(
-			@PathParam("label") @NotNull String tagLabel) 
+			@NotNull @PathParam("label") String tagLabel) 
 	{
 		List<Sound> sounds = null;
 		try {
