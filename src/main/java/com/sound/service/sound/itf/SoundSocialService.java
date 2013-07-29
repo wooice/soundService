@@ -14,4 +14,6 @@ public interface SoundSocialService {
 	public void unReport(String soundAlias, String userAlias)  throws SoundException;
 	
 	public void comment(String soundAlias, String userAlias, String comment, Float pointAt) throws SoundException, UserException;
+	
+	public void unComment(String commentId) throws SoundException;
 }
