@@ -9,6 +9,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,8 @@ import com.sound.model.User;
 @Path("/user")
 public class UserServiceEndpoint{
 
+	Logger logger = Logger.getLogger(UserServiceEndpoint.class);
+	
 	@Autowired
 	com.sound.service.user.itf.UserService userService;
 
@@ -35,6 +38,7 @@ public class UserServiceEndpoint{
 			user = userService.getUserByAlias(userAlias);
 		}catch(Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get user by alias " + userAlias).build();
 		}
 		String result = (null == user)? "true" : "false";
@@ -55,6 +59,7 @@ public class UserServiceEndpoint{
 		}
 		catch(Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to check emailaddress " + emailAddress).build();
 		}
 		String result = (null == user)? "true" : "false";
@@ -76,7 +81,7 @@ public class UserServiceEndpoint{
 		}
 		catch (UserException e) 
 		{
-			e.printStackTrace();
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch(Exception e)

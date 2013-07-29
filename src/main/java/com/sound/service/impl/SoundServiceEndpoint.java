@@ -13,6 +13,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,8 @@ import com.sound.service.sound.itf.SoundService;
 @Path("/sound")
 public class SoundServiceEndpoint {
 
+	Logger logger = Logger.getLogger(SoundServiceEndpoint.class);
+	
 	@Autowired
 	FileService fileService;
 
@@ -45,6 +48,7 @@ public class SoundServiceEndpoint {
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sound " + soundAlias).build();
 		}
 		
@@ -99,6 +103,7 @@ public class SoundServiceEndpoint {
 		}
 		catch(Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to delete sound " + soundAlias).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -119,11 +124,12 @@ public class SoundServiceEndpoint {
 		try {
 			sounds = soundService.getSoundsByUser(userAlias, pageNum, soundsPerPage);
 		} catch (SoundException e) {
-			e.printStackTrace();
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch(Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sounds for user " + userAlias).build();
 		}
 		return Response.status(Status.OK).entity(sounds.toString()).build();
@@ -145,7 +151,7 @@ public class SoundServiceEndpoint {
 			sounds = soundService.getObservingSounds(userAlias, pageNum, soundsPerPage);
 		} catch (SoundException e) 
 		{
-			e.printStackTrace();
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch(Exception e)
