@@ -32,7 +32,7 @@ public class TagServiceEndpoint {
 	SoundService soundService;
 
 	@PUT
-	@Path("/create/{userAlias}/{tag}")
+	@Path("/{userAlias}/create/{tag}")
 	public Response createTag(
 			@NotNull @PathParam("tag") String label, 
 			@NotNull @PathParam("userAlias") String userAlias) 
