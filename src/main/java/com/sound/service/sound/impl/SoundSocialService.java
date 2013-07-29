@@ -61,7 +61,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	}
 
 	@Override
-	public Integer unlike(String soundAlias, String userAlias) throws SoundException 
+	public Integer dislike(String soundAlias, String userAlias) throws SoundException 
 	{
 		Map<String, String> cratiaries = new HashMap<String, String>();
 		cratiaries.put("sound.profile.name", soundAlias);
@@ -80,7 +80,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	}
 
 	@Override
-	public void report(String soundAlias, String userAlias)
+	public void repost(String soundAlias, String userAlias)
 			throws SoundException {
 		Map<String, String> cratiaries = new HashMap<String, String>();
 		cratiaries.put("sound.profile.name", soundAlias);
@@ -103,7 +103,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	}
 
 	@Override
-	public void unReport(String soundAlias, String userAlias)
+	public void unrepost(String soundAlias, String userAlias)
 			throws SoundException {
 		Map<String, String> cratiaries = new HashMap<String, String>();
 		cratiaries.put("sound.profile.name", soundAlias);
@@ -146,7 +146,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	}
 	
 	@Override
-	public void unComment(String commentId) throws SoundException {
+	public void uncomment(String commentId) throws SoundException {
 		SoundComment soundComment = soundCommentDAO.findOne("id", new ObjectId(commentId));
 		
 		if (null == soundComment)
