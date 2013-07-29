@@ -57,7 +57,52 @@ public class SoundSocialServiceEndpoint {
 	{
 		try 
 		{
-			soundSocialService.unlike(soundAlias, userAlias);
+			soundSocialService.dislike(soundAlias, userAlias);
+		} catch (SoundException e) 
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to unlike sound " + soundAlias).build();
+		}
+		return Response.status(Status.OK).entity("true").build();
+	}
+	
+	@PUT
+	@Path("/{userAlias}/repost/{soundAlias}")
+	public Response repost(
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @PathParam("userAlias") String userAlias
+			)
+	{
+		try {
+			soundSocialService.repost(soundAlias, userAlias);
+		} catch (SoundException e) 
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to repost sound " + soundAlias).build();
+		}
+		return Response.status(Status.OK).entity("true").build();
+	}
+
+	@DELETE
+	@Path("/{userAlias}/repost/{soundAlias}")
+	public Response unrepost(
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @PathParam("userAlias") String userAlias
+			)
+	{
+		try 
+		{
+			soundSocialService.unrepost(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -108,7 +153,7 @@ public class SoundSocialServiceEndpoint {
 			)
 	{
 		try {
-			soundSocialService.unComment(commentId);
+			soundSocialService.uncomment(commentId);
 		}
 		catch (SoundException e) 
 		{
