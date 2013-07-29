@@ -125,7 +125,7 @@ public class SoundServiceEndpoint {
 	
 	@GET
 	@Path("/sounds")
-	public Response listObserveSounds(
+	public Response listObservingSounds(
 			@FormParam("userAlias") @NotNull String userAlias,
 			@FormParam("pageNum")  Integer pageNum,
 			@FormParam("soundsPerPage")  Integer soundsPerPage
@@ -136,7 +136,7 @@ public class SoundServiceEndpoint {
 		
 		List<SoundRecord> sounds = null;
 		try {
-			sounds = soundService.getSoundsByUser(userAlias, pageNum, soundsPerPage);
+			sounds = soundService.getObservingSounds(userAlias, pageNum, soundsPerPage);
 		} catch (SoundException e) 
 		{
 			e.printStackTrace();
