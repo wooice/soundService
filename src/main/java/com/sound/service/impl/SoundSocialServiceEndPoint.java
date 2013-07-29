@@ -89,4 +89,24 @@ public class SoundSocialServiceEndpoint {
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
+	
+	@DELETE
+	@Path("/comment")
+	public Response comment(
+			@FormParam("commentId") @NotNull String commentId
+			)
+	{
+		try {
+			soundSocialService.unComment(commentId);
+		}
+		catch (SoundException e) 
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch (Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to comment with id " + commentId).build();
+		}
+		return Response.status(Status.OK).entity("true").build();
+	}
 }

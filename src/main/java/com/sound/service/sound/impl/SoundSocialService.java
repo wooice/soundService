@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.dao.SoundCommentDAO;
@@ -142,6 +143,19 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 		
 		soundCommentDAO.save(soundComment);
 		soundDAO.increase("profile.name", soundAlias, "commentsCount");
+	}
+	
+	@Override
+	public void unComment(String commentId) throws SoundException {
+		SoundComment soundComment = soundCommentDAO.findOne("id", new ObjectId(commentId));
+		
+		if (null == soundComment)
+		{
+			throw new SoundException("Sound comment doesn't exist");
+		}
+		String soundAlias = soundComment.getSound().getProfile().getName();
+		soundCommentDAO.delete(soundComment);
+		soundDAO.decrease("profile.name", soundAlias, "commentsCount");
 	}
 	
 	public SoundDAO getSoundDAO() {
