@@ -102,7 +102,7 @@ public class SoundServiceEndpoint {
 	}
 	
 	@GET
-	@Path("/{userAlias}/sounds")
+	@Path("/{userAlias}/streams")
 	public Response listUsersSounds(
 			@PathParam("userAlias") @NotNull String userAlias,
 			@FormParam("pageNum")  Integer pageNum,
@@ -124,7 +124,7 @@ public class SoundServiceEndpoint {
 	}
 	
 	@GET
-	@Path("/sounds")
+	@Path("/streams")
 	public Response listObservingSounds(
 			@FormParam("userAlias") @NotNull String userAlias,
 			@FormParam("pageNum")  Integer pageNum,
