@@ -33,8 +33,8 @@ public class StorageServiceEndpoint {
 	@GET
 	@Path("/downloadurl/{type}/{file}")
 	public Response getDownloadUrl(
-			@PathParam("type") @NotNull String type,
-			@PathParam("file") @NotNull String file
+			@NotNull @PathParam("type") String type,
+			@NotNull @PathParam("file") String file
 			) 
 	{
 		URL url = null;
@@ -54,8 +54,8 @@ public class StorageServiceEndpoint {
 	@GET
 	@Path("/uploadurl/{type}/{file}")
 	public Response getUploadUrl(
-			@PathParam("type") @NotNull String type,
-			@PathParam("file") @NotNull String file
+			@NotNull @PathParam("type") String type,
+			@NotNull @PathParam("file") String file
 			) 
 	{
 		URL url = null;

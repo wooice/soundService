@@ -30,20 +30,6 @@ public class UserActivity {
 		}
 	}
 	
-	@Entity
-	public static class UserJoinGroup extends UserActivity
-	{
-		private Group toGroup;
-
-		public Group getToGroup() {
-			return toGroup;
-		}
-
-		public void setToGroup(Group toGroup) {
-			this.toGroup = toGroup;
-		}
-	}
-
 	public ObjectId getId() {
 		return id;
 	}

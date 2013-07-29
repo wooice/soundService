@@ -25,7 +25,7 @@ public class UserServiceEndpoint{
 	@GET
 	@Path("/{userAlias}/checkAlias")
 	public Response checkAlias(
-		@PathParam("userAlias") @NotNull String userAlias
+			@NotNull @PathParam("userAlias") String userAlias
 	) 
 	{
 		User user = null;
@@ -45,7 +45,7 @@ public class UserServiceEndpoint{
 	@GET
 	@Path("/{emailAddress}/checkEmail")
 	public Response checkEmail(
-		@PathParam("emailAddress") @NotNull String emailAddress
+		@NotNull @PathParam("emailAddress") String emailAddress
 	) 
 	{
 		User user = null;
@@ -65,9 +65,9 @@ public class UserServiceEndpoint{
 	@PUT
 	@Path("/create")
 	public Response create(
-			@FormParam("userAlias") @NotNull String userAlias , 
-			@FormParam("emailAddress") @NotNull String emailAddress,
-			@FormParam("password") @NotNull String password
+			@NotNull @FormParam("userAlias") String userAlias , 
+			@NotNull @FormParam("emailAddress") String emailAddress,
+			@NotNull @FormParam("password") String password
 	)
 	{
 		try
