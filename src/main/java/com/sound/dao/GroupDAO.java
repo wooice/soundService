@@ -4,12 +4,12 @@ import org.bson.types.ObjectId;
 
 import com.github.jmkgreen.morphia.Morphia;
 import com.mongodb.Mongo;
-import com.sound.model.SoundActivity.SoundRepost;
+import com.sound.model.Group;
 import com.sound.morphia.extension.BaseDAO;
 
-public class SoundRepostDAO extends BaseDAO<SoundRepost, ObjectId>{
+public class GroupDAO extends BaseDAO<Group, ObjectId>{
 
-	public SoundRepostDAO(Mongo mongo, Morphia morphia,
+	public GroupDAO(Mongo mongo, Morphia morphia,
 			String dbName) 
 	{
 		super(mongo, morphia, dbName);

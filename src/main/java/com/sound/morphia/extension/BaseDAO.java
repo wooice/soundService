@@ -107,4 +107,17 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		}
 		return result;
 	}
+	
+	public List<T> findWithRange(Map<String, String> cratiaries, Integer start, Integer range)
+	{
+		Query<T> query = ds.createQuery(clazz);
+		
+		for(String key: cratiaries.keySet())
+		{
+			query.field(key).equal(cratiaries.get(key));
+		}
+		query.offset(start).limit(range);
+		
+		return this.find(query).asList();
+	}
 }

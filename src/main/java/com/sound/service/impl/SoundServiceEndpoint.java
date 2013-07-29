@@ -1,19 +1,25 @@
 package com.sound.service.impl;
 
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.exception.SoundException;
 import com.sound.model.Sound;
+import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.service.file.itf.FileService;
 import com.sound.service.sound.itf.SoundService;
 
@@ -21,6 +27,8 @@ import com.sound.service.sound.itf.SoundService;
 @Path("/sound")
 public class SoundServiceEndpoint {
 
+	Logger logger = Logger.getLogger(SoundServiceEndpoint.class);
+	
 	@Autowired
 	FileService fileService;
 
@@ -29,9 +37,8 @@ public class SoundServiceEndpoint {
 
 	@GET
 	@Path("/{soundAlias}")
-	@Produces("text/plain")
-	public String loadSound(
-			@PathParam("soundAlias") String soundAlias
+	public Response loadSound(
+			@NotNull @PathParam("soundAlias") String soundAlias
 			)
 	{
 		Sound sound = null;
@@ -39,51 +46,47 @@ public class SoundServiceEndpoint {
 		{
 			sound = soundService.load(soundAlias);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			throw new RuntimeException(e.getMessage()); 
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sound " + soundAlias).build();
 		}
 		
-		return sound.toString();
+		return Response.status(Status.OK).entity(sound.toString()).build();
 	}
 	
 	@PUT
 	@Path("/save")
 	public Response saveProfile(
-			@FormParam("objectId") String objectId, 
-			@FormParam("soundAlias") String soundAlias, 
+			@NotNull @FormParam("objectId") String objectId, 
+			@NotNull @FormParam("soundAlias") String soundAlias, 
 			@FormParam("description") String description, 
-			@FormParam("ownerAlias") String ownerAlias, 
-			@FormParam("status") String status,
+			@NotNull @FormParam("ownerAlias") String ownerAlias, 
+			@NotNull @FormParam("status") String status,
 			@FormParam("posterId") String posterId)
 	{
-
-		if (null == objectId)
-		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("sound object id can't be null").build(); 
-		}
-
-		if (null == soundAlias)
-		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("sound alias can't be null").build(); 
-		}
-		
 		try
 		{
 			soundService.saveProfile(objectId, soundAlias, description, ownerAlias, status, posterId);
 		}
-		catch(Exception e)
+		catch(SoundException e)
 		{
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to save sound " + soundAlias).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
 
 	@PUT
 	@Path("/addToSet")
-	public Response addToSet(@FormParam("userId") String userId,
-			@FormParam("soundId") String soundId,
-			@FormParam("SetId") String setId) {
+	public Response addToSet(
+			@NotNull @FormParam("userId") String userId,
+			@NotNull @FormParam("soundId") String soundId,
+			@FormParam("SetId") String setId
+			) {
 		soundService.addToSet(soundId, setId);
 
 		return Response.status(Status.OK).entity("true").build();
@@ -91,10 +94,71 @@ public class SoundServiceEndpoint {
 
 	@DELETE
 	@Path("/{soundAlias}")
-	public Response delete(@PathParam("soundAlias") String soundAlias) {
-		soundService.delete(soundAlias);
-
+	public Response delete(
+			@NotNull @PathParam("soundAlias") String soundAlias
+			) {
+		try
+		{
+			soundService.delete(soundAlias);
+		}
+		catch(Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to delete sound " + soundAlias).build();
+		}
 		return Response.status(Status.OK).entity("true").build();
+	}
+	
+	@GET
+	@Path("/streams/{userAlias}")
+	public Response listUsersSounds(
+			@NotNull @PathParam("userAlias") String userAlias,
+			@QueryParam("pageNum")  Integer pageNum,
+			@QueryParam("soundsPerPage")  Integer soundsPerPage
+			)
+	{
+		pageNum = (null == pageNum)? 0 : pageNum;
+		soundsPerPage = (null == soundsPerPage)? 15 : soundsPerPage;
+		
+		List<SoundRecord> sounds = null;
+		try {
+			sounds = soundService.getSoundsByUser(userAlias, pageNum, soundsPerPage);
+		} catch (SoundException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch(Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sounds for user " + userAlias).build();
+		}
+		return Response.status(Status.OK).entity(sounds.toString()).build();
+	}
+	
+	@GET
+	@Path("/streams")
+	public Response listObservingSounds(
+			@NotNull @FormParam("userAlias") String userAlias,
+			@FormParam("pageNum")  Integer pageNum,
+			@FormParam("soundsPerPage")  Integer soundsPerPage
+			)
+	{
+		pageNum = (null == pageNum)? 0 : pageNum;
+		soundsPerPage = (null == soundsPerPage)? 15 : soundsPerPage;
+		
+		List<SoundRecord> sounds = null;
+		try {
+			sounds = soundService.getObservingSounds(userAlias, pageNum, soundsPerPage);
+		} catch (SoundException e) 
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch(Exception e)
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sounds for user " + userAlias).build();
+		}
+		return Response.status(Status.OK).entity(sounds.toString()).build();
 	}
 
 }

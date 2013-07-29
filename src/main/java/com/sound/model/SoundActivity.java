@@ -10,7 +10,6 @@ import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 
-@Entity
 public class SoundActivity {
 
 	@Id
@@ -56,6 +55,7 @@ public class SoundActivity {
 		this.createdTime = createdTime;
 	}
 	
+	@Entity
 	public static class SoundComment extends SoundActivity
 	{
 		private String comment;
@@ -104,14 +104,30 @@ public class SoundActivity {
 		}
 	}
 
+	@Entity
 	public static class SoundLike extends SoundActivity
 	{
 	}
 
-	public static class SoundRepost extends SoundActivity
+	@Entity
+	public static class SoundRecord extends SoundActivity
 	{
+		public static final String CREATE = "create";
+		
+		public static final String REPOST = "repost";
+		
+		private String recordType;
+
+		public String getRecordType() {
+			return recordType;
+		}
+
+		public void setRecordType(String recordType) {
+			this.recordType = recordType;
+		}
 	}
 
+	@Entity
 	public static class SoundShare extends SoundActivity
 	{
 	}

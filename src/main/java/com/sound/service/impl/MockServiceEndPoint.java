@@ -13,7 +13,7 @@ import com.sound.service.sound.itf.SoundService;
 
 @Component
 @Path("/mock")
-public class MockServiceEndPoint {
+public class MockServiceEndpoint {
 
 	@Autowired
 	com.sound.service.user.itf.UserService userService;

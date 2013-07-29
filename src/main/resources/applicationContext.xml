@@ -34,19 +34,37 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
+	<bean id="userConnectDAO" class="com.sound.dao.UserConnectDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
 	<bean id="soundLikeDAO" class="com.sound.dao.SoundLikeDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
-	<bean id="soundRepostDAO" class="com.sound.dao.SoundRepostDAO">
+	<bean id="soundRecordDAO" class="com.sound.dao.SoundRecordDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
+	<bean id="soundCommentDAO" class="com.sound.dao.SoundCommentDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
 	<bean id="tagDAO" class="com.sound.dao.TagDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
+	<bean id="groupDAO" class="com.sound.dao.GroupDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  
         <constructor-arg value="dev"></constructor-arg> 
@@ -67,6 +85,7 @@
 		<property name="soundDAO" ref="soundDAO" />
 		<property name="userDAO" ref="userDAO" />
 		<property name="soundDataService" ref="soundDataService" />
+		<property name="soundRecordDAO" ref="soundRecordDAO" />
 		<property name="processFactory" ref="processFactory" />
 	</bean>
 	
@@ -74,7 +93,14 @@
 		<property name="userDAO" ref="userDAO" />
 		<property name="soundDAO" ref="soundDAO" />
 		<property name="soundLikeDAO" ref="soundLikeDAO" />
-		<property name="soundRepostDAO" ref="soundRepostDAO" />
+		<property name="soundRecordDAO" ref="soundRecordDAO" />
+		<property name="soundCommentDAO" ref="soundCommentDAO" />
+	</bean>
+	
+	<bean id="userSocialService" class="com.sound.service.user.impl.UserSocialService">
+		<property name="userDAO" ref="userDAO" />
+		<property name="userConnectDAO" ref="userConnectDAO" />
+		<property name="groupDAO" ref="groupDAO" />
 	</bean>
 	
 	<bean id="tagService" class="com.sound.service.sound.impl.TagService">

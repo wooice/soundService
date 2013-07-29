@@ -1,7 +1,10 @@
 package com.sound.service.sound.itf;
 
+import java.util.List;
+
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
+import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.file.LocalSoundFile;
 
 public interface SoundService {
@@ -15,4 +18,9 @@ public interface SoundService {
 	public void delete(String soundAlias);
 
 	public Sound load(String soundId);
+	
+	public List<SoundRecord> getSoundsByUser(String userAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
+	
+	public List<SoundRecord> getObservingSounds(String userAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
+	
 }

@@ -2,6 +2,7 @@ package com.sound.service.impl;
 
 import java.net.URL;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -9,7 +10,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,8 @@ import com.sound.model.enums.FileType;
 @Path("/storage")
 public class StorageServiceEndpoint {
 
+	Logger logger = Logger.getLogger(StorageServiceEndpoint.class);
+	
 	@Autowired
 	com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
 
@@ -33,28 +36,43 @@ public class StorageServiceEndpoint {
 	@GET
 	@Path("/downloadurl/{type}/{file}")
 	public Response getDownloadUrl(
-			@PathParam("type") String type,
-			@PathParam("file") String file
-			) {
-		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
-			return Response.status(Status.BAD_REQUEST).entity(null).build();
+			@NotNull @PathParam("type") String type,
+			@NotNull @PathParam("file") String file
+			) 
+	{
+		URL url = null;
+		try
+		{
+			url = remoteStorageService.generateDownloadUrl(file,
+					FileType.getFileType(type));
 		}
-		URL url = remoteStorageService.generateDownloadUrl(file,
-				FileType.getFileType(type));
+		catch(Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get download url of type " + type + " and file " + file).build();
+		}
+		
 		return Response.status(Status.OK).entity(url.toString()).build();
 	}
 
 	@GET
 	@Path("/uploadurl/{type}/{file}")
 	public Response getUploadUrl(
-			@PathParam("type") String type,
-			@PathParam("file") String file
-			) {
-		if (StringUtils.isBlank(file) || StringUtils.isBlank(type)) {
-			return Response.status(Status.BAD_REQUEST).entity(null).build();
+			@NotNull @PathParam("type") String type,
+			@NotNull @PathParam("file") String file
+			) 
+	{
+		URL url = null;
+		try
+		{
+			url = remoteStorageService.generateUploadUrl(file,
+					FileType.getFileType(type));
 		}
-		URL url = remoteStorageService.generateUploadUrl(file,
-				FileType.getFileType(type));
+		catch(Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get upload url of type " + type + " and file " + file).build();
+		}
 		return Response.status(Status.OK).entity(url.toString()).build();
 	}
 
