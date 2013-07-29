@@ -90,6 +90,18 @@ public class User extends BaseModel
 	public void setAuth(UserAuth auth) {
 		this.auth = auth;
 	}
+	
+	public void addGroup(Group group)
+	{
+		this.groups = (null == this.groups)? new ArrayList<Group>():this.groups;
+		this.groups.add(group);
+	}
+	
+	public void removeGroup(Group group)
+	{
+		this.groups = (null == this.groups)? new ArrayList<Group>():this.groups;
+		this.groups.remove(group);
+	}
 
 	@Entity
 	public static class UserProfile

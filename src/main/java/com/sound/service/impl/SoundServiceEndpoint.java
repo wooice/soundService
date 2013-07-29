@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -34,7 +35,7 @@ public class SoundServiceEndpoint {
 	@GET
 	@Path("/{soundAlias}")
 	public Response loadSound(
-			@PathParam("soundAlias") @NotNull String soundAlias
+			@NotNull @PathParam("soundAlias") String soundAlias
 			)
 	{
 		Sound sound = null;
@@ -53,11 +54,11 @@ public class SoundServiceEndpoint {
 	@PUT
 	@Path("/save")
 	public Response saveProfile(
-			@FormParam("objectId") @NotNull String objectId, 
-			@FormParam("soundAlias") @NotNull String soundAlias, 
+			@NotNull @FormParam("objectId") String objectId, 
+			@NotNull @FormParam("soundAlias") String soundAlias, 
 			@FormParam("description") String description, 
-			@FormParam("ownerAlias") @NotNull String ownerAlias, 
-			@FormParam("status") @NotNull String status,
+			@NotNull @FormParam("ownerAlias") String ownerAlias, 
+			@NotNull @FormParam("status") String status,
 			@FormParam("posterId") String posterId)
 	{
 		try
@@ -78,8 +79,8 @@ public class SoundServiceEndpoint {
 	@PUT
 	@Path("/addToSet")
 	public Response addToSet(
-			@FormParam("userId") @NotNull String userId,
-			@FormParam("soundId") @NotNull String soundId,
+			@NotNull @FormParam("userId") String userId,
+			@NotNull @FormParam("soundId") String soundId,
 			@FormParam("SetId") String setId
 			) {
 		soundService.addToSet(soundId, setId);
@@ -89,7 +90,9 @@ public class SoundServiceEndpoint {
 
 	@DELETE
 	@Path("/{soundAlias}")
-	public Response delete(@PathParam("soundAlias") String soundAlias) {
+	public Response delete(
+			@NotNull @PathParam("soundAlias") String soundAlias
+			) {
 		try
 		{
 			soundService.delete(soundAlias);
@@ -102,13 +105,16 @@ public class SoundServiceEndpoint {
 	}
 	
 	@GET
-	@Path("/{userAlias}/sounds")
+	@Path("/streams/{userAlias}")
 	public Response listUsersSounds(
-			@PathParam("userAlias") @NotNull String userAlias,
-			@FormParam("pageNum")  Integer pageNum,
-			@FormParam("soundsPerPage")  Integer soundsPerPage
+			@NotNull @PathParam("userAlias") String userAlias,
+			@QueryParam("pageNum")  Integer pageNum,
+			@QueryParam("soundsPerPage")  Integer soundsPerPage
 			)
 	{
+		pageNum = (null == pageNum)? 0 : pageNum;
+		soundsPerPage = (null == soundsPerPage)? 15 : soundsPerPage;
+		
 		List<SoundRecord> sounds = null;
 		try {
 			sounds = soundService.getSoundsByUser(userAlias, pageNum, soundsPerPage);
@@ -124,9 +130,9 @@ public class SoundServiceEndpoint {
 	}
 	
 	@GET
-	@Path("/sounds")
-	public Response listObserveSounds(
-			@FormParam("userAlias") @NotNull String userAlias,
+	@Path("/streams")
+	public Response listObservingSounds(
+			@NotNull @FormParam("userAlias") String userAlias,
 			@FormParam("pageNum")  Integer pageNum,
 			@FormParam("soundsPerPage")  Integer soundsPerPage
 			)
@@ -136,7 +142,7 @@ public class SoundServiceEndpoint {
 		
 		List<SoundRecord> sounds = null;
 		try {
-			sounds = soundService.getSoundsByUser(userAlias, pageNum, soundsPerPage);
+			sounds = soundService.getObservingSounds(userAlias, pageNum, soundsPerPage);
 		} catch (SoundException e) 
 		{
 			e.printStackTrace();

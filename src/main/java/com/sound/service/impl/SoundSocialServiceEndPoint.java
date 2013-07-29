@@ -5,6 +5,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -23,10 +24,10 @@ public class SoundSocialServiceEndpoint {
 	SoundSocialService soundSocialService;
 
 	@PUT
-	@Path("/like")
+	@Path("/{userAlias}/like/{soundAlias}")
 	public Response like(
-			@FormParam("soundAlias") @NotNull String soundAlias,
-			@FormParam("userAlias") @NotNull String userAlias
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
 		try {
@@ -43,10 +44,10 @@ public class SoundSocialServiceEndpoint {
 	}
 
 	@DELETE
-	@Path("/like")
+	@Path("/{userAlias}/like/{soundAlias}")
 	public Response unlike(
-			@FormParam("soundAlias") @NotNull String soundAlias,
-			@FormParam("userAlias") @NotNull String userAlias
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
 		try 
@@ -64,11 +65,11 @@ public class SoundSocialServiceEndpoint {
 	}
 	
 	@PUT
-	@Path("/comment")
+	@Path("/{userAlias}/comment/{soundAlias}")
 	public Response comment(
-			@FormParam("soundAlias") @NotNull String soundAlias,
-			@FormParam("userAlias") @NotNull String userAlias,
-			@FormParam("comment") @NotNull String comment,
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @PathParam("userAlias") String userAlias,
+			@NotNull @FormParam("comment")  String comment,
 			@FormParam("pointAt") Float pointAt
 			)
 	{
@@ -91,9 +92,9 @@ public class SoundSocialServiceEndpoint {
 	}
 	
 	@DELETE
-	@Path("/comment")
+	@Path("/comment/{commentId}")
 	public Response comment(
-			@FormParam("commentId") @NotNull String commentId
+			@NotNull @PathParam("commentId") String commentId
 			)
 	{
 		try {

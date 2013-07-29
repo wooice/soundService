@@ -168,7 +168,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 
 	@Override
-	public List<SoundRecord> getObservingUser(String userAlias,
+	public List<SoundRecord> getObservingSounds(String userAlias,
 			Integer pageNum, Integer soundsPerPage) throws SoundException {
 		List<UserConnect> connections = userConnectDAO.find("fromUser.profile.alias", userAlias);
 		List<User> users = new ArrayList<User>();
