@@ -15,7 +15,7 @@ import com.sound.exception.UserException;
 import com.sound.service.user.itf.UserSocialService;
 
 @Component
-@Path("/userSocial")
+@Path("/userActivity")
 public class UserSocialServiceEndpoint {
 
 	@Autowired
@@ -23,7 +23,7 @@ public class UserSocialServiceEndpoint {
 	
 	@PUT
 	@Path("/follow")
-	public Response like(
+	public Response follow(
 			@FormParam("fromUserAlias") @NotNull String fromUserAlias,
 			@FormParam("toUserAlias") @NotNull String toUserAlias
 			)
