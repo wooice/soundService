@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,8 @@ import com.sound.model.enums.FileType;
 @Path("/storage")
 public class StorageServiceEndpoint {
 
+	Logger logger = Logger.getLogger(StorageServiceEndpoint.class);
+	
 	@Autowired
 	com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
 
@@ -45,6 +48,7 @@ public class StorageServiceEndpoint {
 		}
 		catch(Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get download url of type " + type + " and file " + file).build();
 		}
 		
@@ -66,6 +70,7 @@ public class StorageServiceEndpoint {
 		}
 		catch(Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get upload url of type " + type + " and file " + file).build();
 		}
 		return Response.status(Status.OK).entity(url.toString()).build();

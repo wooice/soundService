@@ -9,6 +9,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,8 @@ import com.sound.service.user.itf.UserSocialService;
 @Path("/userActivity")
 public class UserSocialServiceEndpoint {
 
+	Logger logger = Logger.getLogger(UserSocialServiceEndpoint.class);
+	
 	@Autowired
 	UserSocialService userSocialService;
 	
@@ -33,10 +36,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.follow(fromUserAlias, toUserAlias);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to follow user " + toUserAlias).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -54,10 +59,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.unfollow(fromUserAlias, toUserAlias);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to follow user " + toUserAlias).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -76,10 +83,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.createGroup(userAlias, groupName, description);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to create group " + groupName).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -97,10 +106,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.dismissGroup(userAlias, groupName);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to delete group " + groupName).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -118,10 +129,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.joinGroup(userAlias, groupName);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to join group " + groupName).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -139,10 +152,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.leaveGroup(userAlias, groupName);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to leave group " + groupName).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -162,10 +177,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.promoteGroupAdmin(ownerAlias, adminAlias, groupName);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to promote group admin" + groupName).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
@@ -184,10 +201,12 @@ public class UserSocialServiceEndpoint {
 			userSocialService.promoteGroupAdmin(ownerAlias, adminAlias, groupName);
 		} catch (UserException e) 
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		catch (Exception e)
 		{
+			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to demote group admin" + groupName).build();
 		}
 		return Response.status(Status.OK).entity("true").build();

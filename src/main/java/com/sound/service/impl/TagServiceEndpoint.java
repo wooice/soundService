@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,8 @@ import com.sound.service.sound.itf.SoundService;
 @Path("/tag")
 public class TagServiceEndpoint {
 
+	Logger logger = Logger.getLogger(TagServiceEndpoint.class);
+	
 	@Autowired
 	com.sound.service.sound.itf.TagService tagService;
 
@@ -44,7 +47,7 @@ public class TagServiceEndpoint {
 		} 
 		catch (SoundException e) 
 		{
-			e.printStackTrace();
+			logger.error(e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(e.getMessage())
 					.build();
@@ -71,7 +74,7 @@ public class TagServiceEndpoint {
 		{
 			tagService.attachToSound(soundAlias, tagLabels, userAlias);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e);
 			return Response
 					.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("Cannot attach Tag because internal server error")
@@ -92,7 +95,7 @@ public class TagServiceEndpoint {
 			tagService.detachFromSound(soundAlias, tagLabels, userAlias);
 		} 
 		catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e);
 			return Response
 					.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("Cannot detach Tag because internal server error")
@@ -117,7 +120,7 @@ public class TagServiceEndpoint {
 			}
 			
 		} catch (SoundException e) {
-			e.printStackTrace();
+			logger.error(e);
 			return Response
 					.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("Cannot detach Tag because internal server error")
@@ -137,7 +140,7 @@ public class TagServiceEndpoint {
 		try {
 			sounds = tagService.getSoundsWithTag(tagLabel);
 		} catch (SoundException e) {
-			e.printStackTrace();
+			logger.error(e);
 			return Response
 					.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("Cannot get sounds by tag because internal server error")
