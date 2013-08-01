@@ -1,6 +1,5 @@
 package com.sound.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -21,6 +20,7 @@ import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
 import com.sound.service.sound.itf.SoundService;
+import com.sound.util.JsonHandler;
 
 @Component
 @Path("/tag")
@@ -55,7 +55,7 @@ public class TagServiceEndpoint {
 		catch (Exception e)
 		{
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity("Failed to create tag " + label)
+					.entity(("Failed to create tag " + label))
 					.build();
 		}
 		
@@ -111,14 +111,9 @@ public class TagServiceEndpoint {
 	public Response getTagsContains(
 			@NotNull @PathParam("pattern") String pattern) 
 	{
-		List<String> tagLabels = null;
+		List<Tag> tags = null;
 		try {
-			List<Tag> tags = tagService.listTagsContains(pattern);
-			tagLabels = new ArrayList<String>();
-			for (Tag tag : tags) {
-				tagLabels.add(tag.getLabel());
-			}
-			
+			tags  = tagService.listTagsContains(pattern);
 		} catch (SoundException e) {
 			logger.error(e);
 			return Response
@@ -127,7 +122,7 @@ public class TagServiceEndpoint {
 					.build();
 		}
 		
-		return Response.status(Response.Status.OK).entity(tagLabels).build();
+		return Response.status(Response.Status.OK).entity(JsonHandler.toJson(tags)).build();
 	}
 
 	@GET

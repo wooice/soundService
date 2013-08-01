@@ -222,6 +222,8 @@ public class Sound extends BaseModel {
 			private String posterId;
 
 			private String extension;
+			
+			private String url;
 
 			public String getPosterId() {
 				return posterId;
@@ -238,6 +240,15 @@ public class Sound extends BaseModel {
 			public void setExtension(String extension) {
 				this.extension = extension;
 			}
+
+			public String getUrl() {
+				return url;
+			}
+
+			public void setUrl(String url) {
+				this.url = url;
+			}
+			
 		}
 
 		@Override
@@ -278,6 +289,8 @@ public class Sound extends BaseModel {
 
 		private int duration;
 
+		private String url;
+		
 		@Serialized
 		private float[][] wave;
 
@@ -295,6 +308,14 @@ public class Sound extends BaseModel {
 
 		public void setDuration(int duration) {
 			this.duration = duration;
+		}
+		
+		public String getUrl() {
+			return url;
+		}
+
+		public void setUrl(String url) {
+			this.url = url;
 		}
 
 		public float[][] getWave() {

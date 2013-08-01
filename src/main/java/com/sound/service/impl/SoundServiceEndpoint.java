@@ -22,6 +22,7 @@ import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.service.file.itf.FileService;
 import com.sound.service.sound.itf.SoundService;
+import com.sound.util.JsonHandler;
 
 @Component
 @Path("/sound")
@@ -75,7 +76,7 @@ public class SoundServiceEndpoint {
 		}
 		catch(Exception e)
 		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to save sound " + soundAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to save sound " + soundAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -104,7 +105,7 @@ public class SoundServiceEndpoint {
 		catch(Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to delete sound " + soundAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to delete sound " + soundAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -130,9 +131,10 @@ public class SoundServiceEndpoint {
 		catch(Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sounds for user " + userAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sound streams.").build();
 		}
-		return Response.status(Status.OK).entity(sounds.toString()).build();
+		
+		return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
 	}
 	
 	@GET
@@ -156,9 +158,9 @@ public class SoundServiceEndpoint {
 		}
 		catch(Exception e)
 		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sounds for user " + userAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to load sounds for user " + userAlias)).build();
 		}
-		return Response.status(Status.OK).entity(sounds.toString()).build();
+		return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
 	}
 
 }

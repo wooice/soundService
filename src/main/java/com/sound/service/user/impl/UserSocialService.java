@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import com.sound.dao.GroupDAO;
 import com.sound.dao.UserConnectDAO;
@@ -15,6 +17,8 @@ import com.sound.model.Group;
 import com.sound.model.User;
 import com.sound.model.UserActivity.UserConnect;
 
+@Service
+@Scope("singleton")
 public class UserSocialService implements
 		com.sound.service.user.itf.UserSocialService {
 

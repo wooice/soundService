@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import com.sound.dao.UserDAO;
 import com.sound.exception.UserException;
@@ -11,6 +13,8 @@ import com.sound.model.User;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
 
+@Service
+@Scope("singleton")
 public class UserService implements com.sound.service.user.itf.UserService {
 
 	@Autowired
