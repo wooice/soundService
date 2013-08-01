@@ -39,7 +39,7 @@ public class UserServiceEndpoint{
 		}catch(Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to get user by alias " + userAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to get user by alias " + userAlias)).build();
 		}
 		String result = (null == user)? "true" : "false";
 
@@ -60,7 +60,7 @@ public class UserServiceEndpoint{
 		catch(Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to check emailaddress " + emailAddress).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to check emailaddress " + emailAddress)).build();
 		}
 		String result = (null == user)? "true" : "false";
 
@@ -86,7 +86,7 @@ public class UserServiceEndpoint{
 		}
 		catch(Exception e)
 		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to create user " + userAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user " + userAlias)).build();
 		}
 
 		return Response.status(Status.OK).entity("true").build();

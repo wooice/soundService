@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import com.sound.dao.SoundDAO;
 import com.sound.dao.TagDAO;
@@ -13,6 +15,8 @@ import com.sound.model.Sound;
 import com.sound.model.Tag;
 import com.sound.service.user.itf.UserService;
 
+@Service
+@Scope("singleton")
 public class TagService implements com.sound.service.sound.itf.TagService {
 	@Autowired
 	SoundDAO soundDAO;
@@ -93,30 +97,6 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 		}
 		return soundDAO.fetchEntitiesPropertyContains("tags", tag);
 	
-	}
-
-	public SoundDAO getSoundDAO() {
-		return soundDAO;
-	}
-
-	public void setSoundDAO(SoundDAO soundDAO) {
-		this.soundDAO = soundDAO;
-	}
-
-	public TagDAO getTagDAO() {
-		return tagDAO;
-	}
-
-	public void setTagDAO(TagDAO tagDAO) {
-		this.tagDAO = tagDAO;
-	}
-
-	public UserService getUserService() {
-		return userService;
-	}
-
-	public void setUserService(UserService userService) {
-		this.userService = userService;
 	}
 
 }

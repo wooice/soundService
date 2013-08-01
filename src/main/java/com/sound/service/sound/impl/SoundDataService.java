@@ -1,10 +1,14 @@
 package com.sound.service.sound.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
-import com.sound.model.Sound.SoundData;
 import com.sound.dao.SoundDataDAO;
+import com.sound.model.Sound.SoundData;
 
+@Service
+@Scope("singleton")
 public class SoundDataService implements com.sound.service.sound.itf.SoundDataService
 {
 	@Autowired
@@ -28,14 +32,6 @@ public class SoundDataService implements com.sound.service.sound.itf.SoundDataSe
 	public void delete(String objectId)
 	{
 		soundDataDAO.deleteByProperty("objectId", objectId);
-	}
-	
-	public SoundDataDAO getSoundDataDAO() {
-		return soundDataDAO;
-	}
-
-	public void setSoundDataDAO(SoundDataDAO soundDataDAO) {
-		this.soundDataDAO = soundDataDAO;
 	}
 
 }

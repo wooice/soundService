@@ -42,7 +42,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to follow user " + toUserAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to follow user " + toUserAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -65,7 +65,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to follow user " + toUserAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to follow user " + toUserAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -89,7 +89,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to create group " + groupName).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create group " + groupName)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -112,7 +112,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to delete group " + groupName).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to delete group " + groupName)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -135,7 +135,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to join group " + groupName).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to join group " + groupName)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -158,7 +158,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to leave group " + groupName).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to leave group " + groupName)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -183,7 +183,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to promote group admin" + groupName).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to promote group admin" + groupName)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -207,7 +207,7 @@ public class UserSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to demote group admin" + groupName).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to demote group admin" + groupName)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
