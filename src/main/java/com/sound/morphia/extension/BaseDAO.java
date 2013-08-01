@@ -24,7 +24,7 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 	                .getGenericSuperclass()).getActualTypeArguments()[0];  
 	}
 	
-	public void deleteByProperty(String key, String value)
+	public void deleteByProperty(String key, Object value)
 	{
 		Query<T> q = ds.find(clazz, key, value);
 		this.deleteByQuery(q);
@@ -108,7 +108,7 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		return result;
 	}
 	
-	public List<T> findWithRange(Map<String, String> cratiaries, Integer start, Integer range)
+	public List<T> findWithRange(Map<String, Object> cratiaries, Integer start, Integer range)
 	{
 		Query<T> query = ds.createQuery(clazz);
 		

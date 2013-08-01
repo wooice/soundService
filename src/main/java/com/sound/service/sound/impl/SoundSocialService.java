@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import com.sound.dao.SoundCommentDAO;
 import com.sound.dao.SoundDAO;
@@ -20,6 +22,8 @@ import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.User;
 
+@Service
+@Scope("singleton")
 public class SoundSocialService implements com.sound.service.sound.itf.SoundSocialService{
 
 	@Autowired
@@ -156,46 +160,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 		String soundAlias = soundComment.getSound().getProfile().getName();
 		soundCommentDAO.delete(soundComment);
 		soundDAO.decrease("profile.name", soundAlias, "commentsCount");
-	}
-	
-	public SoundDAO getSoundDAO() {
-		return soundDAO;
-	}
-
-	public void setSoundDAO(SoundDAO soundDAO) {
-		this.soundDAO = soundDAO;
-	}
-
-	public UserDAO getUserDAO() {
-		return userDAO;
-	}
-
-	public void setUserDAO(UserDAO userDAO) {
-		this.userDAO = userDAO;
-	}
-
-	public SoundLikeDAO getSoundLikeDAO() {
-		return soundLikeDAO;
-	}
-
-	public void setSoundLikeDAO(SoundLikeDAO soundLikeDAO) {
-		this.soundLikeDAO = soundLikeDAO;
-	}
-
-	public SoundRecordDAO getSoundRecordDAO() {
-		return soundRecordDAO;
-	}
-
-	public void setSoundRecordDAO(SoundRecordDAO soundRecordDAO) {
-		this.soundRecordDAO = soundRecordDAO;
-	}
-
-	public SoundCommentDAO getSoundCommentDAO() {
-		return soundCommentDAO;
-	}
-
-	public void setSoundCommentDAO(SoundCommentDAO soundCommentDAO) {
-		this.soundCommentDAO = soundCommentDAO;
 	}
 
 }

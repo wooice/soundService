@@ -43,7 +43,7 @@ public class SoundSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to like sound " + soundAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to like sound " + soundAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -66,7 +66,7 @@ public class SoundSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to unlike sound " + soundAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to unlike sound " + soundAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -88,7 +88,7 @@ public class SoundSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to repost sound " + soundAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to repost sound " + soundAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -111,7 +111,7 @@ public class SoundSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to unlike sound " + soundAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to unlike sound " + soundAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -141,7 +141,7 @@ public class SoundSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to comment on sound " + soundAlias).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to comment on sound " + soundAlias)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
@@ -163,7 +163,7 @@ public class SoundSocialServiceEndpoint {
 		catch (Exception e)
 		{
 			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to comment with id " + commentId).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to comment with id " + commentId)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
 	}
