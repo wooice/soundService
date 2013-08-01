@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import com.sound.dao.SoundDAO;
 import com.sound.dao.SoundRecordDAO;
@@ -23,6 +25,7 @@ import com.sound.model.Sound.SoundProfile.SoundPoster;
 import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.User;
 import com.sound.model.UserActivity.UserConnect;
+import com.sound.model.enums.FileType;
 import com.sound.model.enums.SoundType;
 import com.sound.model.file.LocalSoundFile;
 import com.sound.processor.factory.ProcessorFactory;
@@ -30,7 +33,10 @@ import com.sound.processor.itf.Converter;
 import com.sound.processor.itf.Extractor;
 import com.sound.processor.model.AudioInfo;
 import com.sound.processor.model.Wave;
+import com.sound.service.storage.itf.RemoteStorageService;
 
+@Service
+@Scope("singleton")
 public class SoundService implements com.sound.service.sound.itf.SoundService
 {
 	@Autowired
@@ -50,6 +56,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 	@Autowired
 	ProcessorFactory processFactory;
+	
+	@Autowired
+	RemoteStorageService remoteStorageService;
 
 	@Override
 	public LocalSoundFile uniform(LocalSoundFile sound) throws SoundException {
@@ -109,9 +118,14 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 	@Override
 	public void delete(String soundAlias) {
-		soundDAO.deleteByProperty("profile.name", soundAlias);
-		//Delete create sound activity.
-		soundRecordDAO.deleteByProperty("sound.profile.name", soundAlias);
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		
+		if (null != sound)
+		{
+			//Delete create sound activity.
+			soundRecordDAO.deleteByProperty("sound", sound);
+			soundDAO.delete(sound);
+		}
 	}
 
 	@Override
@@ -161,9 +175,17 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	@Override
 	public List<SoundRecord> getSoundsByUser(String userAlias, Integer pageNum, Integer soundsPerPage)
 	{
-		Map<String, String> cratiaries = new HashMap<String, String>();
-		cratiaries.put("owner.profile.alias", userAlias);
-		return soundRecordDAO.findWithRange(cratiaries, pageNum * soundsPerPage, soundsPerPage);
+		User owner = userDAO.findOne("profile.alias", userAlias);
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
+		cratiaries.put("owner", owner);
+		List<SoundRecord> records = soundRecordDAO.findWithRange(cratiaries, pageNum * soundsPerPage, soundsPerPage);
+		
+		for(SoundRecord oneSound: records)
+		{
+			oneSound.getSound().getSoundData().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
+			oneSound.getSound().getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
+		}
+		return records;
 	}
 
 
@@ -177,60 +199,17 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		{
 			users.add(connect.getFromUser());
 		}
+		users.add(userDAO.findOne("profile.alias", userAlias));
 		
 		Map<String, String> cratiaries = Collections.emptyMap();
-		soundRecordDAO.findByOwners(cratiaries, users, pageNum * soundsPerPage, soundsPerPage);
-		return null;
-	}
+		List<SoundRecord> records = soundRecordDAO.findByOwners(cratiaries, users, pageNum * soundsPerPage, soundsPerPage);
 
-	// ---------setters & getters ----------
-	
-	public SoundDAO getSoundDAO() {
-		return soundDAO;
-	}
-
-	public void setSoundDAO(SoundDAO soundDAO) {
-		this.soundDAO = soundDAO;
-	}
-
-	public SoundRecordDAO getSoundRecordDAO() {
-		return soundRecordDAO;
-	}
-
-	public void setSoundRecordDAO(SoundRecordDAO soundRecordDAO) {
-		this.soundRecordDAO = soundRecordDAO;
-	}
-
-	public UserDAO getUserDAO() {
-		return userDAO;
-	}
-
-	public void setUserDAO(UserDAO userDAO) {
-		this.userDAO = userDAO;
-	}
-
-	public ProcessorFactory getProcessFactory() {
-		return processFactory;
-	}
-
-	public void setProcessFactory(ProcessorFactory processFactory) {
-		this.processFactory = processFactory;
-	}
-
-	public SoundDataService getSoundDataService() {
-		return soundDataService;
-	}
-
-	public void setSoundDataService(SoundDataService soundDataService) {
-		this.soundDataService = soundDataService;
-	}
-
-	public UserConnectDAO getUserConnectDAO() {
-		return userConnectDAO;
-	}
-
-	public void setUserConnectDAO(UserConnectDAO userConnectDAO) {
-		this.userConnectDAO = userConnectDAO;
+		for(SoundRecord oneSound: records)
+		{
+			oneSound.getSound().getSoundData().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
+			oneSound.getSound().getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
+		}
+		return records;
 	}
 
 }

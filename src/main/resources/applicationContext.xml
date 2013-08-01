@@ -73,44 +73,4 @@
 	<bean id="processFactory" class="com.sound.processor.factory.ProcessorFactory">
 	</bean>
 
-	<bean id="userService" class="com.sound.service.user.impl.UserService">
-		<property name="userDAO" ref="userDAO" />
-	</bean>
-
-	<bean id="soundDataService" class="com.sound.service.sound.impl.SoundDataService">
-		<property name="soundDataDAO" ref="soundDataDAO" />
-	</bean>
-
-	<bean id="soundService" class="com.sound.service.sound.impl.SoundService">
-		<property name="soundDAO" ref="soundDAO" />
-		<property name="userDAO" ref="userDAO" />
-		<property name="soundDataService" ref="soundDataService" />
-		<property name="soundRecordDAO" ref="soundRecordDAO" />
-		<property name="processFactory" ref="processFactory" />
-	</bean>
-	
-	<bean id="soundSocialService" class="com.sound.service.sound.impl.SoundSocialService">
-		<property name="userDAO" ref="userDAO" />
-		<property name="soundDAO" ref="soundDAO" />
-		<property name="soundLikeDAO" ref="soundLikeDAO" />
-		<property name="soundRecordDAO" ref="soundRecordDAO" />
-		<property name="soundCommentDAO" ref="soundCommentDAO" />
-	</bean>
-	
-	<bean id="userSocialService" class="com.sound.service.user.impl.UserSocialService">
-		<property name="userDAO" ref="userDAO" />
-		<property name="userConnectDAO" ref="userConnectDAO" />
-		<property name="groupDAO" ref="groupDAO" />
-	</bean>
-	
-	<bean id="tagService" class="com.sound.service.sound.impl.TagService">
-		<property name="soundDAO" ref="soundDAO" />
-		<property name="tagDAO" ref="tagDAO" />
-	</bean>
-
-	<bean id="fileService" class="com.sound.service.file.impl.FileService">
-	</bean>
-	
-	<bean id="remoteStorageService" class="com.sound.service.storage.impl.RemoteStorageService">
-	</bean>
 </beans>
