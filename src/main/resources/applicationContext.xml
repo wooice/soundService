@@ -16,6 +16,13 @@
 	<bean id="morphia" class="com.github.jmkgreen.morphia.Morphia">  
     </bean>
 
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize"
+                  value="40000000" />
+        <!-- 40M -->
+    </bean>
+
 	<bean id="soundDAO" class="com.sound.dao.SoundDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  
