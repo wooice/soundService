@@ -130,7 +130,11 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 	@Override
 	public Sound load(String soundAlias) {
-		return soundDAO.findOne("profile.name", soundAlias);
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		sound.getSoundData().setUrl(remoteStorageService.generateDownloadUrl(sound.getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
+		sound.getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(sound.getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
+		
+		return sound;
 	}
 
 	@Override
