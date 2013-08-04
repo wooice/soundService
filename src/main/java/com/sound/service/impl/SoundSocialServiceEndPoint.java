@@ -175,10 +175,12 @@ public class SoundSocialServiceEndpoint {
 	
 	@POST
 	@Path("/recommand/sounds")
-	public Response getRecommandedGroupsByTags(@NotNull @FormParam("tags") List<String> tags) {
+	public Response getRecommandedGroupsByTags(@NotNull @FormParam("tags") List<String> tags, 
+			@NotNull @FormParam("pageNum") Integer pageNum,
+			@NotNull @FormParam("pageSize") Integer pageSize) {
 		List<Sound> sounds = new ArrayList<Sound>();
 		try {
-			sounds.addAll(soundSocialService.recommandSoundsByTags(tags));
+			sounds.addAll(soundSocialService.recommandSoundsByTags(tags, pageNum, pageSize));
 		} catch (SoundException e) {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

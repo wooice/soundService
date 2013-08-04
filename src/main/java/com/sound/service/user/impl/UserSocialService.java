@@ -222,7 +222,8 @@ public class UserSocialService implements
 	}
 
 	@Override
-	public List<User> getFollowedUsers(String toUserAlias) throws UserException {
+	public List<User> getFollowedUsers(String toUserAlias, Integer pageNum,
+			Integer pageSize) throws UserException {
 		Map<String, String> cratiaries = new HashMap<String, String>();
 		cratiaries.put("toUser.profile.alias", toUserAlias);
 		List<UserConnect> list = userConnectDAO.find(cratiaries);
@@ -230,12 +231,12 @@ public class UserSocialService implements
 		for (UserConnect uc : list) {
 			result.add(userDAO.findOne("profile.alias", uc.getFromUser()));
 		}
-		return result;
+		return SocialUtils.sliceList(result, pageNum, pageSize);
 	}
 
 	@Override
-	public List<User> getFollowingUsers(String fromUserAlias)
-			throws UserException {
+	public List<User> getFollowingUsers(String fromUserAlias, Integer pageNum,
+			Integer pageSize) throws UserException {
 		Map<String, String> cratiaries = new HashMap<String, String>();
 		cratiaries.put("fromUser.profile.alias", fromUserAlias);
 		List<UserConnect> list = userConnectDAO.find(cratiaries);
@@ -243,7 +244,7 @@ public class UserSocialService implements
 		for (UserConnect uc : list) {
 			result.add(userDAO.findOne("profile.alias", uc.getToUser()));
 		}
-		return result;
+		return SocialUtils.sliceList(result, pageNum, pageSize);
 	}
 
 	public UserConnectDAO getUserConnectDAO() {
@@ -279,11 +280,53 @@ public class UserSocialService implements
 	}
 
 	@Override
-	public List<User> recommandUsersByTags(List<String> tagLabels)
-			throws UserException, SoundException {
+	public List<User> recommandUsersByTags(List<String> tagLabels,
+			Integer pageNum, Integer pageSize) throws UserException,
+			SoundException {
+		Map<User, Long> userFollowedNumMap = new HashMap<User, Long>();
+		Map<User, Long> userTagNumMap = this.getUserTagNumMap(tagLabels);
+
+		Map<User, Integer> userTagSeq = SocialUtils.toSeqMap(SocialUtils
+				.sortMapByValue(userTagNumMap, false));
+		Map<User, Integer> userFollowdSeq = SocialUtils.toSeqMap(SocialUtils
+				.sortMapByValue(userFollowedNumMap, false));
+
+		List<User> allResult = SocialUtils.combineLogicAndSocial(userTagSeq,
+				userFollowdSeq, SocialUtils.DEFAULT_SOCIAL_POWER);
+
+		return SocialUtils.sliceList(allResult, pageNum, pageSize);
+	}
+
+	@Override
+	public List<Group> recommandGroupsByTags(List<String> tagLabels,
+			Integer pageNum, Integer pageSize) throws UserException,
+			SoundException {
+		Map<User, Long> userTagNumMap = this.getUserTagNumMap(tagLabels);
+		Map<Group, Long> groupHitMap = new HashMap<Group, Long>();
+
+		for (User user : userTagNumMap.keySet()) {
+			if (user.getGroups() == null) {
+				continue;
+			}
+			for (Group group : user.getGroups()) {
+				if (groupHitMap.containsKey(group)) {
+					groupHitMap.put(group, groupHitMap.get(group)
+							+ userTagNumMap.get(user));
+				} else {
+					groupHitMap.put(group, userTagNumMap.get(user));
+				}
+			}
+		}
+
+		List<Group> allResult = SocialUtils.toSeqList(SocialUtils
+				.sortMapByValue(groupHitMap, false));
+		return SocialUtils.sliceList(allResult, pageNum, pageSize);
+	}
+
+	private Map<User, Long> getUserTagNumMap(List<String> tagLabels)
+			throws SoundException {
 		Map<Tag, List<Sound>> tagSoundMap = new HashMap<Tag, List<Sound>>();
 		Map<User, Long> userTagNumMap = new HashMap<User, Long>();
-		Map<User, Long> userFollowedNumMap = new HashMap<User, Long>();
 
 		// fetch tag : sounds map
 		for (String label : tagLabels) {
@@ -306,43 +349,7 @@ public class UserSocialService implements
 			}
 		}
 
-		for (User user : userTagNumMap.keySet()) {
-			userFollowedNumMap.put(user, user.getSocial().getFollowed());
-		}
-
-		Map<User, Integer> userTagSeq = SocialUtils.toSeqMap(SocialUtils
-				.sortMapByValue(userTagNumMap, false));
-		Map<User, Integer> userFollowdSeq = SocialUtils.toSeqMap(SocialUtils
-				.sortMapByValue(userFollowedNumMap, false));
-
-		List<User> allResult = SocialUtils.combineLogicAndSocial(userTagSeq,
-				userFollowdSeq, SocialUtils.DEFAULT_SOCIAL_POWER);
-
-		return allResult;
-	}
-
-	@Override
-	public List<Group> recommandGroupsByTags(List<String> tagLabels)
-			throws UserException, SoundException {
-		Map<Group, Long> groupHitMap = new HashMap<Group, Long>();
-
-		List<User> users = this.recommandUsersByTags(tagLabels);
-
-		for (User user : users) {
-			if (user.getGroups() == null) {
-				continue;
-			}
-			for (Group group : user.getGroups()) {
-				if (groupHitMap.containsKey(group)) {
-					groupHitMap.put(group, groupHitMap.get(group) + 1);
-				} else {
-					groupHitMap.put(group, 1l);
-				}
-			}
-		}
-
-		return SocialUtils.toSeqList(SocialUtils.sortMapByValue(groupHitMap,
-				false));
+		return userTagNumMap;
 	}
 
 	public static void main(String[] args) {
