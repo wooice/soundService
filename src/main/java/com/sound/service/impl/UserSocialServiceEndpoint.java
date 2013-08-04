@@ -1,8 +1,13 @@
 package com.sound.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -13,7 +18,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
+import com.sound.model.Group;
+import com.sound.model.User;
 import com.sound.service.user.itf.UserSocialService;
 
 @Component
@@ -210,5 +218,63 @@ public class UserSocialServiceEndpoint {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to demote group admin" + groupName)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
+	}
+	
+	@POST
+	@Path("/recommand/users")
+	public Response getRecommandedUsersByTags(@NotNull @FormParam("tags") List<String> tags) {
+		List<User> users = new ArrayList<User>();
+		try {
+			users.addAll(userSocialService.recommandUsersByTags(tags));
+		} catch (UserException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		} catch (SoundException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		return Response.status(Status.OK).entity(users).build();
+	}
+	
+	@POST
+	@Path("/recommand/groups")
+	public Response getRecommandedGroupsByTags(@NotNull @FormParam("tags") List<String> tags) {
+		List<Group> groups = new ArrayList<Group>();
+		try {
+			groups.addAll(userSocialService.recommandGroupsByTags(tags));
+		} catch (UserException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		} catch (SoundException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		return Response.status(Status.OK).entity(groups).build();
+	}
+	
+	@GET
+	@Path("/followed/{userAlias}")
+	public Response getFollowedUsers(@NotNull @PathParam("userAlias") String userAlias){
+		List<User> users = new ArrayList<User>();
+		try {
+			users.addAll(userSocialService.getFollowedUsers(userAlias));
+		} catch (UserException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		return Response.status(Status.OK).entity(users).build();
+	}
+	
+	@GET
+	@Path("/following/{userAlias}")
+	public Response getFollowingUsers(@NotNull @PathParam("userAlias") String userAlias){
+		List<User> users = new ArrayList<User>();
+		try {
+			users.addAll(userSocialService.getFollowingUsers(userAlias));
+		} catch (UserException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		return Response.status(Status.OK).entity(users).build();
 	}
 }
