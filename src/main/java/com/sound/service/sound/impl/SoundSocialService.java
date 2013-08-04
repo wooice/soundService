@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sound.dao.SoundCommentDAO;
 import com.sound.dao.SoundDAO;
 import com.sound.dao.SoundLikeDAO;
+import com.sound.dao.SoundPlayDAO;
 import com.sound.dao.SoundRecordDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
@@ -19,6 +20,7 @@ import com.sound.exception.UserException;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
+import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.User;
 
@@ -33,6 +35,9 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	SoundDAO soundDAO;
 	
 	@Autowired
+	SoundPlayDAO soundPlayDAO;
+	
+	@Autowired
 	SoundLikeDAO soundLikeDAO;
 	
 	@Autowired
@@ -41,9 +46,25 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	@Autowired
 	SoundCommentDAO soundCommentDAO;
 	
+
+	@Override
+	public Integer play(String soundAlias, String userAlias)
+			throws SoundException {
+		SoundPlay play = new SoundPlay();
+		
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		play.setSound(sound);
+		play.setOwner(userDAO.findOne("profile.alias", userAlias));
+		play.setCreatedTime(new Date());
+		soundPlayDAO.save(play);
+		soundDAO.increase("profile.name", soundAlias, "playedCount");
+		
+		return sound.getSoundSocial().getPlayedCount() + 1;
+	}
+	
 	@Override
 	public Integer like(String soundAlias, String userAlias) throws SoundException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		SoundLike liked = soundLikeDAO.findOne(cratiaries);
@@ -67,7 +88,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	@Override
 	public Integer dislike(String soundAlias, String userAlias) throws SoundException 
 	{
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		SoundLike liked = soundLikeDAO.findOne(cratiaries);
@@ -86,7 +107,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	@Override
 	public void repost(String soundAlias, String userAlias)
 			throws SoundException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		cratiaries.put("recordType", SoundRecord.REPOST);
@@ -109,7 +130,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	@Override
 	public void unrepost(String soundAlias, String userAlias)
 			throws SoundException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		cratiaries.put("recordType", SoundRecord.REPOST);
@@ -161,5 +182,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 		soundCommentDAO.delete(soundComment);
 		soundDAO.decrease("profile.name", soundAlias, "commentsCount");
 	}
+
 
 }

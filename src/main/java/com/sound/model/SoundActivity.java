@@ -108,6 +108,11 @@ public class SoundActivity {
 	public static class SoundLike extends SoundActivity
 	{
 	}
+	
+	@Entity
+	public static class SoundPlay extends SoundActivity
+	{
+	}
 
 	@Entity
 	public static class SoundRecord extends SoundActivity
