@@ -25,11 +25,11 @@ public interface UserSocialService
 	
 	public void demoteGroupAdmin(String ownerAlias, String adminAlias, String groupName) throws UserException;
 	
-	public List<User> getFollowedUsers(String toUserAlias) throws UserException;
+	public List<User> getFollowedUsers(String toUserAlias, Integer pageNum, Integer pageSize) throws UserException;
 	
-	public List<User> getFollowingUsers(String fromUserAlias) throws UserException;
+	public List<User> getFollowingUsers(String fromUserAlias, Integer pageNum, Integer pageSize) throws UserException;
 
-	public List<User> recommandUsersByTags(List<String> tagLabels) throws UserException,SoundException;
+	public List<User> recommandUsersByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws UserException,SoundException;
 
-	public List<Group> recommandGroupsByTags(List<String> tagLabels) throws UserException, SoundException;
+	public List<Group> recommandGroupsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws UserException, SoundException;
 }

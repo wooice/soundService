@@ -63,4 +63,20 @@ public class SocialUtils {
 		return result;
 	}
 
+	public static <T> List<T> sliceList(List<T> allResult, Integer pageNum,
+			Integer pageSize) {
+		int offset = (pageNum - 1) *pageSize;
+		int resultSize = allResult.size();
+		if (resultSize > offset) {
+			int left = resultSize - offset;
+			if (left > pageSize) {
+				return allResult.subList(offset, offset + pageNum - 1);
+			}else {
+				return allResult.subList(offset, resultSize - 1);
+			}
+		}else {
+			return new ArrayList<T>();
+		}
+	}
+
 }
