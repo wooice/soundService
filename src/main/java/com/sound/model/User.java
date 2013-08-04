@@ -36,6 +36,9 @@ public class User extends BaseModel
 	@Reference(lazy=true)
 	private List<Group> groups;
 	
+	@Reference(lazy=true)
+	private UserSocial social;
+
 	@JsonIgnore
 	public ObjectId getId() {
 		return id;
@@ -63,6 +66,15 @@ public class User extends BaseModel
 
 	public UserExternal getExternal() {
 		return external;
+	}
+	
+
+	public UserSocial getSocial() {
+		return social;
+	}
+
+	public void setSocial(UserSocial social) {
+		this.social = social;
 	}
 
 	public void setExternal(UserExternal external) {
@@ -249,15 +261,14 @@ public class User extends BaseModel
 		}
 		
 	}
-
+	
+	@Entity
 	public static class UserSocial
 	{
 
 		private Long following;
 
 		private Long followed;
-		
-		private Long groups;
 
 		public Long getFollowing() {
 			return following;
@@ -273,14 +284,6 @@ public class User extends BaseModel
 
 		public void setFollowed(Long followed) {
 			this.followed = followed;
-		}
-
-		public Long getGroups() {
-			return groups;
-		}
-
-		public void setGroups(Long groups) {
-			this.groups = groups;
 		}
 	}
 	
