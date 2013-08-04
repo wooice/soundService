@@ -1,8 +1,12 @@
 package com.sound.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
+import com.sound.model.Sound;
 import com.sound.service.sound.itf.SoundSocialService;
 
 @Component
@@ -166,5 +171,18 @@ public class SoundSocialServiceEndpoint {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to comment with id " + commentId)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
+	}
+	
+	@POST
+	@Path("/recommand/sounds")
+	public Response getRecommandedGroupsByTags(@NotNull @FormParam("tags") List<String> tags) {
+		List<Sound> sounds = new ArrayList<Sound>();
+		try {
+			sounds.addAll(soundSocialService.recommandSoundsByTags(tags));
+		} catch (SoundException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		return Response.status(Status.OK).entity(sounds).build();
 	}
 }
