@@ -20,5 +20,5 @@ public interface SoundSocialService {
 	
 	public void uncomment(String commentId) throws SoundException;
 
-	public List<Sound> recommandSoundsByTags(List<String> tagLabels) throws SoundException;
+	public List<Sound> recommandSoundsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws SoundException;
 }

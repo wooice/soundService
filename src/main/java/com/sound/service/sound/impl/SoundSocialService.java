@@ -218,7 +218,8 @@ public class SoundSocialService implements
 	}
 
 	@Override
-	public List<Sound> recommandSoundsByTags(List<String> tagLabels)
+	public List<Sound> recommandSoundsByTags(List<String> tagLabels,
+			Integer pageNum, Integer pageSize)
 			throws SoundException {
 		Map<Tag, List<Sound>> tagSoundMap = new HashMap<Tag, List<Sound>>();
 		Map<Sound, Long> soundTagNumMap = new HashMap<Sound, Long>();
@@ -241,8 +242,9 @@ public class SoundSocialService implements
 			}
 		}
 
-		return SocialUtils.toSeqList(SocialUtils.sortMapByValue(soundTagNumMap,
+		List<Sound> allResult = SocialUtils.toSeqList(SocialUtils.sortMapByValue(soundTagNumMap,
 				false));
+		return SocialUtils.sliceList(allResult, pageNum, pageSize);
 	}
 
 }
