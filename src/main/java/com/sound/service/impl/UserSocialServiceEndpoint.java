@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -249,5 +250,31 @@ public class UserSocialServiceEndpoint {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 		return Response.status(Status.OK).entity(groups).build();
+	}
+	
+	@GET
+	@Path("/followed/{userAlias}")
+	public Response getFollowedUsers(@NotNull @PathParam("userAlias") String userAlias){
+		List<User> users = new ArrayList<User>();
+		try {
+			users.addAll(userSocialService.getFollowedUsers(userAlias));
+		} catch (UserException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		return Response.status(Status.OK).entity(users).build();
+	}
+	
+	@GET
+	@Path("/following/{userAlias}")
+	public Response getFollowingUsers(@NotNull @PathParam("userAlias") String userAlias){
+		List<User> users = new ArrayList<User>();
+		try {
+			users.addAll(userSocialService.getFollowingUsers(userAlias));
+		} catch (UserException e) {
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		return Response.status(Status.OK).entity(users).build();
 	}
 }
