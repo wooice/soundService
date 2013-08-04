@@ -235,7 +235,7 @@ public class UserSocialServiceEndpoint {
 	}
 
 	@GET
-	@Path("/followed/{userAlias}")
+	@Path("/followed/{userAlias}/{pageSize}/{pageNum}")
 	public Response getFollowedUsers(
 			@NotNull @PathParam("userAlias") String userAlias, 
 			@NotNull @FormParam("pageNum") Integer pageNum,
@@ -252,7 +252,7 @@ public class UserSocialServiceEndpoint {
 	}
 
 	@GET
-	@Path("/following/{userAlias}")
+	@Path("/following/{userAlias}/{pageSize}/{pageNum}")
 	public Response getFollowingUsers(
 			@NotNull @PathParam("userAlias") String userAlias, 
 			@NotNull @FormParam("pageNum") Integer pageNum,
