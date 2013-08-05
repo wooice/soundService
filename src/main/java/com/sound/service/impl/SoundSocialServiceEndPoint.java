@@ -21,6 +21,7 @@ import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
 import com.sound.model.Sound;
 import com.sound.service.sound.itf.SoundSocialService;
+import com.sound.util.JsonHandler;
 
 @Component
 @Path("/soundActivity")
@@ -38,8 +39,9 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("soundAlias") String soundAlias
 			)
 	{
+		Integer played = 0;
 		try {
-			soundSocialService.play(soundAlias, userAlias);
+			played = soundSocialService.play(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -50,7 +52,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to record play sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(played)).build();
 	}
 	
 	@PUT
@@ -60,8 +62,9 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer liked = 0;
 		try {
-			soundSocialService.like(soundAlias, userAlias);
+			liked = soundSocialService.like(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -72,7 +75,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to like sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(liked)).build();
 	}
 
 	@DELETE
@@ -82,9 +85,10 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer liked = 0;
 		try 
 		{
-			soundSocialService.dislike(soundAlias, userAlias);
+			liked = soundSocialService.dislike(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -95,7 +99,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to unlike sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(liked)).build();
 	}
 	
 	@PUT
@@ -105,8 +109,9 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer reposted = 0;
 		try {
-			soundSocialService.repost(soundAlias, userAlias);
+			reposted = soundSocialService.repost(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -117,7 +122,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to repost sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(reposted)).build();
 	}
 
 	@DELETE
@@ -127,9 +132,10 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer reposted = 0;
 		try 
 		{
-			soundSocialService.unrepost(soundAlias, userAlias);
+			reposted = soundSocialService.unrepost(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -140,7 +146,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to unlike sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(reposted)).build();
 	}
 	
 	@PUT

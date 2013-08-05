@@ -14,9 +14,9 @@ public interface SoundSocialService {
 	
 	public Integer dislike(String soundAlias, String userAlias)  throws SoundException;
 	
-	public void repost(String soundAlias, String userAlias)  throws SoundException;
+	public Integer repost(String soundAlias, String userAlias)  throws SoundException;
 	
-	public void unrepost(String soundAlias, String userAlias)  throws SoundException;
+	public Integer unrepost(String soundAlias, String userAlias)  throws SoundException;
 	
 	public void comment(String soundAlias, String userAlias, String comment, Float pointAt) throws SoundException, UserException;
 	
