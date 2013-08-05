@@ -32,6 +32,28 @@ public class SoundSocialServiceEndpoint {
 	SoundSocialService soundSocialService;
 
 	@PUT
+	@Path("/{userAlias}/play/{soundAlias}")
+	public Response play(
+			@NotNull @PathParam("userAlias") String userAlias,
+			@NotNull @PathParam("soundAlias") String soundAlias
+			)
+	{
+		try {
+			soundSocialService.play(soundAlias, userAlias);
+		} catch (SoundException e) 
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to record play sound " + soundAlias)).build();
+		}
+		return Response.status(Status.OK).entity("true").build();
+	}
+	
+	@PUT
 	@Path("/{userAlias}/like/{soundAlias}")
 	public Response like(
 			@NotNull @PathParam("soundAlias") String soundAlias,

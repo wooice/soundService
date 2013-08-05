@@ -17,7 +17,7 @@ public interface SoundService {
 
 	public void delete(String soundAlias);
 
-	public Sound load(String soundId);
+	public Sound load(String userAlias, String soundId);
 	
 	public List<SoundRecord> getSoundsByUser(String userAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
 	
