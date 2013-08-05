@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 public class SocialUtils {
 	
 	public static final double DEFAULT_SOCIAL_POWER = 0.4d;
+	public static final long FIRST_CLASS_WEIGHT = 1000;
+	public static final int FOLLOW_MIN_BORDER = 3;
 
 	public static <T> List<T> combineLogicAndSocial(Map<T, Integer> logicSeq,
 			Map<T, Integer> socialSeq, double socialPower) {

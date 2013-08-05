@@ -1,5 +1,6 @@
 package com.sound.service.sound.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ public class SoundSocialService implements
 
 	@Autowired
 	SoundPlayDAO soundPlayDAO;
-	
+
 	@Autowired
 	SoundLikeDAO soundLikeDAO;
 
@@ -49,7 +50,7 @@ public class SoundSocialService implements
 
 	@Autowired
 	SoundCommentDAO soundCommentDAO;
-	
+
 	@Autowired
 	TagService tagService;
 
@@ -57,19 +58,20 @@ public class SoundSocialService implements
 	public Integer play(String soundAlias, String userAlias)
 			throws SoundException {
 		SoundPlay play = new SoundPlay();
-		
+
 		Sound sound = soundDAO.findOne("profile.name", soundAlias);
 		play.setSound(sound);
 		play.setOwner(userDAO.findOne("profile.alias", userAlias));
 		play.setCreatedTime(new Date());
 		soundPlayDAO.save(play);
 		soundDAO.increase("profile.name", soundAlias, "playedCount");
-		
+
 		return sound.getSoundSocial().getPlayedCount() + 1;
 	}
-	
+
 	@Override
-	public Integer like(String soundAlias, String userAlias) throws SoundException {
+	public Integer like(String soundAlias, String userAlias)
+			throws SoundException {
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
@@ -92,8 +94,8 @@ public class SoundSocialService implements
 	}
 
 	@Override
-	public Integer dislike(String soundAlias, String userAlias) throws SoundException 
-	{
+	public Integer dislike(String soundAlias, String userAlias)
+			throws SoundException {
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
@@ -189,8 +191,7 @@ public class SoundSocialService implements
 	}
 
 	@Override
-	public List<Sound> recommandSoundsByTags(List<String> tagLabels,
-			Integer pageNum, Integer pageSize)
+	public List<Sound> recommandSoundsByTags(List<String> tagLabels)
 			throws SoundException {
 		Map<Tag, List<Sound>> tagSoundMap = new HashMap<Tag, List<Sound>>();
 		Map<Sound, Long> soundTagNumMap = new HashMap<Sound, Long>();
@@ -213,9 +214,22 @@ public class SoundSocialService implements
 			}
 		}
 
-		List<Sound> allResult = SocialUtils.toSeqList(SocialUtils.sortMapByValue(soundTagNumMap,
-				false));
-		return SocialUtils.sliceList(allResult, pageNum, pageSize);
+		List<Sound> allResult = SocialUtils.toSeqList(SocialUtils
+				.sortMapByValue(soundTagNumMap, false));
+		return allResult;
 	}
 
+	@Override
+	public List<Sound> getLikedSoundsByUser(String userAlias)
+			throws SoundException {
+		List<Sound> sounds = new ArrayList<Sound>();
+		List<SoundLike> likes = soundLikeDAO.find("user.profile.alias",
+				userAlias);
+		if (likes != null) {
+			for (SoundLike like : likes) {
+				sounds.add(like.getSound());
+			}
+		}
+		return sounds;
+	}
 }
