@@ -2,7 +2,6 @@ package com.sound.service.sound.impl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.sound.dao.SoundDAO;
+import com.sound.dao.SoundLikeDAO;
 import com.sound.dao.SoundRecordDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
@@ -22,6 +22,9 @@ import com.sound.model.Sound;
 import com.sound.model.Sound.SoundData;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.Sound.SoundProfile.SoundPoster;
+import com.sound.model.Sound.SoundSocial;
+import com.sound.model.Sound.UserPrefer;
+import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.User;
 import com.sound.model.UserActivity.UserConnect;
@@ -53,6 +56,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	
 	@Autowired
 	SoundRecordDAO soundRecordDAO;
+	
+	@Autowired
+	SoundLikeDAO soundLikeDAO;
 
 	@Autowired
 	ProcessorFactory processFactory;
@@ -129,8 +135,32 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	}
 
 	@Override
-	public Sound load(String soundAlias) {
-		return soundDAO.findOne("profile.name", soundAlias);
+	public Sound load(String userAlias, String soundAlias) {
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		sound.getSoundData().setUrl(remoteStorageService.generateDownloadUrl(sound.getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
+		sound.getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(sound.getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
+		
+		User currentUser = userDAO.findOne("profile.alias", userAlias);
+		
+		if (null != currentUser)
+		{
+			UserPrefer userPrefer = new UserPrefer();
+			
+			Map<String, Object> cratiaries = new HashMap<String, Object>();
+			cratiaries.put("sound", sound);
+			cratiaries.put("owner", currentUser);
+			SoundLike liked = soundLikeDAO.findOne("sound", sound);
+			userPrefer.setLike((null == liked)? 0:1);
+			
+			cratiaries.clear();
+			cratiaries.put("sound", sound);
+			cratiaries.put("owner", currentUser);
+			cratiaries.put("recordType", SoundRecord.REPOST);
+			SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
+			userPrefer.setRepost((null == reposted)? 0:1);
+		}
+		
+		return sound;
 	}
 
 	@Override
@@ -148,7 +178,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		soundProfile.setModifiedTime(new Date());
 		soundProfile.setName(soundAlias);
 		soundProfile.setDescription(description);
-		soundProfile.setPlayed(0);
 		soundProfile.setStatus(status);
 		soundProfile.setType(SoundType.SOUND.getTypeName());
 		
@@ -160,6 +189,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		soundProfile.setPoster(soundPoster);
 		
 		sound.setProfile(soundProfile);
+		
+		SoundSocial soundSocial = new SoundSocial();
+		sound.setSoundSocial(soundSocial);
 		
 		soundDAO.save(sound);
 		
@@ -184,6 +216,26 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		{
 			oneSound.getSound().getSoundData().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
 			oneSound.getSound().getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
+		
+			if (null != owner)
+			{
+				UserPrefer userPrefer = new UserPrefer();
+				
+				cratiaries.clear();
+				cratiaries.put("sound", oneSound.getSound());
+				cratiaries.put("owner", owner);
+				SoundLike liked = soundLikeDAO.findOne(cratiaries);
+				userPrefer.setLike((null == liked)? 0:1);
+				
+				cratiaries.clear();
+				cratiaries.put("sound", oneSound.getSound());
+				cratiaries.put("owner", owner);
+				cratiaries.put("recordType", SoundRecord.REPOST);
+				SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
+				userPrefer.setRepost((null == reposted)? 0:1);
+				
+				oneSound.getSound().setUserPrefer(userPrefer);
+			}
 		}
 		return records;
 	}
@@ -192,6 +244,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	@Override
 	public List<SoundRecord> getObservingSounds(String userAlias,
 			Integer pageNum, Integer soundsPerPage) throws SoundException {
+		User currentUser = userDAO.findOne("profile.alias", userAlias);
 		List<UserConnect> connections = userConnectDAO.find("fromUser.profile.alias", userAlias);
 		List<User> users = new ArrayList<User>();
 		
@@ -201,13 +254,33 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		}
 		users.add(userDAO.findOne("profile.alias", userAlias));
 		
-		Map<String, String> cratiaries = Collections.emptyMap();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		List<SoundRecord> records = soundRecordDAO.findByOwners(cratiaries, users, pageNum * soundsPerPage, soundsPerPage);
 
 		for(SoundRecord oneSound: records)
 		{
 			oneSound.getSound().getSoundData().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
 			oneSound.getSound().getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
+		
+			if (null != currentUser)
+			{
+				UserPrefer userPrefer = new UserPrefer();
+				
+				cratiaries.clear();
+				cratiaries.put("sound", oneSound.getSound());
+				cratiaries.put("owner", currentUser);
+				SoundLike liked = soundLikeDAO.findOne(cratiaries);
+				userPrefer.setLike((null == liked)? 0:1);
+				
+				cratiaries.clear();
+				cratiaries.put("sound", oneSound.getSound());
+				cratiaries.put("owner", currentUser);
+				cratiaries.put("recordType", SoundRecord.REPOST);
+				SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
+				userPrefer.setRepost((null == reposted)? 0:1);
+				
+				oneSound.getSound().setUserPrefer(userPrefer);
+			}
 		}
 		return records;
 	}

@@ -39,13 +39,14 @@ public class SoundServiceEndpoint {
 	@GET
 	@Path("/{soundAlias}")
 	public Response loadSound(
+			@QueryParam("soundAlias") String userAlias,
 			@NotNull @PathParam("soundAlias") String soundAlias
 			)
 	{
 		Sound sound = null;
 		try
 		{
-			sound = soundService.load(soundAlias);
+			sound = soundService.load(userAlias, soundAlias);
 		}
 		catch (Exception e)
 		{
@@ -57,10 +58,10 @@ public class SoundServiceEndpoint {
 	}
 	
 	@PUT
-	@Path("/save")
+	@Path("/{soundAlias}")
 	public Response saveProfile(
 			@NotNull @FormParam("objectId") String objectId, 
-			@NotNull @FormParam("soundAlias") String soundAlias, 
+			@NotNull @PathParam("soundAlias") String soundAlias, 
 			@FormParam("description") String description, 
 			@NotNull @FormParam("ownerAlias") String ownerAlias, 
 			@NotNull @FormParam("status") String status,
@@ -140,9 +141,9 @@ public class SoundServiceEndpoint {
 	@GET
 	@Path("/streams")
 	public Response listObservingSounds(
-			@NotNull @FormParam("userAlias") String userAlias,
-			@FormParam("pageNum")  Integer pageNum,
-			@FormParam("soundsPerPage")  Integer soundsPerPage
+			@NotNull @QueryParam("userAlias") String userAlias,
+			@QueryParam("pageNum")  Integer pageNum,
+			@QueryParam("soundsPerPage")  Integer soundsPerPage
 			)
 	{
 		pageNum = (null == pageNum)? 0 : pageNum;

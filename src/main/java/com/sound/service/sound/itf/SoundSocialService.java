@@ -8,6 +8,8 @@ import com.sound.model.Sound;
 
 public interface SoundSocialService {
 
+	public Integer play(String soundAlias, String userAlias)  throws SoundException;
+	
 	public Integer like(String soundAlias, String userAlias)  throws SoundException;
 	
 	public Integer dislike(String soundAlias, String userAlias)  throws SoundException;

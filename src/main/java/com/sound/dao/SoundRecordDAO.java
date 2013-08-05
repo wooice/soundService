@@ -20,7 +20,7 @@ public class SoundRecordDAO extends BaseDAO<SoundRecord, ObjectId>{
 		super(mongo, morphia, dbName);
 	}
 	
-	public List<SoundRecord> findByOwners(Map<String, String> cratiaries, List<User> users, Integer start, Integer range)
+	public List<SoundRecord> findByOwners(Map<String, Object> cratiaries, List<User> users, Integer start, Integer range)
 	{
 		Query<SoundRecord> query = createQuery();
 		

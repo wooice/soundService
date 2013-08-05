@@ -11,6 +11,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
+import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
 import com.sound.model.enums.SoundState;
@@ -40,6 +41,10 @@ public class Sound extends BaseModel {
 	
 	@Reference(lazy = true)
 	private List<Tag> tags;
+	
+	@NotSaved
+	@Embedded
+	private UserPrefer userPrefer;
 
 	@JsonIgnore
 	public ObjectId getId() {
@@ -105,6 +110,16 @@ public class Sound extends BaseModel {
 		this.tags.addAll(tags);
 	}
 
+	public UserPrefer getUserPrefer() {
+		return userPrefer;
+	}
+
+	public void setUserPrefer(UserPrefer userPrefer) {
+		this.userPrefer = userPrefer;
+	}
+
+
+
 	public static class SoundProfile {
 		@Reference(lazy = true)
 		private User owner;
@@ -125,11 +140,6 @@ public class Sound extends BaseModel {
 		 * sound, set
 		 */
 		private int type;
-
-		/**
-		 * times played
-		 */
-		private int played;
 
 		private Date createdTime;
 
@@ -175,14 +185,6 @@ public class Sound extends BaseModel {
 
 		public void setDescription(String description) {
 			this.description = description;
-		}
-
-		public int getPlayed() {
-			return played;
-		}
-
-		public void setPlayed(int played) {
-			this.played = played;
 		}
 
 		public Date getCreatedTime() {
@@ -339,11 +341,29 @@ public class Sound extends BaseModel {
 	
 	public static class SoundSocial
 	{
+		private Integer playedCount;
+		
 		private Integer likesCount;
 		
 		private Integer reportsCount;
 		
 		private Integer commentsCount;
+
+		public SoundSocial()
+		{
+			playedCount = 0;
+			likesCount = 0;
+			reportsCount = 0;
+			commentsCount = 0;
+		}
+		
+		public Integer getPlayedCount() {
+			return playedCount;
+		}
+
+		public void setPlayedCount(Integer playedCount) {
+			this.playedCount = playedCount;
+		}
 
 		public Integer getLikesCount() {
 			return likesCount;
@@ -371,6 +391,29 @@ public class Sound extends BaseModel {
 		
 	}
 
+	public static class UserPrefer{
+		
+		private Integer like;
+		
+		private Integer repost;
+
+		public Integer getLike() {
+			return like;
+		}
+
+		public void setLike(Integer like) {
+			this.like = like;
+		}
+
+		public Integer getRepost() {
+			return repost;
+		}
+
+		public void setRepost(Integer repost) {
+			this.repost = repost;
+		}
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
