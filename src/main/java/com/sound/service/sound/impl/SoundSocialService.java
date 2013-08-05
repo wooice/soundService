@@ -56,23 +56,38 @@ public class SoundSocialService implements
 	@Override
 	public Integer play(String soundAlias, String userAlias)
 			throws SoundException {
-		SoundPlay play = new SoundPlay();
-		
 		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		
+		if (null == sound)
+		{
+			throw new SoundException("Sound with name " + soundAlias + " not found");
+		}
+		User user = userDAO.findOne("profile.alias", userAlias);
+		
+		SoundPlay play = new SoundPlay();
 		play.setSound(sound);
-		play.setOwner(userDAO.findOne("profile.alias", userAlias));
+		play.setOwner(user);
 		play.setCreatedTime(new Date());
 		soundPlayDAO.save(play);
-		soundDAO.increase("profile.name", soundAlias, "playedCount");
+		soundDAO.increase("profile.name", soundAlias, "soundSocial.playedCount");
 		
 		return sound.getSoundSocial().getPlayedCount() + 1;
 	}
 	
 	@Override
-	public Integer like(String soundAlias, String userAlias) throws SoundException {
+	public Integer like(String soundAlias, String userAlias) throws SoundException 
+	{
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		
+		if (null == sound)
+		{
+			throw new SoundException("Sound with name " + soundAlias + " not found");
+		}
+		
+		User user = userDAO.findOne("profile.alias", userAlias);
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		cratiaries.put("sound.profile.name", soundAlias);
-		cratiaries.put("user.profile.alias", userAlias);
+		cratiaries.put("sound", sound);
+		cratiaries.put("owner", user);
 		SoundLike liked = soundLikeDAO.findOne(cratiaries);
 
 		if (null != liked) {
@@ -81,22 +96,30 @@ public class SoundSocialService implements
 		}
 
 		SoundLike like = new SoundLike();
-		Sound sound = soundDAO.findOne("profile.name", soundAlias);
 		like.setSound(sound);
-		like.setOwner(userDAO.findOne("profile.alias", userAlias));
+		like.setOwner(user);
 		like.setCreatedTime(new Date());
 		soundLikeDAO.save(like);
-		soundDAO.increase("profile.name", soundAlias, "likesCount");
+		soundDAO.increase("profile.name", soundAlias, "soundSocial.likesCount");
 
-		return sound.getSoundSocial().getLikesCount() - 1;
+		return sound.getSoundSocial().getLikesCount() + 1;
 	}
 
 	@Override
 	public Integer dislike(String soundAlias, String userAlias) throws SoundException 
 	{
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		
+		if (null == sound)
+		{
+			throw new SoundException("Sound with name " + soundAlias + " not found");
+		}
+		
+		User user = userDAO.findOne("profile.alias", userAlias);
+		
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		cratiaries.put("sound.profile.name", soundAlias);
-		cratiaries.put("user.profile.alias", userAlias);
+		cratiaries.put("sound", sound);
+		cratiaries.put("owner", user);
 		SoundLike liked = soundLikeDAO.findOne(cratiaries);
 
 		if (null == liked) {
@@ -105,18 +128,26 @@ public class SoundSocialService implements
 		}
 
 		soundLikeDAO.delete(liked);
-		soundDAO.decrease("profile.name", soundAlias, "likesCount");
+		soundDAO.decrease("profile.name", soundAlias, "soundSocial.likesCount");
 
-		return soundDAO.findOne("profile.name", soundAlias).getSoundSocial()
-				.getLikesCount() - 1;
+		return sound.getSoundSocial().getLikesCount() - 1;
 	}
 
 	@Override
-	public void repost(String soundAlias, String userAlias)
+	public Integer repost(String soundAlias, String userAlias)
 			throws SoundException {
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		
+		if (null == sound)
+		{
+			throw new SoundException("Sound with name " + soundAlias + " not found");
+		}
+		
+		User user = userDAO.findOne("profile.alias", userAlias);
+		
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		cratiaries.put("sound.profile.name", soundAlias);
-		cratiaries.put("user.profile.alias", userAlias);
+		cratiaries.put("sound", sound);
+		cratiaries.put("owner", user);
 		cratiaries.put("recordType", SoundRecord.REPOST);
 		SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
 
@@ -126,20 +157,31 @@ public class SoundSocialService implements
 		}
 
 		SoundRecord repost = new SoundRecord();
-		Sound sound = soundDAO.findOne("profile.name", soundAlias);
 		repost.setSound(sound);
-		repost.setOwner(userDAO.findOne("profile.alias", userAlias));
+		repost.setOwner(user);
+		repost.setRecordType(SoundRecord.REPOST);
 		repost.setCreatedTime(new Date());
 		soundRecordDAO.save(repost);
-		soundDAO.increase("profile.name", soundAlias, "reportsCount");
+		soundDAO.increase("profile.name", soundAlias, "soundSocial.reportsCount");
+	
+		return sound.getSoundSocial().getReportsCount() + 1;
 	}
 
 	@Override
-	public void unrepost(String soundAlias, String userAlias)
+	public Integer unrepost(String soundAlias, String userAlias)
 			throws SoundException {
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		
+		if (null == sound)
+		{
+			throw new SoundException("Sound with name " + soundAlias + " not found");
+		}
+		
+		User user = userDAO.findOne("profile.alias", userAlias);
+		
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		cratiaries.put("sound.profile.name", soundAlias);
-		cratiaries.put("user.profile.alias", userAlias);
+		cratiaries.put("sound", sound);
+		cratiaries.put("owner", user);
 		cratiaries.put("recordType", SoundRecord.REPOST);
 		SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
 
@@ -149,7 +191,9 @@ public class SoundSocialService implements
 		}
 
 		soundRecordDAO.delete(reposted);
-		soundDAO.decrease("profile.name", soundAlias, "reportsCount");
+		soundDAO.decrease("profile.name", soundAlias, "soundSocial.reportsCount");
+		
+		return sound.getSoundSocial().getReportsCount() - 1;
 	}
 
 	@Override
@@ -172,7 +216,7 @@ public class SoundSocialService implements
 		soundComment.setPointAt(pointAt);
 
 		soundCommentDAO.save(soundComment);
-		soundDAO.increase("profile.name", soundAlias, "commentsCount");
+		soundDAO.increase("profile.name", soundAlias, "soundSocial.commentsCount");
 	}
 
 	@Override
@@ -185,7 +229,7 @@ public class SoundSocialService implements
 		}
 		String soundAlias = soundComment.getSound().getProfile().getName();
 		soundCommentDAO.delete(soundComment);
-		soundDAO.decrease("profile.name", soundAlias, "commentsCount");
+		soundDAO.decrease("profile.name", soundAlias, "soundSocial.commentsCount");
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class SoundServiceEndpoint {
 	@GET
 	@Path("/{soundAlias}")
 	public Response loadSound(
-			@QueryParam("soundAlias") String userAlias,
+			@QueryParam("userAlias") String userAlias,
 			@NotNull @PathParam("soundAlias") String soundAlias
 			)
 	{
