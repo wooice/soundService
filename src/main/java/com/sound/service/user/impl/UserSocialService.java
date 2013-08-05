@@ -47,7 +47,7 @@ public class UserSocialService implements
 	@Override
 	public void follow(String fromUserAlias, String toUserAlias)
 			throws UserException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("fromUser.profile.alias", fromUserAlias);
 		cratiaries.put("toUser.profile.alias", toUserAlias);
 		UserConnect userConnected = userConnectDAO.findOne(cratiaries);
@@ -81,7 +81,7 @@ public class UserSocialService implements
 	@Override
 	public void unfollow(String fromUserAlias, String toUserAlias)
 			throws UserException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("fromUser.profile.alias", fromUserAlias);
 		cratiaries.put("toUser.profile.alias", toUserAlias);
 		UserConnect userConnected = userConnectDAO.findOne(cratiaries);

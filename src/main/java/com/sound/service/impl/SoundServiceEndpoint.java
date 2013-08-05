@@ -39,13 +39,14 @@ public class SoundServiceEndpoint {
 	@GET
 	@Path("/{soundAlias}")
 	public Response loadSound(
+			@QueryParam("soundAlias") String userAlias,
 			@NotNull @PathParam("soundAlias") String soundAlias
 			)
 	{
 		Sound sound = null;
 		try
 		{
-			sound = soundService.load(soundAlias);
+			sound = soundService.load(userAlias, soundAlias);
 		}
 		catch (Exception e)
 		{

@@ -50,7 +50,7 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		return this.find(query).asList();
 	}
 	
-	public T findOne(Map<String, String> cratiaries)
+	public T findOne(Map<String, Object> cratiaries)
 	{
 		Query<T> query = ds.createQuery(clazz);
 		

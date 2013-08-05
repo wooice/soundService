@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sound.dao.SoundCommentDAO;
 import com.sound.dao.SoundDAO;
 import com.sound.dao.SoundLikeDAO;
+import com.sound.dao.SoundPlayDAO;
 import com.sound.dao.SoundRecordDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
@@ -20,6 +21,7 @@ import com.sound.exception.UserException;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
+import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.Tag;
 import com.sound.model.User;
@@ -37,6 +39,9 @@ public class SoundSocialService implements
 	SoundDAO soundDAO;
 
 	@Autowired
+	SoundPlayDAO soundPlayDAO;
+	
+	@Autowired
 	SoundLikeDAO soundLikeDAO;
 
 	@Autowired
@@ -44,14 +49,28 @@ public class SoundSocialService implements
 
 	@Autowired
 	SoundCommentDAO soundCommentDAO;
-
+	
 	@Autowired
 	TagService tagService;
 
 	@Override
-	public Integer like(String soundAlias, String userAlias)
+	public Integer play(String soundAlias, String userAlias)
 			throws SoundException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		SoundPlay play = new SoundPlay();
+		
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		play.setSound(sound);
+		play.setOwner(userDAO.findOne("profile.alias", userAlias));
+		play.setCreatedTime(new Date());
+		soundPlayDAO.save(play);
+		soundDAO.increase("profile.name", soundAlias, "playedCount");
+		
+		return sound.getSoundSocial().getPlayedCount() + 1;
+	}
+	
+	@Override
+	public Integer like(String soundAlias, String userAlias) throws SoundException {
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		SoundLike liked = soundLikeDAO.findOne(cratiaries);
@@ -73,9 +92,9 @@ public class SoundSocialService implements
 	}
 
 	@Override
-	public Integer dislike(String soundAlias, String userAlias)
-			throws SoundException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+	public Integer dislike(String soundAlias, String userAlias) throws SoundException 
+	{
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		SoundLike liked = soundLikeDAO.findOne(cratiaries);
@@ -92,58 +111,10 @@ public class SoundSocialService implements
 				.getLikesCount() - 1;
 	}
 
-	public UserDAO getUserDAO() {
-		return userDAO;
-	}
-
-	public void setUserDAO(UserDAO userDAO) {
-		this.userDAO = userDAO;
-	}
-
-	public SoundDAO getSoundDAO() {
-		return soundDAO;
-	}
-
-	public void setSoundDAO(SoundDAO soundDAO) {
-		this.soundDAO = soundDAO;
-	}
-
-	public SoundLikeDAO getSoundLikeDAO() {
-		return soundLikeDAO;
-	}
-
-	public void setSoundLikeDAO(SoundLikeDAO soundLikeDAO) {
-		this.soundLikeDAO = soundLikeDAO;
-	}
-
-	public SoundRecordDAO getSoundRecordDAO() {
-		return soundRecordDAO;
-	}
-
-	public void setSoundRecordDAO(SoundRecordDAO soundRecordDAO) {
-		this.soundRecordDAO = soundRecordDAO;
-	}
-
-	public SoundCommentDAO getSoundCommentDAO() {
-		return soundCommentDAO;
-	}
-
-	public void setSoundCommentDAO(SoundCommentDAO soundCommentDAO) {
-		this.soundCommentDAO = soundCommentDAO;
-	}
-
-	public TagService getTagService() {
-		return tagService;
-	}
-
-	public void setTagService(TagService tagService) {
-		this.tagService = tagService;
-	}
-
 	@Override
 	public void repost(String soundAlias, String userAlias)
 			throws SoundException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		cratiaries.put("recordType", SoundRecord.REPOST);
@@ -166,7 +137,7 @@ public class SoundSocialService implements
 	@Override
 	public void unrepost(String soundAlias, String userAlias)
 			throws SoundException {
-		Map<String, String> cratiaries = new HashMap<String, String>();
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound.profile.name", soundAlias);
 		cratiaries.put("user.profile.alias", userAlias);
 		cratiaries.put("recordType", SoundRecord.REPOST);
