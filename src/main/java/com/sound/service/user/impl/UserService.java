@@ -60,6 +60,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
 		email.setEmailAddress(emailAddress);
 		user.setProfile(profile);
 		user.addEmail(email);
+		User.UserSocial social = new User.UserSocial();
+		user.setSocial(social);
 
 		userDAO.save(user);
 
