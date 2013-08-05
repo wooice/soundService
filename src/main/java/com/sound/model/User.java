@@ -266,9 +266,20 @@ public class User extends BaseModel
 	public static class UserSocial
 	{
 
+		@Id
+		private ObjectId id;
+		
 		private Long following;
 
 		private Long followed;
+
+		public ObjectId getId() {
+			return id;
+		}
+
+		public void setId(ObjectId id) {
+			this.id = id;
+		}
 
 		public Long getFollowing() {
 			return following;
