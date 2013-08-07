@@ -197,11 +197,11 @@ public class SoundSocialService implements
 	}
 
 	@Override
-	public void comment(String soundAlias, String userAlias, String comment,
+	public Integer comment(String soundAlias, String userAlias, String comment,
 			Float pointAt) throws SoundException, UserException {
 		SoundComment soundComment = new SoundComment();
 
-		User user = userDAO.findOne("profile.name", userAlias);
+		User user = userDAO.findOne("profile.alias", userAlias);
 		if (null == user) {
 			throw new UserException("User " + userAlias + " not found.");
 		}
@@ -213,10 +213,13 @@ public class SoundSocialService implements
 		}
 		soundComment.setSound(sound);
 		soundComment.setCreatedTime(new Date());
+		soundComment.setComment(comment);
 		soundComment.setPointAt(pointAt);
 
 		soundCommentDAO.save(soundComment);
 		soundDAO.increase("profile.name", soundAlias, "soundSocial.commentsCount");
+		
+		return sound.getSoundSocial().getCommentsCount() + 1;
 	}
 
 	@Override
@@ -261,5 +264,16 @@ public class SoundSocialService implements
 				false));
 		return SocialUtils.sliceList(allResult, pageNum, pageSize);
 	}
+	
+	@Override
+	public List<SoundComment> getComments(String soundAlias,
+			Integer pageNum, Integer commentsPerPage) throws SoundException {
+		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
+		cratiaries.put("sound", sound);
+		List<SoundComment> comments = soundCommentDAO.findWithRange(cratiaries, (pageNum-1) * commentsPerPage, commentsPerPage);
 
+		return comments;
+	}
 }

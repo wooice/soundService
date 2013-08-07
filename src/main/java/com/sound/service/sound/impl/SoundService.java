@@ -193,7 +193,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		User owner = userDAO.findOne("profile.alias", userAlias);
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("owner", owner);
-		List<SoundRecord> records = soundRecordDAO.findWithRange(cratiaries, pageNum * soundsPerPage, soundsPerPage);
+		List<SoundRecord> records = soundRecordDAO.findWithRange(cratiaries, (pageNum - 1) * soundsPerPage, soundsPerPage);
 		
 		for(SoundRecord oneSound: records)
 		{
@@ -219,7 +219,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		users.add(userDAO.findOne("profile.alias", userAlias));
 		
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		List<SoundRecord> records = soundRecordDAO.findByOwners(cratiaries, users, pageNum * soundsPerPage, soundsPerPage);
+		List<SoundRecord> records = soundRecordDAO.findByOwners(cratiaries, users, (pageNum - 1) * soundsPerPage, soundsPerPage);
 
 		for(SoundRecord oneSound: records)
 		{
