@@ -11,7 +11,6 @@ import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
-import com.github.jmkgreen.morphia.annotations.Serialized;
 import com.sound.model.enums.GenderEnum;
 
 @Entity(noClassnameStored= true)
@@ -126,8 +125,7 @@ public class User extends BaseModel
 	@Entity
 	public static class UserProfile
 	{
-		@Embedded
-		private ProfileAvator avator;
+		private String avatorUrl;
 		private String alias;
 		private String password;
 		private String firstName;
@@ -136,6 +134,14 @@ public class User extends BaseModel
 		private String description;
 		private int age;
 		private boolean gender;
+		
+		public String getAvatorUrl() {
+			return avatorUrl;
+		}
+
+		public void setAvatorUrl(String avatorUrl) {
+			this.avatorUrl = avatorUrl;
+		}
 
 		@JsonIgnore
 		public String getPassword() {
@@ -144,14 +150,6 @@ public class User extends BaseModel
 
 		public void setPassword(String password) {
 			this.password = password;
-		}
-
-		public ProfileAvator getAvator() {
-			return avator;
-		}
-
-		public void setAvator(ProfileAvator avator) {
-			this.avator = avator;
 		}
 
 		public String getAlias() {
@@ -210,30 +208,6 @@ public class User extends BaseModel
 			this.gender = GenderEnum.getGenderValue(gender);
 		}
 
-		public class ProfileAvator
-		{
-			@Serialized
-			private byte[] avator;
-
-			private String extension;
-
-			public byte[] getAvator() {
-				return avator;
-			}
-
-			public void setAvator(byte[] avator) {
-				this.avator = avator;
-			}
-
-			public String getExtension() {
-				return extension;
-			}
-
-			public void setExtension(String extension) {
-				this.extension = extension;
-			}
-
-		}
 
 		@Override
 		public int hashCode() {

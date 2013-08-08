@@ -210,13 +210,13 @@ public class SoundSocialServiceEndpoint {
 	public Response comment(
 			@NotNull @PathParam("soundAlias") String soundAlias,
 			@NotNull @QueryParam("pageNum")  Integer pageNum,
-			@QueryParam("soundsPerPage") Integer soundsPerPage
+			@QueryParam("commentsPerPage") Integer commentsPerPage
 			)
 	{
 		List<SoundComment> comments = null;
 		try 
 		{
-			soundSocialService.getComments(soundAlias, pageNum, soundsPerPage);
+			comments = soundSocialService.getComments(soundAlias, pageNum, commentsPerPage);
 		}
 		catch (SoundException e) 
 		{
