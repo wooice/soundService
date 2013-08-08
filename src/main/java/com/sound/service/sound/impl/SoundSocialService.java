@@ -23,8 +23,10 @@ import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.enums.FileType;
 import com.sound.model.Tag;
 import com.sound.model.User;
+import com.sound.service.storage.itf.RemoteStorageService;
 import com.sound.util.SocialUtils;
 
 @Service
@@ -52,6 +54,9 @@ public class SoundSocialService implements
 	
 	@Autowired
 	TagService tagService;
+	
+	@Autowired
+	RemoteStorageService remoteStorageService;
 
 	@Override
 	public Integer play(String soundAlias, String userAlias)
@@ -273,6 +278,14 @@ public class SoundSocialService implements
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
 		cratiaries.put("sound", sound);
 		List<SoundComment> comments = soundCommentDAO.findWithRange(cratiaries, (pageNum-1) * commentsPerPage, commentsPerPage);
+		
+		for(SoundComment comment: comments)
+		{
+			comment.getSound().setSoundData(null);
+			comment.getSound().setTags(null);
+			comment.getSound().setSoundSocial(null);
+			comment.getOwner().getProfile().setAvatorUrl(remoteStorageService.generateDownloadUrl(comment.getOwner().getProfile().getAlias(), FileType.getFileType("image")).toString());
+		}
 
 		return comments;
 	}
