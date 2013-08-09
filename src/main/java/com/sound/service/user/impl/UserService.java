@@ -12,6 +12,8 @@ import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
+import com.sound.model.enums.FileType;
+import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
 @Scope("singleton")
@@ -19,11 +21,19 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
 	@Autowired
 	UserDAO userDAO;	
+	
+	@Autowired
+	RemoteStorageService remoteStorageService;
 
 	@Override
 	public User getUserByAlias(String userAlias)
 	{
 		User user = userDAO.findOne("profile.alias", userAlias);
+		
+		if (user.getProfile().hasAvatar())
+		{
+			user.getProfile().setAvatorUrl(remoteStorageService.generateDownloadUrl(user.getProfile().getAlias(), FileType.getFileType("image")).toString());
+		}
 
 		return user;
 	}

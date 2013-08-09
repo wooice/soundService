@@ -23,9 +23,9 @@ import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
-import com.sound.model.enums.FileType;
 import com.sound.model.Tag;
 import com.sound.model.User;
+import com.sound.model.enums.FileType;
 import com.sound.service.storage.itf.RemoteStorageService;
 import com.sound.util.SocialUtils;
 
@@ -284,7 +284,15 @@ public class SoundSocialService implements
 			comment.getSound().setSoundData(null);
 			comment.getSound().setTags(null);
 			comment.getSound().setSoundSocial(null);
-			comment.getOwner().getProfile().setAvatorUrl(remoteStorageService.generateDownloadUrl(comment.getOwner().getProfile().getAlias(), FileType.getFileType("image")).toString());
+			
+			if (comment.getOwner().getProfile().hasAvatar())
+			{
+				comment.getOwner().getProfile().setAvatorUrl(remoteStorageService.generateDownloadUrl(comment.getOwner().getProfile().getAlias(), FileType.getFileType("image")).toString());
+			}
+			else
+			{
+				comment.getOwner().getProfile().setAvatorUrl(null);
+			}
 		}
 
 		return comments;

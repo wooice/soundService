@@ -29,6 +29,7 @@ public class User extends BaseModel
 	@Embedded
 	private List<UserEmail> emails;
 
+	@JsonIgnore
 	@Reference(lazy=true)
 	private UserAuth auth;
 
@@ -134,6 +135,7 @@ public class User extends BaseModel
 		private String description;
 		private int age;
 		private boolean gender;
+		private boolean hasAvatar = false;
 		
 		public String getAvatorUrl() {
 			return avatorUrl;
@@ -207,7 +209,14 @@ public class User extends BaseModel
 		public void setGender(String gender) {
 			this.gender = GenderEnum.getGenderValue(gender);
 		}
+		
+		public boolean hasAvatar() {
+			return hasAvatar;
+		}
 
+		public void setHasAvatar(boolean hasAvatar) {
+			this.hasAvatar = hasAvatar;
+		}
 
 		@Override
 		public int hashCode() {
