@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sound.exception.UserException;
 import com.sound.model.User;
+import com.sound.util.JsonHandler;
 
 @Component
 @Path("/user")
@@ -90,6 +91,26 @@ public class UserServiceEndpoint{
 		}
 
 		return Response.status(Status.OK).entity("true").build();
+	}
+	
+	@GET
+	@Path("/{userAlias}")
+	public Response load(
+		@NotNull @PathParam("userAlias") String userAlias
+			)
+	{
+		User user = null;
+		try
+		{
+			user = userService.getUserByAlias(userAlias);
+		}
+		catch(Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to load user " + userAlias)).build();
+		}
+
+		return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
 	}
 
 }
