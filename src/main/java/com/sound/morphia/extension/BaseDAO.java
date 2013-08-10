@@ -30,7 +30,7 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		this.deleteByQuery(q);
 	}
 	
-	public List<T> find(String key, String value)
+	public List<T> find(String key, Object value)
 	{
 		Query<T> query = this.ds.createQuery(clazz);
 		query.field(key).equal(value);

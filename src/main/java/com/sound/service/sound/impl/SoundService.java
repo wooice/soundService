@@ -212,7 +212,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 	public List<SoundRecord> getObservingSounds(String userAlias,
 			Integer pageNum, Integer soundsPerPage) throws SoundException {
 		User currentUser = userDAO.findOne("profile.alias", userAlias);
-		List<UserConnect> connections = userConnectDAO.find("fromUser.profile.alias", userAlias);
+		List<UserConnect> connections = userConnectDAO.find("fromUser", currentUser);
 		List<User> users = new ArrayList<User>();
 		
 		for(UserConnect connect : connections)

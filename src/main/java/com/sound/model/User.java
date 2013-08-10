@@ -10,327 +10,343 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
+import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.sound.model.enums.GenderEnum;
 
-@Entity(noClassnameStored= true)
+@Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class User extends BaseModel
-{
-	@Id 
-	private ObjectId id;
+public class User extends BaseModel {
+  @Id
+  private ObjectId id;
 
-	@Embedded
-	private UserProfile profile;
+  @Embedded
+  private UserProfile profile;
 
-	@Embedded
-	private UserExternal external;
+  @Embedded
+  private UserExternal external;
 
-	@Embedded
-	private List<UserEmail> emails;
+  @Embedded
+  private List<UserEmail> emails;
 
-	@JsonIgnore
-	@Reference(lazy=true)
-	private UserAuth auth;
+  @JsonIgnore
+  @Reference(lazy = true)
+  private UserAuth auth;
 
-	@Reference(lazy=true)
-	private List<Group> groups;
-	
-	@Embedded
-	private UserSocial social;
+  @Reference(lazy = true)
+  private List<Group> groups;
 
-	@JsonIgnore
-	public ObjectId getId() {
-		return id;
-	}
+  @Embedded
+  private UserSocial social;
 
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
+  @NotSaved
+  @Embedded
+  private UserPrefer userPrefer;
 
-	public UserProfile getProfile() {
-		return profile;
-	}
+  @JsonIgnore
+  public ObjectId getId() {
+    return id;
+  }
 
-	public void setProfile(UserProfile profile) {
-		this.profile = profile;
-	}
+  public void setId(ObjectId id) {
+    this.id = id;
+  }
 
-	public List<Group> getGroups() {
-		return groups;
-	}
+  public UserProfile getProfile() {
+    return profile;
+  }
 
-	public void setGroups(List<Group> groups) {
-		this.groups = groups;
-	}
+  public void setProfile(UserProfile profile) {
+    this.profile = profile;
+  }
 
-	public UserExternal getExternal() {
-		return external;
-	}
-	
+  public List<Group> getGroups() {
+    return groups;
+  }
 
-	public UserSocial getSocial() {
-		return social;
-	}
+  public void setGroups(List<Group> groups) {
+    this.groups = groups;
+  }
 
-	public void setSocial(UserSocial social) {
-		this.social = social;
-	}
+  public UserExternal getExternal() {
+    return external;
+  }
 
-	public void setExternal(UserExternal external) {
-		this.external = external;
-	}
 
-	public List<UserEmail> getEmails() {
-		return emails;
-	}
+  public UserSocial getSocial() {
+    return social;
+  }
 
-	public void setEmails(List<UserEmail> emails) {
-		this.emails = emails;
-	}
+  public void setSocial(UserSocial social) {
+    this.social = social;
+  }
 
-	public void addEmail(UserEmail email)
-	{
-		this.emails = (null == this.emails)? new ArrayList<UserEmail>() : this.emails;
-		this.emails.add(email);
-	}
+  public void setExternal(UserExternal external) {
+    this.external = external;
+  }
 
-	public UserAuth getAuth() {
-		return auth;
-	}
+  public List<UserEmail> getEmails() {
+    return emails;
+  }
 
-	public void setAuth(UserAuth auth) {
-		this.auth = auth;
-	}
-	
-	public void addGroup(Group group)
-	{
-		this.groups = (null == this.groups)? new ArrayList<Group>():this.groups;
-		
-		for(Group oneGroup: this.groups)
-		{
-			if (oneGroup == group)
-			{
-				return ;
-			}
-		}
-		this.groups.add(group);
-	}
-	
-	public void removeGroup(Group group)
-	{
-		this.groups = (null == this.groups)? new ArrayList<Group>():this.groups;
-		this.groups.remove(group);
-	}
+  public void setEmails(List<UserEmail> emails) {
+    this.emails = emails;
+  }
 
-	@Entity
-	public static class UserProfile
-	{
-		private String avatorUrl;
-		private String alias;
-		private String password;
-		private String firstName;
-		private String lastName;
-		private String location;
-		private String description;
-		private int age;
-		private boolean gender;
-		private boolean hasAvatar = false;
-		
-		public String getAvatorUrl() {
-			return avatorUrl;
-		}
+  public void addEmail(UserEmail email) {
+    this.emails = (null == this.emails) ? new ArrayList<UserEmail>() : this.emails;
+    this.emails.add(email);
+  }
 
-		public void setAvatorUrl(String avatorUrl) {
-			this.avatorUrl = avatorUrl;
-		}
+  public UserAuth getAuth() {
+    return auth;
+  }
 
-		@JsonIgnore
-		public String getPassword() {
-			return password;
-		}
+  public void setAuth(UserAuth auth) {
+    this.auth = auth;
+  }
 
-		public void setPassword(String password) {
-			this.password = password;
-		}
 
-		public String getAlias() {
-			return alias;
-		}
+  public UserPrefer getUserPrefer() {
+    return userPrefer;
+  }
 
-		public void setAlias(String alias) {
-			this.alias = alias;
-		}
+  public void setUserPrefer(UserPrefer userPrefer) {
+    this.userPrefer = userPrefer;
+  }
 
-		public String getFirstName() {
-			return firstName;
-		}
+  public void addGroup(Group group) {
+    this.groups = (null == this.groups) ? new ArrayList<Group>() : this.groups;
 
-		public void setFirstName(String firstName) {
-			this.firstName = firstName;
-		}
+    for (Group oneGroup : this.groups) {
+      if (oneGroup == group) {
+        return;
+      }
+    }
+    this.groups.add(group);
+  }
 
-		public String getLastName() {
-			return lastName;
-		}
+  public void removeGroup(Group group) {
+    this.groups = (null == this.groups) ? new ArrayList<Group>() : this.groups;
+    this.groups.remove(group);
+  }
 
-		public void setLastName(String lastName) {
-			this.lastName = lastName;
-		}
+  @Entity
+  public static class UserProfile {
+    private String avatorUrl;
+    private String alias;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private String location;
+    private String description;
+    private int age;
+    private boolean gender;
+    private boolean hasAvatar = false;
 
-		public String getLocation() {
-			return location;
-		}
+    public String getAvatorUrl() {
+      return avatorUrl;
+    }
 
-		public void setLocation(String location) {
-			this.location = location;
-		}
+    public void setAvatorUrl(String avatorUrl) {
+      this.avatorUrl = avatorUrl;
+    }
 
-		public int getAge() {
-			return age;
-		}
+    @JsonIgnore
+    public String getPassword() {
+      return password;
+    }
 
-		public String getDescription() {
-			return description;
-		}
+    public void setPassword(String password) {
+      this.password = password;
+    }
 
-		public void setDescription(String description) {
-			this.description = description;
-		}
+    public String getAlias() {
+      return alias;
+    }
 
-		public void setAge(int age) {
-			this.age = age;
-		}
+    public void setAlias(String alias) {
+      this.alias = alias;
+    }
 
-		public String getGender() {
-			return GenderEnum.getGenderName(gender);
-		}
+    public String getFirstName() {
+      return firstName;
+    }
 
-		public void setGender(String gender) {
-			this.gender = GenderEnum.getGenderValue(gender);
-		}
-		
-		public boolean hasAvatar() {
-			return hasAvatar;
-		}
+    public void setFirstName(String firstName) {
+      this.firstName = firstName;
+    }
 
-		public void setHasAvatar(boolean hasAvatar) {
-			this.hasAvatar = hasAvatar;
-		}
+    public String getLastName() {
+      return lastName;
+    }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((alias == null) ? 0 : alias.hashCode());
-			return result;
-		}
+    public void setLastName(String lastName) {
+      this.lastName = lastName;
+    }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			UserProfile other = (UserProfile) obj;
-			if (alias == null) {
-				if (other.alias != null)
-					return false;
-			} else if (!alias.equals(other.alias))
-				return false;
-			return true;
-		}
-		
-	}
-	
-	@Entity
-	public static class UserSocial
-	{
-		private Long following;
+    public String getLocation() {
+      return location;
+    }
 
-		private Long followed;
-		
-		private Long sounds;
-		
-		private Long reposts;
+    public void setLocation(String location) {
+      this.location = location;
+    }
 
-		public Long getFollowing() {
-			return following;
-		}
+    public int getAge() {
+      return age;
+    }
 
-		public void setFollowing(Long following) {
-			this.following = following;
-		}
+    public String getDescription() {
+      return description;
+    }
 
-		public Long getFollowed() {
-			return followed;
-		}
+    public void setDescription(String description) {
+      this.description = description;
+    }
 
-		public void setFollowed(Long followed) {
-			this.followed = followed;
-		}
+    public void setAge(int age) {
+      this.age = age;
+    }
 
-        public Long getSounds() {
-          return sounds;
-        }
-    
-        public void setSounds(Long sounds) {
-          this.sounds = sounds;
-        }
+    public String getGender() {
+      return GenderEnum.getGenderName(gender);
+    }
 
-        public Long getReposts() {
-          return reposts;
-        }
+    public void setGender(String gender) {
+      this.gender = GenderEnum.getGenderValue(gender);
+    }
 
-        public void setReposts(Long reposts) {
-          this.reposts = reposts;
-        }
-		
-	}
-	
-	public static class UserExternal
-	{
-	}
+    public boolean hasAvatar() {
+      return hasAvatar;
+    }
 
-	public static class UserEmail
-	{
-		private String emailAddress;
+    public void setHasAvatar(boolean hasAvatar) {
+      this.hasAvatar = hasAvatar;
+    }
 
-		public String getEmailAddress() {
-			return emailAddress;
-		}
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+      return result;
+    }
 
-		public void setEmailAddress(String emailAddress) {
-			this.emailAddress = emailAddress;
-		}
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
+      UserProfile other = (UserProfile) obj;
+      if (alias == null) {
+        if (other.alias != null) return false;
+      } else if (!alias.equals(other.alias)) return false;
+      return true;
+    }
 
-	}
+  }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((profile == null) ? 0 : profile.hashCode());
-		return result;
-	}
+  @Entity
+  public static class UserSocial {
+    private Long following;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		if (profile == null) {
-			if (other.profile != null)
-				return false;
-		} else if (!profile.equals(other.profile))
-			return false;
-		return true;
-	}
- 
+    private Long followed;
+
+    private Long sounds;
+
+    private Long reposts;
+
+    public Long getFollowing() {
+      return following;
+    }
+
+    public void setFollowing(Long following) {
+      this.following = following;
+    }
+
+    public Long getFollowed() {
+      return followed;
+    }
+
+    public void setFollowed(Long followed) {
+      this.followed = followed;
+    }
+
+    public Long getSounds() {
+      return sounds;
+    }
+
+    public void setSounds(Long sounds) {
+      this.sounds = sounds;
+    }
+
+    public Long getReposts() {
+      return reposts;
+    }
+
+    public void setReposts(Long reposts) {
+      this.reposts = reposts;
+    }
+
+  }
+
+  public static class UserExternal {}
+
+  public static class UserEmail {
+    private String emailAddress;
+
+    public String getEmailAddress() {
+      return emailAddress;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+      this.emailAddress = emailAddress;
+    }
+
+  }
+
+  public static class UserPrefer {
+    private boolean following;
+
+    private boolean followed;
+
+    public boolean isFollowing() {
+      return following;
+    }
+
+    public void setFollowing(boolean following) {
+      this.following = following;
+    }
+
+    public boolean isFollowed() {
+      return followed;
+    }
+
+    public void setFollowed(boolean followed) {
+      this.followed = followed;
+    }
+
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((profile == null) ? 0 : profile.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    User other = (User) obj;
+    if (profile == null) {
+      if (other.profile != null) return false;
+    } else if (!profile.equals(other.profile)) return false;
+    return true;
+  }
+
 }
