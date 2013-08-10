@@ -1,6 +1,7 @@
 package com.sound.service.sound.itf;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
@@ -9,7 +10,7 @@ import com.sound.model.SoundActivity.SoundComment;
 
 public interface SoundSocialService {
 
-	public Integer play(String soundAlias, String userAlias)  throws SoundException;
+	public Map<String, String> play(String soundAlias, String userAlias)  throws SoundException;
 	
 	public Integer like(String soundAlias, String userAlias)  throws SoundException;
 	
