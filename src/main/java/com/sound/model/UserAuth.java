@@ -21,7 +21,7 @@ public class UserAuth extends BaseModel
 	private String password;
 
 	@Embedded
-	private List<ChangeHistory> hisoties;
+	private List<ChangeHistory> histories;
 
 	@JsonIgnore
 	public ObjectId getId() {
@@ -41,13 +41,13 @@ public class UserAuth extends BaseModel
 	}
 
 
-	public List<ChangeHistory> getHisoties() {
-		return hisoties;
+	public List<ChangeHistory> getHistories() {
+		return histories;
 	}
 
 
-	public void setHisoties(List<ChangeHistory> hisoties) {
-		this.hisoties = hisoties;
+	public void setHistories(List<ChangeHistory> histories) {
+		this.histories = histories;
 	}
 
 

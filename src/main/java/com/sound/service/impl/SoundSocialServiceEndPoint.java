@@ -6,10 +6,12 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -20,7 +22,9 @@ import org.springframework.stereotype.Component;
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
 import com.sound.model.Sound;
+import com.sound.model.SoundActivity.SoundComment;
 import com.sound.service.sound.itf.SoundSocialService;
+import com.sound.util.JsonHandler;
 
 @Component
 @Path("/soundActivity")
@@ -38,8 +42,9 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("soundAlias") String soundAlias
 			)
 	{
+		Integer played = 0;
 		try {
-			soundSocialService.play(soundAlias, userAlias);
+			played = soundSocialService.play(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -50,7 +55,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to record play sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(played)).build();
 	}
 	
 	@PUT
@@ -60,8 +65,9 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer liked = 0;
 		try {
-			soundSocialService.like(soundAlias, userAlias);
+			liked = soundSocialService.like(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -72,7 +78,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to like sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(liked)).build();
 	}
 
 	@DELETE
@@ -82,9 +88,10 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer liked = 0;
 		try 
 		{
-			soundSocialService.dislike(soundAlias, userAlias);
+			liked = soundSocialService.dislike(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -95,7 +102,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to unlike sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(liked)).build();
 	}
 	
 	@PUT
@@ -105,8 +112,9 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer reposted = 0;
 		try {
-			soundSocialService.repost(soundAlias, userAlias);
+			reposted = soundSocialService.repost(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -117,7 +125,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to repost sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(reposted)).build();
 	}
 
 	@DELETE
@@ -127,9 +135,10 @@ public class SoundSocialServiceEndpoint {
 			@NotNull @PathParam("userAlias") String userAlias
 			)
 	{
+		Integer reposted = 0;
 		try 
 		{
-			soundSocialService.unrepost(soundAlias, userAlias);
+			reposted = soundSocialService.unrepost(soundAlias, userAlias);
 		} catch (SoundException e) 
 		{
 			logger.error(e);
@@ -140,7 +149,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to unlike sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(reposted)).build();
 	}
 	
 	@PUT
@@ -148,12 +157,13 @@ public class SoundSocialServiceEndpoint {
 	public Response comment(
 			@NotNull @PathParam("soundAlias") String soundAlias,
 			@NotNull @PathParam("userAlias") String userAlias,
-			@NotNull @FormParam("comment")  String comment,
-			@FormParam("pointAt") Float pointAt
+			@NotNull @QueryParam("comment")  String comment,
+			@QueryParam("pointAt") Float pointAt
 			)
 	{
+		Integer commentsCount = 0;
 		try {
-			soundSocialService.comment(soundAlias, userAlias, comment, pointAt);
+			commentsCount = soundSocialService.comment(soundAlias, userAlias, comment, pointAt);
 		}
 		catch (UserException e) 
 		{
@@ -170,7 +180,7 @@ public class SoundSocialServiceEndpoint {
 			logger.error(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to comment on sound " + soundAlias)).build();
 		}
-		return Response.status(Status.OK).entity("true").build();
+		return Response.status(Status.OK).entity(String.valueOf(commentsCount)).build();
 	}
 	
 	@DELETE
@@ -193,6 +203,33 @@ public class SoundSocialServiceEndpoint {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to comment with id " + commentId)).build();
 		}
 		return Response.status(Status.OK).entity("true").build();
+	}
+	
+	@GET
+	@Path("/{soundAlias}/comments")
+	public Response comment(
+			@NotNull @PathParam("soundAlias") String soundAlias,
+			@NotNull @QueryParam("pageNum")  Integer pageNum,
+			@QueryParam("commentsPerPage") Integer commentsPerPage
+			)
+	{
+		List<SoundComment> comments = null;
+		try 
+		{
+			comments = soundSocialService.getComments(soundAlias, pageNum, commentsPerPage);
+		}
+		catch (SoundException e) 
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+		catch (Exception e)
+		{
+			logger.error(e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to load comments of sound " + soundAlias)).build();
+		}
+		
+		return Response.status(Status.OK).entity(JsonHandler.toJson(comments)).build();
 	}
 	
 	@POST

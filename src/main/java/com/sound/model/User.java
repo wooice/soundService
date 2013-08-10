@@ -11,8 +11,8 @@ import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
-import com.github.jmkgreen.morphia.annotations.Serialized;
 import com.sound.model.enums.GenderEnum;
+import com.sound.model.enums.UserOccupationType;
 
 @Entity(noClassnameStored= true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,13 +30,14 @@ public class User extends BaseModel
 	@Embedded
 	private List<UserEmail> emails;
 
+	@JsonIgnore
 	@Reference(lazy=true)
 	private UserAuth auth;
 
 	@Reference(lazy=true)
 	private List<Group> groups;
 	
-	@Reference(lazy=true)
+	@Embedded
 	private UserSocial social;
 
 	@JsonIgnore
@@ -126,16 +127,34 @@ public class User extends BaseModel
 	@Entity
 	public static class UserProfile
 	{
-		@Embedded
-		private ProfileAvator avator;
+		private String avatorUrl;
 		private String alias;
 		private String password;
 		private String firstName;
 		private String lastName;
-		private String location;
+		private String city;
+		private String country;
 		private String description;
 		private int age;
 		private boolean gender;
+		private boolean hasAvatar = false;
+		private List<Integer> occupations;
+		
+		public List<UserOccupationType> getOccupations() {
+			return UserOccupationType.getTypesByIds(occupations);
+		}
+
+		public void setOccupations(List<Integer> occupations) {
+			this.occupations = occupations;
+		}
+
+		public String getAvatorUrl() {
+			return avatorUrl;
+		}
+
+		public void setAvatorUrl(String avatorUrl) {
+			this.avatorUrl = avatorUrl;
+		}
 
 		@JsonIgnore
 		public String getPassword() {
@@ -144,14 +163,6 @@ public class User extends BaseModel
 
 		public void setPassword(String password) {
 			this.password = password;
-		}
-
-		public ProfileAvator getAvator() {
-			return avator;
-		}
-
-		public void setAvator(ProfileAvator avator) {
-			this.avator = avator;
 		}
 
 		public String getAlias() {
@@ -178,14 +189,21 @@ public class User extends BaseModel
 			this.lastName = lastName;
 		}
 
-		public String getLocation() {
-			return location;
+		public String getCity() {
+			return city;
 		}
 
-		public void setLocation(String location) {
-			this.location = location;
+		public void setCity(String city) {
+			this.city = city;
 		}
 
+		public String getCountry() {
+			return country;
+		}
+
+		public void setCountry(String country) {
+			this.country = country;
+		}
 		public int getAge() {
 			return age;
 		}
@@ -209,30 +227,13 @@ public class User extends BaseModel
 		public void setGender(String gender) {
 			this.gender = GenderEnum.getGenderValue(gender);
 		}
+		
+		public boolean hasAvatar() {
+			return hasAvatar;
+		}
 
-		public class ProfileAvator
-		{
-			@Serialized
-			private byte[] avator;
-
-			private String extension;
-
-			public byte[] getAvator() {
-				return avator;
-			}
-
-			public void setAvator(byte[] avator) {
-				this.avator = avator;
-			}
-
-			public String getExtension() {
-				return extension;
-			}
-
-			public void setExtension(String extension) {
-				this.extension = extension;
-			}
-
+		public void setHasAvatar(boolean hasAvatar) {
+			this.hasAvatar = hasAvatar;
 		}
 
 		@Override
@@ -265,21 +266,13 @@ public class User extends BaseModel
 	@Entity
 	public static class UserSocial
 	{
-
-		@Id
-		private ObjectId id;
-		
 		private Long following;
 
 		private Long followed;
-
-		public ObjectId getId() {
-			return id;
-		}
-
-		public void setId(ObjectId id) {
-			this.id = id;
-		}
+		
+		private Long sounds;
+		
+		private Long reposts;
 
 		public Long getFollowing() {
 			return following;
@@ -296,10 +289,73 @@ public class User extends BaseModel
 		public void setFollowed(Long followed) {
 			this.followed = followed;
 		}
+
+        public Long getSounds() {
+          return sounds;
+        }
+    
+        public void setSounds(Long sounds) {
+          this.sounds = sounds;
+        }
+
+        public Long getReposts() {
+          return reposts;
+        }
+
+        public void setReposts(Long reposts) {
+          this.reposts = reposts;
+        }
+		
 	}
 	
+	@Entity
 	public static class UserExternal
 	{
+		private String website;
+		private String sina;
+		private String qq;
+		private String renren;
+		private String douban;
+
+		public String getWebsite() {
+			return website;
+		}
+
+		public void setWebsite(String website) {
+			this.website = website;
+		}
+
+		public String getSina() {
+			return sina;
+		}
+
+		public void setSina(String sina) {
+			this.sina = sina;
+		}
+
+		public String getQq() {
+			return qq;
+		}
+
+		public void setQq(String qq) {
+			this.qq = qq;
+		}
+
+		public String getRenren() {
+			return renren;
+		}
+
+		public void setRenren(String renren) {
+			this.renren = renren;
+		}
+
+		public String getDouban() {
+			return douban;
+		}
+
+		public void setDouban(String douban) {
+			this.douban = douban;
+		}
 	}
 
 	public static class UserEmail

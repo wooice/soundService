@@ -4,11 +4,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
+import com.sound.jackson.extension.DateSerializer;
 
 public class SoundActivity {
 
@@ -47,6 +49,7 @@ public class SoundActivity {
 		this.owner = owner;
 	}
 
+	@JsonSerialize(using = DateSerializer.class) 
 	public Date getCreatedTime() {
 		return createdTime;
 	}
