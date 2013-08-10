@@ -58,7 +58,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   RemoteStorageService remoteStorageService;
 
   @Override
-  public Integer play(String soundAlias, String userAlias) throws SoundException {
+  public Map<String, String> play(String soundAlias, String userAlias) throws SoundException {
     Sound sound = soundDAO.findOne("profile.name", soundAlias);
 
     if (null == sound) {
@@ -73,7 +73,14 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     soundPlayDAO.save(play);
     soundDAO.increase("profile.name", soundAlias, "soundSocial.playedCount");
 
-    return sound.getSoundSocial().getPlayedCount() + 1;
+    Map<String, String> playResult = new HashMap<String, String>();
+    playResult.put("played", String.valueOf(sound.getSoundSocial().getPlayedCount() + 1));
+    playResult.put(
+        "url",
+        remoteStorageService.generateDownloadUrl(sound.getSoundData().getObjectId(),
+            FileType.getFileType("sound")).toString());
+
+    return playResult;
   }
 
   @Override

@@ -39,11 +39,13 @@ public class SoundSocialServiceEndpoint {
 
   @PUT
   @Path("/{userAlias}/play/{soundAlias}")
-  public Response play(@NotNull @PathParam("userAlias") String userAlias,
-      @NotNull @PathParam("soundAlias") String soundAlias) {
-    Integer played = 0;
+  public Response play(
+      @NotNull @PathParam("userAlias") String userAlias,
+      @NotNull @PathParam("soundAlias") String soundAlias
+      ) {
+    Map<String, String> result = null;
     try {
-      played = soundSocialService.play(soundAlias, userAlias);
+      result = soundSocialService.play(soundAlias, userAlias);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -53,8 +55,6 @@ public class SoundSocialServiceEndpoint {
           .entity(("Failed to record play sound " + soundAlias)).build();
     }
 
-    Map<String, Integer> result = new HashMap<String, Integer>();
-    result.put("played", played);
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
