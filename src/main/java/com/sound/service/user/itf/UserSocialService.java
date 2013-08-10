@@ -9,9 +9,9 @@ import com.sound.model.User;
 
 public interface UserSocialService 
 {
-	public void follow(String fromUserAlias, String toUserAlias) throws UserException;
+	public Integer follow(String fromUserAlias, String toUserAlias) throws UserException;
 	
-	public void unfollow(String fromUserAlias, String toUserAlias) throws UserException;
+	public Integer unfollow(String fromUserAlias, String toUserAlias) throws UserException;
 	
 	public void createGroup(String user, String groupName, String description)  throws UserException;
 	
