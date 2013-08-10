@@ -185,6 +185,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		soundRecord.setSound(sound);
 		soundRecord.setCreatedTime(new Date());
 		soundRecordDAO.save(soundRecord);
+		
+		//Add one sound count to user social
+		userDAO.increase("profile.alias", ownerAlias, "social.sounds");
 	}
 	
 	@Override
