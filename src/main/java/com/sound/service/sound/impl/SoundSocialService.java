@@ -168,6 +168,7 @@ public class SoundSocialService implements
 		repost.setCreatedTime(new Date());
 		soundRecordDAO.save(repost);
 		soundDAO.increase("profile.name", soundAlias, "soundSocial.reportsCount");
+		userDAO.increase("profile.alias", userAlias, "social.reposts");
 	
 		return sound.getSoundSocial().getReportsCount() + 1;
 	}
@@ -197,6 +198,7 @@ public class SoundSocialService implements
 
 		soundRecordDAO.delete(reposted);
 		soundDAO.decrease("profile.name", soundAlias, "soundSocial.reportsCount");
+		userDAO.decrease("profile.alias", userAlias, "social.reposts");
 		
 		return sound.getSoundSocial().getReportsCount() - 1;
 	}
