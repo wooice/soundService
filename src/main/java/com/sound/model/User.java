@@ -10,121 +10,129 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
+import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.sound.model.enums.GenderEnum;
 import com.sound.model.enums.UserOccupationType;
 
-@Entity(noClassnameStored= true)
+@Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class User extends BaseModel
-{
-	@Id 
-	private ObjectId id;
+public class User extends BaseModel {
+  @Id
+  private ObjectId id;
 
-	@Embedded
-	private UserProfile profile;
+  @Embedded
+  private UserProfile profile;
 
-	@Embedded
-	private UserExternal external;
+  @Embedded
+  private UserExternal external;
 
-	@Embedded
-	private List<UserEmail> emails;
+  @Embedded
+  private List<UserEmail> emails;
 
-	@JsonIgnore
-	@Reference(lazy=true)
-	private UserAuth auth;
+  @JsonIgnore
+  @Reference(lazy = true)
+  private UserAuth auth;
 
-	@Reference(lazy=true)
-	private List<Group> groups;
-	
-	@Embedded
-	private UserSocial social;
+  @Reference(lazy = true)
+  private List<Group> groups;
 
-	@JsonIgnore
-	public ObjectId getId() {
-		return id;
-	}
+  @Embedded
+  private UserSocial social;
 
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
+  @NotSaved
+  @Embedded
+  private UserPrefer userPrefer;
 
-	public UserProfile getProfile() {
-		return profile;
-	}
+  @JsonIgnore
+  public ObjectId getId() {
+    return id;
+  }
 
-	public void setProfile(UserProfile profile) {
-		this.profile = profile;
-	}
+  public void setId(ObjectId id) {
+    this.id = id;
+  }
 
-	public List<Group> getGroups() {
-		return groups;
-	}
+  public UserProfile getProfile() {
+    return profile;
+  }
 
-	public void setGroups(List<Group> groups) {
-		this.groups = groups;
-	}
+  public void setProfile(UserProfile profile) {
+    this.profile = profile;
+  }
 
-	public UserExternal getExternal() {
-		return external;
-	}
-	
+  public List<Group> getGroups() {
+    return groups;
+  }
 
-	public UserSocial getSocial() {
-		return social;
-	}
+  public void setGroups(List<Group> groups) {
+    this.groups = groups;
+  }
 
-	public void setSocial(UserSocial social) {
-		this.social = social;
-	}
+  public UserExternal getExternal() {
+    return external;
+  }
 
-	public void setExternal(UserExternal external) {
-		this.external = external;
-	}
 
-	public List<UserEmail> getEmails() {
-		return emails;
-	}
+  public UserSocial getSocial() {
+    return social;
+  }
 
-	public void setEmails(List<UserEmail> emails) {
-		this.emails = emails;
-	}
+  public void setSocial(UserSocial social) {
+    this.social = social;
+  }
 
-	public void addEmail(UserEmail email)
-	{
-		this.emails = (null == this.emails)? new ArrayList<UserEmail>() : this.emails;
-		this.emails.add(email);
-	}
+  public void setExternal(UserExternal external) {
+    this.external = external;
+  }
 
-	public UserAuth getAuth() {
-		return auth;
-	}
+  public List<UserEmail> getEmails() {
+    return emails;
+  }
 
-	public void setAuth(UserAuth auth) {
-		this.auth = auth;
-	}
-	
-	public void addGroup(Group group)
-	{
-		this.groups = (null == this.groups)? new ArrayList<Group>():this.groups;
-		
-		for(Group oneGroup: this.groups)
-		{
-			if (oneGroup == group)
-			{
-				return ;
-			}
-		}
-		this.groups.add(group);
-	}
-	
-	public void removeGroup(Group group)
-	{
-		this.groups = (null == this.groups)? new ArrayList<Group>():this.groups;
-		this.groups.remove(group);
-	}
+  public void setEmails(List<UserEmail> emails) {
+    this.emails = emails;
+  }
 
-	@Entity
+  public void addEmail(UserEmail email) {
+    this.emails = (null == this.emails) ? new ArrayList<UserEmail>() : this.emails;
+    this.emails.add(email);
+  }
+
+  public UserAuth getAuth() {
+    return auth;
+  }
+
+  public void setAuth(UserAuth auth) {
+    this.auth = auth;
+  }
+
+
+  public UserPrefer getUserPrefer() {
+    return userPrefer;
+  }
+
+  public void setUserPrefer(UserPrefer userPrefer) {
+    this.userPrefer = userPrefer;
+  }
+
+  public void addGroup(Group group) {
+    this.groups = (null == this.groups) ? new ArrayList<Group>() : this.groups;
+
+    for (Group oneGroup : this.groups) {
+      if (oneGroup == group) {
+        return;
+      }
+    }
+    this.groups.add(group);
+  }
+
+  public void removeGroup(Group group) {
+    this.groups = (null == this.groups) ? new ArrayList<Group>() : this.groups;
+    this.groups.remove(group);
+  }
+
+  @Entity
 	public static class UserProfile
 	{
 		private String avatorUrl;
@@ -262,54 +270,53 @@ public class User extends BaseModel
 		}
 		
 	}
-	
-	@Entity
-	public static class UserSocial
-	{
-		private Long following;
 
-		private Long followed;
-		
-		private Long sounds;
-		
-		private Long reposts;
+  @Entity
+  public static class UserSocial {
+    private Long following;
 
-		public Long getFollowing() {
-			return following;
-		}
+    private Long followed;
 
-		public void setFollowing(Long following) {
-			this.following = following;
-		}
+    private Long sounds;
 
-		public Long getFollowed() {
-			return followed;
-		}
+    private Long reposts;
 
-		public void setFollowed(Long followed) {
-			this.followed = followed;
-		}
+    public Long getFollowing() {
+      return following;
+    }
 
-        public Long getSounds() {
-          return sounds;
-        }
-    
-        public void setSounds(Long sounds) {
-          this.sounds = sounds;
-        }
+    public void setFollowing(Long following) {
+      this.following = following;
+    }
 
-        public Long getReposts() {
-          return reposts;
-        }
+    public Long getFollowed() {
+      return followed;
+    }
 
-        public void setReposts(Long reposts) {
-          this.reposts = reposts;
-        }
-		
-	}
-	
-	@Entity
-	public static class UserExternal
+    public void setFollowed(Long followed) {
+      this.followed = followed;
+    }
+
+    public Long getSounds() {
+      return sounds;
+    }
+
+    public void setSounds(Long sounds) {
+      this.sounds = sounds;
+    }
+
+    public Long getReposts() {
+      return reposts;
+    }
+
+    public void setReposts(Long reposts) {
+      this.reposts = reposts;
+    }
+
+  }
+
+  @Entity
+  public static class UserExternal
 	{
 		private String website;
 		private String sina;
@@ -358,43 +365,61 @@ public class User extends BaseModel
 		}
 	}
 
-	public static class UserEmail
-	{
-		private String emailAddress;
 
-		public String getEmailAddress() {
-			return emailAddress;
-		}
+  public static class UserEmail {
+    private String emailAddress;
 
-		public void setEmailAddress(String emailAddress) {
-			this.emailAddress = emailAddress;
-		}
+    public String getEmailAddress() {
+      return emailAddress;
+    }
 
-	}
+    public void setEmailAddress(String emailAddress) {
+      this.emailAddress = emailAddress;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((profile == null) ? 0 : profile.hashCode());
-		return result;
-	}
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		if (profile == null) {
-			if (other.profile != null)
-				return false;
-		} else if (!profile.equals(other.profile))
-			return false;
-		return true;
-	}
- 
+  public static class UserPrefer {
+    private boolean following;
+
+    private boolean followed;
+
+    public boolean isFollowing() {
+      return following;
+    }
+
+    public void setFollowing(boolean following) {
+      this.following = following;
+    }
+
+    public boolean isFollowed() {
+      return followed;
+    }
+
+    public void setFollowed(boolean followed) {
+      this.followed = followed;
+    }
+
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((profile == null) ? 0 : profile.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    User other = (User) obj;
+    if (profile == null) {
+      if (other.profile != null) return false;
+    } else if (!profile.equals(other.profile)) return false;
+    return true;
+  }
+
 }

@@ -21,7 +21,7 @@ public interface SoundSocialService {
 	
 	public Integer comment(String soundAlias, String userAlias, String comment, Float pointAt) throws SoundException, UserException;
 	
-	public void uncomment(String commentId) throws SoundException;
+	public Integer uncomment(String commentId) throws SoundException;
 
 	public List<Sound> recommandSoundsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws SoundException;
 

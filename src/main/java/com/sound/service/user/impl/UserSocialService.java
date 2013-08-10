@@ -42,31 +42,31 @@ public class UserSocialService implements
 
 	@Autowired
 	TagService tagService;
-
+	
 	@Autowired
 	SoundSocialService soundSocialService;
 
 	@Override
-	public void follow(String fromUserAlias, String toUserAlias)
+	public Integer follow(String fromUserAlias, String toUserAlias)
 			throws UserException {
-		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		cratiaries.put("fromUser.profile.alias", fromUserAlias);
-		cratiaries.put("toUser.profile.alias", toUserAlias);
-		UserConnect userConnected = userConnectDAO.findOne(cratiaries);
-
-		if (userConnected != null) {
-			throw new UserException("The user " + fromUserAlias
-					+ "has followed user " + toUserAlias);
-		}
-
 		User fromUser = userDAO.findOne("profile.alias", fromUserAlias);
 		if (null == fromUser) {
-			throw new UserException("The user " + fromUserAlias + "not found.");
+			throw new UserException("The user " + fromUserAlias + " not found.");
 		}
 
 		User toUser = userDAO.findOne("profile.alias", toUserAlias);
 		if (null == toUser) {
-			throw new UserException("The user " + toUserAlias + "not found.");
+			throw new UserException("The user " + toUserAlias + " not found.");
+		}
+
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
+		cratiaries.put("fromUser", fromUser);
+		cratiaries.put("toUser", toUser);
+		UserConnect userConnected = userConnectDAO.findOne(cratiaries);
+
+		if (userConnected != null) {
+			throw new UserException("The user " + fromUserAlias
+					+ " has followed user " + toUserAlias);
 		}
 
 		UserConnect userConnect = new UserConnect();
@@ -78,14 +78,26 @@ public class UserSocialService implements
 
 		userDAO.increase("profile.alias", fromUserAlias, "social.following");
 		userDAO.increase("profile.alias", toUserAlias, "social.followed");
+
+		return (int) (toUser.getSocial().getFollowed() + 1);
 	}
 
 	@Override
-	public void unfollow(String fromUserAlias, String toUserAlias)
+	public Integer unfollow(String fromUserAlias, String toUserAlias)
 			throws UserException {
+		User fromUser = userDAO.findOne("profile.alias", fromUserAlias);
+		if (null == fromUser) {
+			throw new UserException("The user " + fromUserAlias + " not found.");
+		}
+
+		User toUser = userDAO.findOne("profile.alias", toUserAlias);
+		if (null == toUser) {
+			throw new UserException("The user " + toUserAlias + " not found.");
+		}
+
 		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		cratiaries.put("fromUser.profile.alias", fromUserAlias);
-		cratiaries.put("toUser.profile.alias", toUserAlias);
+		cratiaries.put("fromUser", fromUser);
+		cratiaries.put("toUser", toUser);
 		UserConnect userConnected = userConnectDAO.findOne(cratiaries);
 
 		if (userConnected == null) {
@@ -95,8 +107,10 @@ public class UserSocialService implements
 
 		userConnectDAO.delete(userConnected);
 
-		userDAO.decrease("profile.alias", fromUserAlias, "following");
-		userDAO.decrease("profile.alias", toUserAlias, "followed");
+		userDAO.decrease("profile.alias", fromUserAlias, "social.following");
+		userDAO.decrease("profile.alias", toUserAlias, "social.followed");
+
+		return (int) (toUser.getSocial().getFollowed() - 1);
 	}
 
 	@Override
@@ -226,21 +240,6 @@ public class UserSocialService implements
 	@Override
 	public List<User> getFollowedUsers(String toUserAlias, Integer pageNum,
 			Integer pageSize) throws UserException {
-		return SocialUtils.sliceList(getAllFollowedUsers(toUserAlias), pageNum,
-				pageSize);
-	}
-
-	@Override
-	public List<User> getFollowingUsers(String fromUserAlias, Integer pageNum,
-			Integer pageSize) throws UserException {
-
-		return SocialUtils.sliceList(getAllFollowingUsers(fromUserAlias),
-				pageNum, pageSize);
-	}
-
-	private List<User> getAllFollowedUsers(String toUserAlias)
-			throws UserException {
-
 		Map<String, String> cratiaries = new HashMap<String, String>();
 		cratiaries.put("toUser.profile.alias", toUserAlias);
 		List<UserConnect> list = userConnectDAO.find(cratiaries);
@@ -248,7 +247,20 @@ public class UserSocialService implements
 		for (UserConnect uc : list) {
 			result.add(userDAO.findOne("profile.alias", uc.getFromUser()));
 		}
-		return result;
+		return SocialUtils.sliceList(result, pageNum, pageSize);
+	}
+
+	@Override
+	public List<User> getFollowingUsers(String fromUserAlias, Integer pageNum,
+			Integer pageSize) throws UserException {
+		Map<String, String> cratiaries = new HashMap<String, String>();
+		cratiaries.put("fromUser.profile.alias", fromUserAlias);
+		List<UserConnect> list = userConnectDAO.find(cratiaries);
+		List<User> result = new ArrayList<User>();
+		for (UserConnect uc : list) {
+			result.add(userDAO.findOne("profile.alias", uc.getToUser()));
+		}
+		return SocialUtils.sliceList(result, pageNum, pageSize);
 	}
 
 	private List<User> getAllFollowingUsers(String fromUserAlias)
