@@ -38,11 +38,12 @@ public class TagServiceEndpoint {
 	@Path("/{userAlias}/create/{tag}")
 	public Response createTag(
 			@NotNull @PathParam("tag") String label, 
-			@NotNull @PathParam("userAlias") String userAlias) 
+			@NotNull @PathParam("userAlias") String userAlias,
+			@PathParam("userAlias") String categoryName) 
 	{
 		try 
 		{
-			tagService.getOrCreate(label, userAlias);
+			tagService.getOrCreate(label, userAlias, categoryName);
 
 		} 
 		catch (SoundException e) 
