@@ -14,8 +14,4 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
 	public SoundDAO(Mongo mongo, Morphia morphia, String dbName) {
 		super(mongo, morphia, dbName);
 	}
-
-	public List<Sound> getSoundsByTags(List<String> tags) {
-		return createQuery().field("tags").hasAnyOf(tags).asList();
-	}
 }

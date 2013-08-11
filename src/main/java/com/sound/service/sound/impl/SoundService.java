@@ -200,7 +200,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 		
 		for(SoundRecord oneSound: records)
 		{
-			oneSound.getSound().getSoundData().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
 			oneSound.getSound().getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
 			oneSound.getSound().setUserPrefer(getUserPreferOfSound(oneSound.getSound(), owner));
 		}
@@ -226,7 +225,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService
 
 		for(SoundRecord oneSound: records)
 		{
-			oneSound.getSound().getSoundData().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getSoundData().getObjectId(), FileType.getFileType("sound")).toString());
 			oneSound.getSound().getProfile().getPoster().setUrl(remoteStorageService.generateDownloadUrl(oneSound.getSound().getProfile().getPoster().getPosterId(), FileType.getFileType("image")).toString());
 			oneSound.getSound().setUserPrefer(getUserPreferOfSound(oneSound.getSound(), currentUser));
 		}

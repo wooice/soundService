@@ -182,7 +182,7 @@ public class UserSocialServiceEndpoint {
   }
 
   @POST
-  @Path("/recommand/newuser")
+  @Path("/recommand/users")
   public Response getRecommandedUsersByTags(@NotNull @FormParam("tags") List<String> tags,
       @NotNull @FormParam("pageNum") Integer pageNum,
       @NotNull @FormParam("pageSize") Integer pageSize) {

@@ -359,7 +359,6 @@ public class User extends BaseModel {
     }
   }
 
-
   public static class UserEmail {
     private String emailAddress;
 

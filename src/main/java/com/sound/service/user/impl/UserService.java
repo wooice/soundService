@@ -3,7 +3,6 @@ package com.sound.service.user.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -32,227 +31,215 @@ import com.sound.service.storage.itf.RemoteStorageService;
 @Scope("singleton")
 public class UserService implements com.sound.service.user.itf.UserService {
 
-	@Autowired
-	UserDAO userDAO;
+  @Autowired
+  UserDAO userDAO;
 
-	@Autowired
-	UserConnectDAO userConnectDAO;
+  @Autowired
+  UserConnectDAO userConnectDAO;
 
-	@Autowired
-	RemoteStorageService remoteStorageService;
+  @Autowired
+  RemoteStorageService remoteStorageService;
+  
+  @Autowired
+  UserAuthDAO userAuthDAO;
 
-	@Autowired
-	UserAuthDAO userAuthDAO;
+  @Override
+  public User getUserByAlias(String userAlias) {
+    User user = userDAO.findOne("profile.alias", userAlias);
 
-	@Override
-	public User getUserByAlias(String userAlias) {
-		User user = userDAO.findOne("profile.alias", userAlias);
+    if (user.getProfile().hasAvatar()) {
+      user.getProfile().setAvatorUrl(
+          remoteStorageService.generateDownloadUrl(user.getProfile().getAlias(),
+              FileType.getFileType("image")).toString());
+    }
 
-		if (user.getProfile().hasAvatar()) {
-			user.getProfile().setAvatorUrl(
-					remoteStorageService.generateDownloadUrl(
-							user.getProfile().getAlias(),
-							FileType.getFileType("image")).toString());
-		}
+    user.setUserPrefer(getUserPreferOfSound(user, user));
 
-		user.setUserPrefer(getUserPreferOfSound(user, user));
+    return user;
+  }
 
-		return user;
-	}
+  @Override
+  public User getUserByEmail(String emailAddress) {
+    User user = userDAO.findOne("emails.emailAddress", emailAddress);
 
-	@Override
-	public User getUserByEmail(String emailAddress) throws UserException {
-		User.UserEmail userEmail = new User.UserEmail();
-		userEmail.setEmailAddress(emailAddress);
-		List<User> users = userDAO.fetchEntitiesPropertyContains("emails",
-				userEmail);
-		if (users.size() > 1) {
-			throw new UserException("Find more than 1 users with email : "
-					+ emailAddress);
-		} else if (users.size() == 0) {
-			throw new UserException("Cannot find user by email : "
-					+ emailAddress);
-		}
+    return user;
+  }
 
-		return users.get(0);
-	}
+  @Override
+  public User createUser(String userAlias, String emailAddress, String password)
+      throws UserException {
+    User user = this.getUserByAlias(userAlias);
 
-	@Override
-	public User createUser(String userAlias, String emailAddress,
-			String password) throws UserException {
-		User user = this.getUserByAlias(userAlias);
+    if (null != user) {
+      throw new UserException("User with alias " + userAlias + " exists.");
+    }
 
-		if (null != user) {
-			throw new UserException("User with alias " + userAlias + " exists.");
-		}
+    user = this.getUserByEmail(emailAddress);
 
-		user = this.getUserByEmail(emailAddress);
+    if (null != user) {
+      throw new UserException("User with email address " + emailAddress + " exists.");
+    }
 
-		if (null != user) {
-			throw new UserException("User with email address " + emailAddress
-					+ " exists.");
-		}
+    user = new User();
+    User.UserProfile profile = new User.UserProfile();
+    profile.setAlias(userAlias);
+    profile.setPassword(password);
+    User.UserEmail email = new User.UserEmail();
+    email.setEmailAddress(emailAddress);
+    user.setProfile(profile);
+    user.addEmail(email);
+    User.UserSocial social = new User.UserSocial();
+    social.setFollowed(0L);
+    social.setFollowing(0L);
+    social.setSounds(0L);
+    user.setSocial(social);
 
-		user = new User();
-		User.UserProfile profile = new User.UserProfile();
-		profile.setAlias(userAlias);
-		profile.setPassword(password);
-		User.UserEmail email = new User.UserEmail();
-		email.setEmailAddress(emailAddress);
-		user.setProfile(profile);
-		user.addEmail(email);
-		User.UserSocial social = new User.UserSocial();
-		social.setFollowed(0L);
-		social.setFollowing(0L);
-		social.setSounds(0L);
-		user.setSocial(social);
+    userDAO.save(user);
 
-		userDAO.save(user);
+    return user;
+  }
 
-		return user;
-	}
+  @Override
+  public User updatePassword(String emailAddress, String password, String ip)
+          throws UserException {
+      User user = this.getUserByEmail(emailAddress);
 
-	@Override
-	public User updatePassword(String emailAddress, String password, String ip)
-			throws UserException {
-		User user = this.getUserByEmail(emailAddress);
+      if (null == user) {
+          throw new UserException("Cannot find user with email address : "
+                  + emailAddress);
+      }
 
-		if (null == user) {
-			throw new UserException("Cannot find user with email address : "
-					+ emailAddress);
-		}
+      UserAuth auth = user.getAuth();
+      if (auth == null) {
+          auth = new UserAuth();
+          user.setAuth(auth);
+          auth.setHistories(new ArrayList<ChangeHistory>());
+      }
+      auth.setId(user.getId());
+      auth.setPassword(password);
+      ChangeHistory history = new ChangeHistory();
+      history.setIp(ip);
+      history.setModifiedDate(new Date());
+      history.setPassword(password);
+      auth.getHistories().add(history);
 
-		UserAuth auth = user.getAuth();
-		if (auth == null) {
-			auth = new UserAuth();
-			user.setAuth(auth);
-			auth.setHistories(new ArrayList<ChangeHistory>());
-		}
-		auth.setId(user.getId());
-		auth.setPassword(password);
-		ChangeHistory history = new ChangeHistory();
-		history.setIp(ip);
-		history.setModifiedDate(new Date());
-		history.setPassword(password);
-		auth.getHistories().add(history);
+      userAuthDAO.save(auth);
 
-		userAuthDAO.save(auth);
+      return user;
+  }
 
-		return user;
-	}
+  public void deleteByAlias(String userAlias) {
+    userDAO.deleteByProperty("profile.alias", userAlias);
+  }
 
-	public void deleteByAlias(String userAlias) {
-		userDAO.deleteByProperty("profile.alias", userAlias);
-	}
+  private UserPrefer getUserPreferOfSound(User currentUser, User targetUser) {
+    UserPrefer userPrefer = new UserPrefer();
 
-	private UserPrefer getUserPreferOfSound(User currentUser, User targetUser) {
-		UserPrefer userPrefer = new UserPrefer();
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("fromUser", currentUser);
+    cratiaries.put("toUser", targetUser);
+    UserConnect following = userConnectDAO.findOne(cratiaries);
 
-		Map<String, Object> cratiaries = new HashMap<String, Object>();
-		cratiaries.put("fromUser", currentUser);
-		cratiaries.put("toUser", targetUser);
-		UserConnect following = userConnectDAO.findOne(cratiaries);
+    if (null != following) {
+      userPrefer.setFollowing(true);
+    }
 
-		if (null != following) {
-			userPrefer.setFollowing(true);
-		}
+    cratiaries.clear();
+    cratiaries.put("fromUser", targetUser);
+    cratiaries.put("toUser", currentUser);
+    UserConnect followed = userConnectDAO.findOne(cratiaries);
 
-		cratiaries.clear();
-		cratiaries.put("fromUser", targetUser);
-		cratiaries.put("toUser", currentUser);
-		UserConnect followed = userConnectDAO.findOne(cratiaries);
+    if (null != followed) {
+      userPrefer.setFollowed(true);
+    }
 
-		if (null != followed) {
-			userPrefer.setFollowed(true);
-		}
+    return userPrefer;
+  }
+  
+  @Override
+  public User updateUserBasicProfile(String userAlias,
+          UserBasicProfileDTO profileDTO) throws UserException {
+      User user = this.getUserByAlias(userAlias);
 
-		return userPrefer;
-	}
+      if (null == user) {
+          throw new UserException("Cannot find user : " + userAlias);
+      }
 
-	@Override
-	public User updateUserBasicProfile(String userAlias,
-			UserBasicProfileDTO profileDTO) throws UserException {
-		User user = this.getUserByAlias(userAlias);
+      UserProfile profile = user.getProfile();
 
-		if (null == user) {
-			throw new UserException("Cannot find user : " + userAlias);
-		}
+      if (StringUtils.isNotBlank(profileDTO.getAlias())) {
+          profile.setAlias(profileDTO.getAlias());
+      }
 
-		UserProfile profile = user.getProfile();
+      if (StringUtils.isNotBlank(profileDTO.getAvatorUrl())) {
+          profile.setAvatorUrl(profileDTO.getAvatorUrl());
+          profile.setHasAvatar(true);
+      }
 
-		if (StringUtils.isNotBlank(profileDTO.getAlias())) {
-			profile.setAlias(profileDTO.getAlias());
-		}
+      if (StringUtils.isNotBlank(profileDTO.getFirstname())) {
+          profile.setFirstName(profileDTO.getFirstname());
+      }
 
-		if (StringUtils.isNotBlank(profileDTO.getAvatorUrl())) {
-			profile.setAvatorUrl(profileDTO.getAvatorUrl());
-			profile.setHasAvatar(true);
-		}
+      if (StringUtils.isNotBlank(profileDTO.getLastname())) {
+          profile.setLastName(profileDTO.getLastname());
+      }
 
-		if (StringUtils.isNotBlank(profileDTO.getFirstname())) {
-			profile.setFirstName(profileDTO.getFirstname());
-		}
+      if (StringUtils.isNotBlank(profileDTO.getCity())) {
+          profile.setCity(profileDTO.getCity());
+      }
 
-		if (StringUtils.isNotBlank(profileDTO.getLastname())) {
-			profile.setLastName(profileDTO.getLastname());
-		}
+      if (StringUtils.isNotBlank(profileDTO.getCountry())) {
+          profile.setCountry(profileDTO.getCountry());
+      }
 
-		if (StringUtils.isNotBlank(profileDTO.getCity())) {
-			profile.setCity(profileDTO.getCity());
-		}
+      if (StringUtils.isNotBlank(profileDTO.getDescription())) {
+          profile.setDescription(profileDTO.getDescription());
+      }
 
-		if (StringUtils.isNotBlank(profileDTO.getCountry())) {
-			profile.setCountry(profileDTO.getCountry());
-		}
+      if (CollectionUtils.isNotEmpty(profileDTO.getOccupations())) {
+          profile.setOccupations(profileDTO.getOccupations());
+      }
 
-		if (StringUtils.isNotBlank(profileDTO.getDescription())) {
-			profile.setDescription(profileDTO.getDescription());
-		}
+      userDAO.updateProperty("profile.alias", userAlias, "profile", profile);
 
-		if (CollectionUtils.isNotEmpty(profileDTO.getOccupations())) {
-			profile.setOccupations(profileDTO.getOccupations());
-		}
+      return user;
 
-		userDAO.updateProperty("profile.alias", userAlias, "profile", profile);
+  }
 
-		return user;
+  @Override
+  public User updateUserSnsProfile(String userAlias, UserSnsProfileDTO snsDTO)
+          throws UserException {
+      User user = this.getUserByAlias(userAlias);
 
-	}
+      if (null == user) {
+          throw new UserException("Cannot find user : " + userAlias);
+      }
 
-	@Override
-	public User updateUserSnsProfile(String userAlias, UserSnsProfileDTO snsDTO)
-			throws UserException {
-		User user = this.getUserByAlias(userAlias);
+      UserExternal external = user.getExternal();
 
-		if (null == user) {
-			throw new UserException("Cannot find user : " + userAlias);
-		}
+      if (StringUtils.isNotBlank(snsDTO.getWebsite())) {
+          external.setWebsite(snsDTO.getWebsite());
+      }
 
-		UserExternal external = user.getExternal();
+      if (StringUtils.isNotBlank(snsDTO.getSina())) {
+          external.setSina(snsDTO.getSina());
+      }
 
-		if (StringUtils.isNotBlank(snsDTO.getWebsite())) {
-			external.setWebsite(snsDTO.getWebsite());
-		}
+      if (StringUtils.isNotBlank(snsDTO.getQq())) {
+          external.setQq(snsDTO.getQq());
+      }
 
-		if (StringUtils.isNotBlank(snsDTO.getSina())) {
-			external.setSina(snsDTO.getSina());
-		}
+      if (StringUtils.isNotBlank(snsDTO.getRenren())) {
+          external.setRenren(snsDTO.getRenren());
+      }
 
-		if (StringUtils.isNotBlank(snsDTO.getQq())) {
-			external.setQq(snsDTO.getQq());
-		}
+      if (StringUtils.isNotBlank(snsDTO.getDouban())) {
+          external.setDouban(snsDTO.getDouban());
+      }
 
-		if (StringUtils.isNotBlank(snsDTO.getRenren())) {
-			external.setRenren(snsDTO.getRenren());
-		}
+      userDAO.updateProperty("profile.alias", userAlias, "external", external);
 
-		if (StringUtils.isNotBlank(snsDTO.getDouban())) {
-			external.setDouban(snsDTO.getDouban());
-		}
+      return user;
 
-		userDAO.updateProperty("profile.alias", userAlias, "external", external);
-
-		return user;
-
-	}
+  }
 }
