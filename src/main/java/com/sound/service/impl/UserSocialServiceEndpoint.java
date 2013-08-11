@@ -182,46 +182,40 @@ public class UserSocialServiceEndpoint {
   }
 
   @POST
-	@Path("/recommand/newuser")
-	public Response getRecommandedUsersByTags(
-			@NotNull @FormParam("tags") List<String> tags,
-			@NotNull @FormParam("pageNum") Integer pageNum,
-			@NotNull @FormParam("pageSize") Integer pageSize) {
-		List<User> users = new ArrayList<User>();
-		try {
-			users.addAll(userSocialService.recommandUsersByTags(tags, pageNum, pageSize));
-		} catch (UserException e) {
-			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-					.entity(e.getMessage()).build();
-		} catch (SoundException e) {
-			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-					.entity(e.getMessage()).build();
-		}
-		return Response.status(Status.OK).entity(users).build();
-	}
+  @Path("/recommand/newuser")
+  public Response getRecommandedUsersByTags(@NotNull @FormParam("tags") List<String> tags,
+      @NotNull @FormParam("pageNum") Integer pageNum,
+      @NotNull @FormParam("pageSize") Integer pageSize) {
+    List<User> users = new ArrayList<User>();
+    try {
+      users.addAll(userSocialService.recommandUsersByTags(tags, pageNum, pageSize));
+    } catch (UserException e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    } catch (SoundException e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    }
+    return Response.status(Status.OK).entity(users).build();
+  }
 
-	@POST
-	@Path("/recommand/user")
-	public Response getRecommandedUsersForUser(
-			@NotNull @FormParam("userAlias") String userAlias,
-			@NotNull @FormParam("pageNum") Integer pageNum,
-			@NotNull @FormParam("pageSize") Integer pageSize) {
-		List<User> users = new ArrayList<User>();
-		try {
-			users.addAll(userSocialService.recommandUsersForUser(userAlias, pageNum, pageSize));
-		} catch (UserException e) {
-			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-					.entity(e.getMessage()).build();
-		} catch (SoundException e) {
-			logger.error(e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-					.entity(e.getMessage()).build();
-		}
-		return Response.status(Status.OK).entity(users).build();
-	}
+  @POST
+  @Path("/recommand/user")
+  public Response getRecommandedUsersForUser(@NotNull @FormParam("userAlias") String userAlias,
+      @NotNull @FormParam("pageNum") Integer pageNum,
+      @NotNull @FormParam("pageSize") Integer pageSize) {
+    List<User> users = new ArrayList<User>();
+    try {
+      users.addAll(userSocialService.recommandUsersForUser(userAlias, pageNum, pageSize));
+    } catch (UserException e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    } catch (SoundException e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    }
+    return Response.status(Status.OK).entity(users).build();
+  }
 
   @GET
   @Path("/followed/{userAlias}/{pageSize}/{pageNum}")

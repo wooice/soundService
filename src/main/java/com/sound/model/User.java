@@ -133,143 +133,138 @@ public class User extends BaseModel {
   }
 
   @Entity
-	public static class UserProfile
-	{
-		private String avatorUrl;
-		private String alias;
-		private String password;
-		private String firstName;
-		private String lastName;
-		private String city;
-		private String country;
-		private String description;
-		private int age;
-		private boolean gender;
-		private boolean hasAvatar = false;
-		private List<Integer> occupations;
-		
-		public List<UserOccupationType> getOccupations() {
-			return UserOccupationType.getTypesByIds(occupations);
-		}
+  public static class UserProfile {
+    private String avatorUrl;
+    private String alias;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private String city;
+    private String country;
+    private String description;
+    private int age;
+    private boolean gender;
+    private boolean hasAvatar = false;
+    private List<Integer> occupations;
 
-		public void setOccupations(List<Integer> occupations) {
-			this.occupations = occupations;
-		}
+    public List<UserOccupationType> getOccupations() {
+      return UserOccupationType.getTypesByIds(occupations);
+    }
 
-		public String getAvatorUrl() {
-			return avatorUrl;
-		}
+    public void setOccupations(List<Integer> occupations) {
+      this.occupations = occupations;
+    }
 
-		public void setAvatorUrl(String avatorUrl) {
-			this.avatorUrl = avatorUrl;
-		}
+    public String getAvatorUrl() {
+      return avatorUrl;
+    }
 
-		@JsonIgnore
-		public String getPassword() {
-			return password;
-		}
+    public void setAvatorUrl(String avatorUrl) {
+      this.avatorUrl = avatorUrl;
+    }
 
-		public void setPassword(String password) {
-			this.password = password;
-		}
+    @JsonIgnore
+    public String getPassword() {
+      return password;
+    }
 
-		public String getAlias() {
-			return alias;
-		}
+    public void setPassword(String password) {
+      this.password = password;
+    }
 
-		public void setAlias(String alias) {
-			this.alias = alias;
-		}
+    public String getAlias() {
+      return alias;
+    }
 
-		public String getFirstName() {
-			return firstName;
-		}
+    public void setAlias(String alias) {
+      this.alias = alias;
+    }
 
-		public void setFirstName(String firstName) {
-			this.firstName = firstName;
-		}
+    public String getFirstName() {
+      return firstName;
+    }
 
-		public String getLastName() {
-			return lastName;
-		}
+    public void setFirstName(String firstName) {
+      this.firstName = firstName;
+    }
 
-		public void setLastName(String lastName) {
-			this.lastName = lastName;
-		}
+    public String getLastName() {
+      return lastName;
+    }
 
-		public String getCity() {
-			return city;
-		}
+    public void setLastName(String lastName) {
+      this.lastName = lastName;
+    }
 
-		public void setCity(String city) {
-			this.city = city;
-		}
+    public String getCity() {
+      return city;
+    }
 
-		public String getCountry() {
-			return country;
-		}
+    public void setCity(String city) {
+      this.city = city;
+    }
 
-		public void setCountry(String country) {
-			this.country = country;
-		}
-		public int getAge() {
-			return age;
-		}
+    public String getCountry() {
+      return country;
+    }
 
-		public String getDescription() {
-			return description;
-		}
+    public void setCountry(String country) {
+      this.country = country;
+    }
 
-		public void setDescription(String description) {
-			this.description = description;
-		}
+    public int getAge() {
+      return age;
+    }
 
-		public void setAge(int age) {
-			this.age = age;
-		}
+    public String getDescription() {
+      return description;
+    }
 
-		public String getGender() {
-			return GenderEnum.getGenderName(gender);
-		}
+    public void setDescription(String description) {
+      this.description = description;
+    }
 
-		public void setGender(String gender) {
-			this.gender = GenderEnum.getGenderValue(gender);
-		}
-		
-		public boolean hasAvatar() {
-			return hasAvatar;
-		}
+    public void setAge(int age) {
+      this.age = age;
+    }
 
-		public void setHasAvatar(boolean hasAvatar) {
-			this.hasAvatar = hasAvatar;
-		}
+    public String getGender() {
+      return GenderEnum.getGenderName(gender);
+    }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((alias == null) ? 0 : alias.hashCode());
-			return result;
-		}
+    public void setGender(String gender) {
+      this.gender = GenderEnum.getGenderValue(gender);
+    }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			UserProfile other = (UserProfile) obj;
-			if (alias == null) {
-				if (other.alias != null)
-					return false;
-			} else if (!alias.equals(other.alias))
-				return false;
-			return true;
-		}
-		
-	}
+    public boolean hasAvatar() {
+      return hasAvatar;
+    }
+
+    public void setHasAvatar(boolean hasAvatar) {
+      this.hasAvatar = hasAvatar;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
+      UserProfile other = (UserProfile) obj;
+      if (alias == null) {
+        if (other.alias != null) return false;
+      } else if (!alias.equals(other.alias)) return false;
+      return true;
+    }
+
+  }
 
   @Entity
   public static class UserSocial {
@@ -316,54 +311,53 @@ public class User extends BaseModel {
   }
 
   @Entity
-  public static class UserExternal
-	{
-		private String website;
-		private String sina;
-		private String qq;
-		private String renren;
-		private String douban;
+  public static class UserExternal {
+    private String website;
+    private String sina;
+    private String qq;
+    private String renren;
+    private String douban;
 
-		public String getWebsite() {
-			return website;
-		}
+    public String getWebsite() {
+      return website;
+    }
 
-		public void setWebsite(String website) {
-			this.website = website;
-		}
+    public void setWebsite(String website) {
+      this.website = website;
+    }
 
-		public String getSina() {
-			return sina;
-		}
+    public String getSina() {
+      return sina;
+    }
 
-		public void setSina(String sina) {
-			this.sina = sina;
-		}
+    public void setSina(String sina) {
+      this.sina = sina;
+    }
 
-		public String getQq() {
-			return qq;
-		}
+    public String getQq() {
+      return qq;
+    }
 
-		public void setQq(String qq) {
-			this.qq = qq;
-		}
+    public void setQq(String qq) {
+      this.qq = qq;
+    }
 
-		public String getRenren() {
-			return renren;
-		}
+    public String getRenren() {
+      return renren;
+    }
 
-		public void setRenren(String renren) {
-			this.renren = renren;
-		}
+    public void setRenren(String renren) {
+      this.renren = renren;
+    }
 
-		public String getDouban() {
-			return douban;
-		}
+    public String getDouban() {
+      return douban;
+    }
 
-		public void setDouban(String douban) {
-			this.douban = douban;
-		}
-	}
+    public void setDouban(String douban) {
+      this.douban = douban;
+    }
+  }
 
 
   public static class UserEmail {
