@@ -246,7 +246,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
     // fetch tag : sounds map
     for (String label : tagLabels) {
-      tagSoundMap.put(tagService.getOrCreate(label, null), tagService.getSoundsWithTag(label));
+      tagSoundMap.put(tagService.getOrCreate(label, null, null), tagService.getSoundsWithTag(label));
     }
 
     for (Tag tag : tagSoundMap.keySet()) {
