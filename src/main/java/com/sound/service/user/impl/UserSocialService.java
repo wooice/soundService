@@ -325,7 +325,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     // fetch tag : sounds map
     for (String label : tagLabels) {
-      tagSoundMap.put(tagService.getOrCreate(label, null), tagService.getSoundsWithTag(label));
+      tagSoundMap.put(tagService.getOrCreate(label, null, null), tagService.getSoundsWithTag(label));
     }
 
     // get user : number of target tags

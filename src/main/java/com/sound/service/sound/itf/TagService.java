@@ -8,7 +8,7 @@ import com.sound.model.Tag;
 
 public interface TagService {
 	
-	public Tag getOrCreate(String label, String userAlias) throws SoundException;
+	public Tag getOrCreate(String label, String userAlias, String tagCategory) throws SoundException;
 
 	public List<Tag> listTagsContains(String pattern) throws SoundException;
 

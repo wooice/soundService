@@ -10,9 +10,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.sound.dao.SoundDAO;
+import com.sound.dao.TagCategoryDAO;
 import com.sound.dao.TagDAO;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
+import com.sound.model.Tag.TagCategory;
 import com.sound.service.user.itf.UserService;
 
 @Service
@@ -23,21 +25,26 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 
 	@Autowired
 	TagDAO tagDAO;
+	
+	@Autowired
+	TagCategoryDAO tagCategoryDAO;
 
 	@Autowired
 	UserService userService;
 
 	@Override
-	public Tag getOrCreate(String label, String userAlias) {
+	public Tag getOrCreate(String label, String userAlias, String tagCategory) {
 		Tag tag = tagDAO.findOne("label", label);
 
 		if (tag != null && tag.getId() != null) {
 			return tag;
 		}
 
+		TagCategory category = tagCategoryDAO.findOne("name", tagCategory);
 		tag = new Tag();
 		tag.setLabel(label);
 		tag.setCreatedUser(userService.getUserByAlias(userAlias));
+		tag.setCategory(category);
 		tag.setCreatedDate(new Date());
 		tagDAO.save(tag);
 
@@ -58,7 +65,7 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	public void attachToSound(String soundAlias, List<String> tagLabels, String userAlias) {
 		List<Tag> tags = new ArrayList<Tag>();
 		for (String label : tagLabels) {
-			tags.add(this.getOrCreate(label, userAlias));
+			tags.add(this.getOrCreate(label, userAlias, null));
 		}
 
 		Sound sound = soundDAO.findOne("profile.name", soundAlias);
@@ -71,7 +78,7 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	public void detachFromSound(String soundAlias, List<String> tagLabels, String userAlias) {
 		List<Tag> tags = new ArrayList<Tag>();
 		for (String label : tagLabels) {
-			tags.add(this.getOrCreate(label, userAlias));
+			tags.add(this.getOrCreate(label, userAlias, null));
 		}
 
 		Sound sound = soundDAO.findOne("profile.name", soundAlias);

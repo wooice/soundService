@@ -13,59 +13,116 @@ import com.github.jmkgreen.morphia.annotations.Reference;
 @Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Tag extends BaseModel {
-	@Id
-	private ObjectId id;
+  @Id
+  private ObjectId id;
 
-	private String label;
+  private boolean curated;
 
-	private Date createdDate;
+  private String label;
 
-	@Reference(lazy = true)
-	private User createdUser;
+  private Date createdDate;
 
-	@JsonIgnore
-	public ObjectId getId() {
-		return id;
-	}
+  @Reference(lazy = true)
+  private User createdUser;
 
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
+  @Reference(lazy = true)
+  private TagCategory category;
 
-	public String getLabel() {
-		return label;
-	}
+  @JsonIgnore
+  public ObjectId getId() {
+    return id;
+  }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+  public void setId(ObjectId id) {
+    this.id = id;
+  }
 
-	public Date getCreatedDate() {
-		return createdDate;
-	}
+  public boolean isCurated() {
+    return curated;
+  }
 
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
+  public void setCurated(boolean curated) {
+    this.curated = curated;
+  }
 
-	public User getCreatedUser() {
-		return createdUser;
-	}
+  public String getLabel() {
+    return label;
+  }
 
-	public void setCreatedUser(User createdUser) {
-		this.createdUser = createdUser;
-	}
-	
-	@Override
-	public int hashCode() {
-		return label.hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object o) {
-		if (o instanceof Tag) {
-			return ((Tag) o).getLabel().equals(label);
-		}
-		return false;
-	}
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
+  public Date getCreatedDate() {
+    return createdDate;
+  }
+
+  public void setCreatedDate(Date createdDate) {
+    this.createdDate = createdDate;
+  }
+
+  public User getCreatedUser() {
+    return createdUser;
+  }
+
+  public void setCreatedUser(User createdUser) {
+    this.createdUser = createdUser;
+  }
+
+  public TagCategory getCategory() {
+    return category;
+  }
+
+  public void setCategory(TagCategory category) {
+    this.category = category;
+  }
+
+  @Entity(noClassnameStored = true)
+  public static class TagCategory {
+    @Id
+    private ObjectId id;
+
+    private String name;
+
+    private Date createdTime;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public Date getCreatedTime() {
+      return createdTime;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+      this.createdTime = createdTime;
+    }
+
+    @JsonIgnore
+    public ObjectId getId() {
+      return id;
+    }
+
+    public void setId(ObjectId id) {
+      this.id = id;
+    }
+
+  }
+
+  @Override
+  public int hashCode() {
+    return label.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof Tag) {
+      return ((Tag) o).getLabel().equals(label);
+    }
+    return false;
+  }
 }
