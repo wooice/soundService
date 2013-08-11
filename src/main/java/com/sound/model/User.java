@@ -13,6 +13,7 @@ import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.sound.model.enums.GenderEnum;
+import com.sound.model.enums.UserOccupationType;
 
 @Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -138,11 +139,21 @@ public class User extends BaseModel {
     private String password;
     private String firstName;
     private String lastName;
-    private String location;
+    private String city;
+    private String country;
     private String description;
     private int age;
     private boolean gender;
     private boolean hasAvatar = false;
+    private List<Integer> occupations;
+
+    public List<UserOccupationType> getOccupations() {
+      return UserOccupationType.getTypesByIds(occupations);
+    }
+
+    public void setOccupations(List<Integer> occupations) {
+      this.occupations = occupations;
+    }
 
     public String getAvatorUrl() {
       return avatorUrl;
@@ -185,12 +196,20 @@ public class User extends BaseModel {
       this.lastName = lastName;
     }
 
-    public String getLocation() {
-      return location;
+    public String getCity() {
+      return city;
     }
 
-    public void setLocation(String location) {
-      this.location = location;
+    public void setCity(String city) {
+      this.city = city;
+    }
+
+    public String getCountry() {
+      return country;
+    }
+
+    public void setCountry(String country) {
+      this.country = country;
     }
 
     public int getAge() {
@@ -291,7 +310,54 @@ public class User extends BaseModel {
 
   }
 
-  public static class UserExternal {}
+  @Entity
+  public static class UserExternal {
+    private String website;
+    private String sina;
+    private String qq;
+    private String renren;
+    private String douban;
+
+    public String getWebsite() {
+      return website;
+    }
+
+    public void setWebsite(String website) {
+      this.website = website;
+    }
+
+    public String getSina() {
+      return sina;
+    }
+
+    public void setSina(String sina) {
+      this.sina = sina;
+    }
+
+    public String getQq() {
+      return qq;
+    }
+
+    public void setQq(String qq) {
+      this.qq = qq;
+    }
+
+    public String getRenren() {
+      return renren;
+    }
+
+    public void setRenren(String renren) {
+      this.renren = renren;
+    }
+
+    public String getDouban() {
+      return douban;
+    }
+
+    public void setDouban(String douban) {
+      this.douban = douban;
+    }
+  }
 
   public static class UserEmail {
     private String emailAddress;

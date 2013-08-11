@@ -120,4 +120,11 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		
 		return this.find(query).asList();
 	}
+
+	public List<T> findTopOnes(Integer number, String property) 
+	{
+	    Query<T> query = ds.createQuery(clazz).order(property).offset(0).limit(number);
+
+	    return this.find(query).asList();
+	}
 }

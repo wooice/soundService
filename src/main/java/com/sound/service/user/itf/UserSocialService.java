@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
-import com.sound.model.Group;
 import com.sound.model.User;
 
 public interface UserSocialService 
@@ -29,7 +28,7 @@ public interface UserSocialService
 	
 	public List<User> getFollowingUsers(String fromUserAlias, Integer pageNum, Integer pageSize) throws UserException;
 
-	public List<User> recommandUsersByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws UserException,SoundException;
-
-	public List<Group> recommandGroupsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws UserException, SoundException;
+	public List<User> recommandUsersForUser(String userAlias, Integer pageNum, Integer pageSize) throws UserException, SoundException;
+	
+	public List<User> recommandUsersByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws UserException, SoundException;
 }

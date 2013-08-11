@@ -1,9 +1,12 @@
 package com.sound.service.sound.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -239,33 +242,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   @Override
-  public List<Sound> recommandSoundsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize)
-      throws SoundException {
-    Map<Tag, List<Sound>> tagSoundMap = new HashMap<Tag, List<Sound>>();
-    Map<Sound, Long> soundTagNumMap = new HashMap<Sound, Long>();
-
-    // fetch tag : sounds map
-    for (String label : tagLabels) {
-      tagSoundMap.put(tagService.getOrCreate(label, null, null), tagService.getSoundsWithTag(label));
-    }
-
-    for (Tag tag : tagSoundMap.keySet()) {
-      List<Sound> soundsOfTag = tagSoundMap.get(tag);
-      for (Sound soundOfTag : soundsOfTag) {
-        if (soundTagNumMap.containsKey(soundOfTag)) {
-          soundTagNumMap.put(soundOfTag, soundTagNumMap.get(soundOfTag) + 1);
-        } else {
-          soundTagNumMap.put(soundOfTag, (long) 1);
-        }
-      }
-    }
-
-    List<Sound> allResult =
-        SocialUtils.toSeqList(SocialUtils.sortMapByValue(soundTagNumMap, false));
-    return SocialUtils.sliceList(allResult, pageNum, pageSize);
-  }
-
-  @Override
   public List<SoundComment> getComments(String soundAlias, Integer pageNum, Integer commentsPerPage)
       throws SoundException {
     Sound sound = soundDAO.findOne("profile.name", soundAlias);
@@ -295,4 +271,86 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
     return comments;
   }
+
+  public List<Sound> recommandSoundsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize)
+      throws SoundException {
+    Set<Tag> tags = new HashSet<Tag>();
+
+    for (String label : tagLabels) {
+      tags.add(tagService.getOrCreate(label, null, null));
+    }
+
+    List<Sound> byTags = recommandSoundsByTags(tags);
+
+    List<Sound> toReturn = SocialUtils.sliceList(byTags, pageNum, pageSize);
+
+    if (toReturn.size() < pageNum) {
+      toReturn.addAll(recommandRandomSounds(pageNum - toReturn.size()));
+    }
+
+    return toReturn;
+  }
+
+  private List<Sound> recommandSoundsByTags(Set<Tag> tags) throws SoundException {
+
+    Map<Tag, List<Sound>> tagSoundMap = new HashMap<Tag, List<Sound>>();
+    Map<Sound, Long> soundTagNumMap = new HashMap<Sound, Long>();
+
+    // fetch tag : sounds map
+    for (Tag tag : tags) {
+      tagSoundMap.put(tag, tagService.getSoundsWithTag(tag.getLabel()));
+    }
+
+    for (Tag tag : tagSoundMap.keySet()) {
+      List<Sound> soundsOfTag = tagSoundMap.get(tag);
+      for (Sound soundOfTag : soundsOfTag) {
+        if (soundTagNumMap.containsKey(soundOfTag)) {
+          soundTagNumMap.put(soundOfTag, soundTagNumMap.get(soundOfTag) + 1);
+        } else {
+          soundTagNumMap.put(soundOfTag, (long) 1);
+        }
+      }
+    }
+
+    List<Sound> allResult =
+        SocialUtils.toSeqList(SocialUtils.sortMapByValue(soundTagNumMap, false));
+    return allResult;
+  }
+
+  @Override
+  public List<Sound> getLikedSoundsByUser(String userAlias) throws SoundException {
+    List<Sound> sounds = new ArrayList<Sound>();
+    List<SoundLike> likes = soundLikeDAO.find("user.profile.alias", userAlias);
+    if (likes != null) {
+      for (SoundLike like : likes) {
+        sounds.add(like.getSound());
+      }
+    }
+    return sounds;
+  }
+
+  @Override
+  public List<Sound> recommandSoundsForUser(String userAlias, Integer pageNum, Integer pageSize)
+      throws SoundException, UserException {
+    List<Sound> liked = getLikedSoundsByUser(userAlias);
+    Set<Tag> tags = new HashSet<Tag>();
+    for (Sound sound : liked) {
+      tags.addAll(sound.getTags());
+    }
+
+    List<Sound> byTags = recommandSoundsByTags(tags);
+
+    List<Sound> toReturn = SocialUtils.sliceList(byTags, pageNum, pageSize);
+
+    if (toReturn.size() < pageNum) {
+      toReturn.addAll(recommandRandomSounds(pageNum - toReturn.size()));
+    }
+
+    return toReturn;
+  }
+
+  private List<Sound> recommandRandomSounds(int number) {
+    return soundDAO.findTopOnes(number, "soundSocial.likesCount");
+  }
+
 }
