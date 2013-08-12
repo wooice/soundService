@@ -9,74 +9,73 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class SocialUtils {
-	
-	public static final double DEFAULT_SOCIAL_POWER = 0.4d;
 
-	public static <T> List<T> combineLogicAndSocial(Map<T, Integer> logicSeq,
-			Map<T, Integer> socialSeq, double socialPower) {
+  public static final double DEFAULT_SOCIAL_POWER = 0.4d;
+  public static final long FIRST_CLASS_WEIGHT = 1000;
+  public static final int FOLLOW_MIN_BORDER = 3;
 
-		Map<T, Double> tmp = new HashMap<T, Double>();
+  public static <T> List<T> combineLogicAndSocial(Map<T, Integer> logicSeq,
+      Map<T, Integer> socialSeq, double socialPower) {
 
-		for (T t : logicSeq.keySet()) {
-			tmp.put(t, logicSeq.get(t) * (1 - socialPower) + socialSeq.get(t)
-					* socialPower);
-		}
+    Map<T, Double> tmp = new HashMap<T, Double>();
 
-		return toSeqList(sortMapByValue(tmp, false));
-	}
+    for (T t : logicSeq.keySet()) {
+      tmp.put(t, logicSeq.get(t) * (1 - socialPower) + socialSeq.get(t) * socialPower);
+    }
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T, K extends Comparable> List<Entry<T, K>> sortMapByValue(
-			Map<T, K> inputMap, final boolean asc) {
-		List<Entry<T, K>> toSort = new ArrayList<Entry<T, K>>(
-				inputMap.entrySet());
+    return toSeqList(sortMapByValue(tmp, false));
+  }
 
-		Collections.sort(toSort, new Comparator<Entry<T, K>>() {
-			public int compare(Entry<T, K> o1, Entry<T, K> o2) {
-				if (asc)
-					return o1.getValue().compareTo(o2.getValue());
-				else
-					return -o1.getValue().compareTo(o2.getValue());
-			}
-		});
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static <T, K extends Comparable> List<Entry<T, K>> sortMapByValue(Map<T, K> inputMap,
+      final boolean asc) {
+    List<Entry<T, K>> toSort = new ArrayList<Entry<T, K>>(inputMap.entrySet());
 
-		return toSort;
-	}
+    Collections.sort(toSort, new Comparator<Entry<T, K>>() {
+      public int compare(Entry<T, K> o1, Entry<T, K> o2) {
+        if (asc)
+          return o1.getValue().compareTo(o2.getValue());
+        else
+          return -o1.getValue().compareTo(o2.getValue());
+      }
+    });
 
-	public static <T> Map<T, Integer> toSeqMap(List<Entry<T, Long>> sortMapByValue) {
+    return toSort;
+  }
 
-		Map<T, Integer> result = new HashMap<T, Integer>();
+  public static <T> Map<T, Integer> toSeqMap(List<Entry<T, Long>> sortMapByValue) {
 
-		for (int i = 0; i < sortMapByValue.size(); i++) {
-			result.put(sortMapByValue.get(i).getKey(), i);
-		}
-		return result;
-	}
+    Map<T, Integer> result = new HashMap<T, Integer>();
 
-	public static <T, K> List<T> toSeqList(List<Entry<T, K>> sortMapByValue) {
+    for (int i = 0; i < sortMapByValue.size(); i++) {
+      result.put(sortMapByValue.get(i).getKey(), i);
+    }
+    return result;
+  }
 
-		List<T> result = new ArrayList<T>();
+  public static <T, K> List<T> toSeqList(List<Entry<T, K>> sortMapByValue) {
 
-		for (int i = 0; i < sortMapByValue.size(); i++) {
-			result.add(sortMapByValue.get(i).getKey());
-		}
-		return result;
-	}
+    List<T> result = new ArrayList<T>();
 
-	public static <T> List<T> sliceList(List<T> allResult, Integer pageNum,
-			Integer pageSize) {
-		int offset = (pageNum - 1) *pageSize;
-		int resultSize = allResult.size();
-		if (resultSize > offset) {
-			int left = resultSize - offset;
-			if (left > pageSize) {
-				return allResult.subList(offset, offset + pageNum - 1);
-			}else {
-				return allResult.subList(offset, resultSize - 1);
-			}
-		}else {
-			return new ArrayList<T>();
-		}
-	}
+    for (int i = 0; i < sortMapByValue.size(); i++) {
+      result.add(sortMapByValue.get(i).getKey());
+    }
+    return result;
+  }
+
+  public static <T> List<T> sliceList(List<T> allResult, Integer pageNum, Integer pageSize) {
+    int offset = (pageNum - 1) * pageSize;
+    int resultSize = allResult.size();
+    if (resultSize > offset) {
+      int left = resultSize - offset;
+      if (left > pageSize) {
+        return allResult.subList(offset, offset + pageNum - 1);
+      } else {
+        return allResult.subList(offset, resultSize - 1);
+      }
+    } else {
+      return new ArrayList<T>();
+    }
+  }
 
 }

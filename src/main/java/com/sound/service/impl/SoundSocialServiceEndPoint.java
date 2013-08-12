@@ -54,7 +54,6 @@ public class SoundSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to record play sound " + soundAlias)).build();
     }
-
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
@@ -73,7 +72,6 @@ public class SoundSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to like sound " + soundAlias)).build();
     }
-    
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("liked", liked);
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
@@ -94,7 +92,6 @@ public class SoundSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to unlike sound " + soundAlias)).build();
     }
-    
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("liked", liked);
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
@@ -115,7 +112,6 @@ public class SoundSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to repost sound " + soundAlias)).build();
     }
-    
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("reposted", reposted);
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
@@ -136,7 +132,6 @@ public class SoundSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to unlike sound " + soundAlias)).build();
     }
-    
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("reposted", reposted);
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
@@ -161,7 +156,6 @@ public class SoundSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to comment on sound " + soundAlias)).build();
     }
-    
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
     return Response.status(Status.OK).entity(String.valueOf(result)).build();
@@ -181,7 +175,6 @@ public class SoundSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to comment with id " + commentId)).build();
     }
-    
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
     return Response.status(Status.OK).entity(String.valueOf(result)).build();
