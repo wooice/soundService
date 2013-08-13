@@ -77,8 +77,7 @@ public class StorageServiceEndpoint {
   public Response upload(@FormDataParam("file") InputStream uploadedInputStream,
       @FormDataParam("file") FormDataContentDisposition fileDetail) {
     try {
-      remoteStorageService.upload(fileDetail.getFileName(), uploadedInputStream,
-          FileType.getFileType(fileDetail.getType()));
+      remoteStorageService.upload(fileDetail.getFileName(), uploadedInputStream, FileType.SOUND);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
