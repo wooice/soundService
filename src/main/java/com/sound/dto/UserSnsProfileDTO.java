@@ -1,4 +1,6 @@
-package com.sound.model;
+package com.sound.dto;
+
+import com.sound.model.BaseModel;
 
 public class UserSnsProfileDTO extends BaseModel {
   private String website;
