@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
-import com.sound.model.Group;
 import com.sound.model.User;
 import com.sound.service.user.itf.UserSocialService;
 import com.sound.util.JsonHandler;
@@ -201,13 +200,13 @@ public class UserSocialServiceEndpoint {
   }
 
   @POST
-  @Path("/recommand/groups")
-  public Response getRecommandedGroupsByTags(@NotNull @FormParam("tags") List<String> tags,
+  @Path("/recommand/user")
+  public Response getRecommandedUsersForUser(@NotNull @FormParam("userAlias") String userAlias,
       @NotNull @FormParam("pageNum") Integer pageNum,
       @NotNull @FormParam("pageSize") Integer pageSize) {
-    List<Group> groups = new ArrayList<Group>();
+    List<User> users = new ArrayList<User>();
     try {
-      groups.addAll(userSocialService.recommandGroupsByTags(tags, pageNum, pageSize));
+      users.addAll(userSocialService.recommandUsersForUser(userAlias, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -215,7 +214,7 @@ public class UserSocialServiceEndpoint {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     }
-    return Response.status(Status.OK).entity(groups).build();
+    return Response.status(Status.OK).entity(users).build();
   }
 
   @GET

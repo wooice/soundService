@@ -26,5 +26,10 @@ public interface SoundSocialService {
 
 	public List<Sound> recommandSoundsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize) throws SoundException;
 
+	public List<Sound> getLikedSoundsByUser(String userAlias) throws SoundException;
+
+	public List<Sound> recommandSoundsForUser(String userAlias, Integer pageNum, Integer pageSize) throws SoundException, UserException;
+
 	public List<SoundComment> getComments(String soundAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
+
 }
