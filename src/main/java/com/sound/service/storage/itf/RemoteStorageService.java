@@ -7,6 +7,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 
 import com.sound.exception.RemoteStorageException;
 import com.sound.model.enums.FileType;
+import com.sound.model.file.SoundLocal;
 
 public interface RemoteStorageService {
 
@@ -15,8 +16,7 @@ public interface RemoteStorageService {
 
   public InputStream downloadToMemory(String fileName, FileType type) throws RemoteStorageException;
 
-  public void upload(String fileName, InputStream content, FileType type)
-      throws RemoteStorageException;
+  public void upload(SoundLocal sound, FileType type) throws RemoteStorageException;
 
   public void delete(String fileName, FileType type) throws RemoteStorageException;
 

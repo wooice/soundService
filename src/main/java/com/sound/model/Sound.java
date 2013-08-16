@@ -21,422 +21,491 @@ import com.sound.model.enums.SoundType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sound extends BaseModel {
 
-	@Id
-	private ObjectId id;
-
-	@Embedded
-	private SoundProfile profile;
-	
-	@Embedded
-	private SoundSocial soundSocial;
+  @Id
+  private ObjectId id;
 
-	@Reference
-	private SoundData soundData;
+  @Embedded
+  private SoundProfile profile;
 
-	@Reference(lazy=true)
-	private List<Sound> innerSounds;
-
-	@Reference(lazy = true)
-	private List<Sound> sets;
-	
-	@Reference(lazy = true)
-	private List<Tag> tags;
-	
-	@NotSaved
-	@Embedded
-	private UserPrefer userPrefer;
+  @Embedded
+  private SoundSocial soundSocial;
 
-	@JsonIgnore
-	public ObjectId getId() {
-		return id;
-	}
+  @Reference
+  private SoundData soundData;
 
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
+  @Reference(lazy = true)
+  private List<Sound> innerSounds;
 
-	public SoundProfile getProfile() {
-		return profile;
-	}
+  @Reference(lazy = true)
+  private List<Sound> sets;
 
-	public void setProfile(SoundProfile profile) {
-		this.profile = profile;
-	}
+  @Reference(lazy = true)
+  private List<Tag> tags;
 
-	public SoundData getSoundData() {
-		return soundData;
-	}
+  @NotSaved
+  @Embedded
+  private UserPrefer userPrefer;
 
-	public void setSoundData(SoundData soundData) {
-		this.soundData = soundData;
-	}
+  @JsonIgnore
+  public ObjectId getId() {
+    return id;
+  }
 
-	public SoundSocial getSoundSocial() {
-		return soundSocial;
-	}
+  public void setId(ObjectId id) {
+    this.id = id;
+  }
 
-	public void setSoundSocial(SoundSocial soundSocial) {
-		this.soundSocial = soundSocial;
-	}
+  public SoundProfile getProfile() {
+    return profile;
+  }
 
-	public List<Sound> getInnerSounds() {
-		return innerSounds;
-	}
+  public void setProfile(SoundProfile profile) {
+    this.profile = profile;
+  }
 
-	public void setInnerSounds(List<Sound> innerSounds) {
-		this.innerSounds = innerSounds;
-	}
+  public SoundData getSoundData() {
+    return soundData;
+  }
 
-	public List<Sound> getSets() {
-		return sets;
-	}
+  public void setSoundData(SoundData soundData) {
+    this.soundData = soundData;
+  }
 
-	public void setSets(List<Sound> sets) {
-		this.sets = sets;
-	}
+  public SoundSocial getSoundSocial() {
+    return soundSocial;
+  }
 
-	public List<Tag> getTags() {
-		return tags;
-	}
+  public void setSoundSocial(SoundSocial soundSocial) {
+    this.soundSocial = soundSocial;
+  }
 
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-	}
+  public List<Sound> getInnerSounds() {
+    return innerSounds;
+  }
 
-	public void addTags(List<Tag> tags) {
-		if (this.tags == null) {
-			this.tags = new ArrayList<Tag>();
-		}
-		this.tags.addAll(tags);
-	}
+  public void setInnerSounds(List<Sound> innerSounds) {
+    this.innerSounds = innerSounds;
+  }
 
-	public UserPrefer getUserPrefer() {
-		return userPrefer;
-	}
+  public List<Sound> getSets() {
+    return sets;
+  }
 
-	public void setUserPrefer(UserPrefer userPrefer) {
-		this.userPrefer = userPrefer;
-	}
+  public void setSets(List<Sound> sets) {
+    this.sets = sets;
+  }
 
+  public List<Tag> getTags() {
+    return tags;
+  }
 
+  public void setTags(List<Tag> tags) {
+    this.tags = tags;
+  }
 
-	public static class SoundProfile {
-		@Reference(lazy = true)
-		private User owner;
+  public void addTags(List<Tag> tags) {
+    if (this.tags == null) {
+      this.tags = new ArrayList<Tag>();
+    }
+    for (Tag newTag : tags) {
+      if (!this.tags.contains(newTag)) {
+        this.tags.addAll(tags);
+      }
+    }
+  }
 
-		@Embedded
-		private SoundPoster poster;
+  public UserPrefer getUserPrefer() {
+    return userPrefer;
+  }
 
-		private String name;
+  public void setUserPrefer(UserPrefer userPrefer) {
+    this.userPrefer = userPrefer;
+  }
 
-		private String description;
 
-		/**
-		 * published, private, deleted
-		 */
-		private int status;
 
-		/**
-		 * sound, set
-		 */
-		private int type;
+  public static class SoundProfile {
+    @Reference(lazy = true)
+    private User owner;
 
-		private Date createdTime;
+    @Embedded
+    private SoundPoster poster;
 
-		private Date modifiedTime;
+    private String name;
 
-		private boolean downloadable;
+    private String alias;
 
-		public User getOwner() {
-			return owner;
-		}
+    private String description;
 
-		public void setOwner(User owner) {
-			this.owner = owner;
-		}
+    /**
+     * published, private, deleted
+     */
+    private int status;
 
-		public String getName() {
-			return name;
-		}
+    /**
+     * sound, set
+     */
+    private int type;
 
-		public void setName(String name) {
-			this.name = name;
-		}
+    private Date createdTime;
 
-		public String getStatus() {
-			return SoundState.getStateName(status);
-		}
-
-		public void setStatus(String status) {
-			this.status = SoundState.getStateId(status);
-		}
-
-		public String getType() {
-			return SoundType.getTypeName(this.type);
-		}
-
-		public void setType(String type) {
-			this.type = SoundType.getTypeId(type);
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		public void setDescription(String description) {
-			this.description = description;
-		}
-
-		public Date getCreatedTime() {
-			return createdTime;
-		}
-
-		public void setCreatedTime(Date createdTime) {
-			this.createdTime = createdTime;
-		}
-
-		public Date getModifiedTime() {
-			return modifiedTime;
-		}
-
-		public void setModifiedTime(Date modifiedTime) {
-			this.modifiedTime = modifiedTime;
-		}
-
-		public SoundPoster getPoster() {
-			return poster;
-		}
-
-		public void setPoster(SoundPoster poster) {
-			this.poster = poster;
-		}
-
-		public boolean isDownloadable() {
-			return downloadable;
-		}
-
-		public void setDownloadable(boolean downloadable) {
-			this.downloadable = downloadable;
-		}
-
-		public static class SoundPoster {
-			// Id of stored poster
-			private String posterId;
-
-			private String extension;
-			
-			private String url;
-
-			public String getPosterId() {
-				return posterId;
-			}
-
-			public void setPosterId(String posterId) {
-				this.posterId = posterId;
-			}
-
-			public String getExtension() {
-				return extension;
-			}
-
-			public void setExtension(String extension) {
-				this.extension = extension;
-			}
-
-			public String getUrl() {
-				return url;
-			}
-
-			public void setUrl(String url) {
-				this.url = url;
-			}
-			
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((name == null) ? 0 : name.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			SoundProfile other = (SoundProfile) obj;
-			if (name == null) {
-				if (other.name != null)
-					return false;
-			} else if (!name.equals(other.name))
-				return false;
-			return true;
-		}
-		
-	}
-
-	@Entity(noClassnameStored = true)
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class SoundData {
-		@Id
-		private ObjectId id;
-
-		// meide route in resource server.
-		private String objectId;
-
-		private int duration;
-
-		private String url;
-		
-		@Serialized
-		private float[][] wave;
-
-		public String getObjectId() {
-			return objectId;
-		}
-
-		public void setObjectId(String objectId) {
-			this.objectId = objectId;
-		}
-
-		public int getDuration() {
-			return duration;
-		}
-
-		public void setDuration(int duration) {
-			this.duration = duration;
-		}
-		
-		public String getUrl() {
-			return url;
-		}
-
-		public void setUrl(String url) {
-			this.url = url;
-		}
-
-		public float[][] getWave() {
-			return wave;
-		}
-
-		public void setWave(float[][] wave) {
-			this.wave = wave;
-		}
-
-		@JsonIgnore
-		public ObjectId getId() {
-			return id;
-		}
-
-		public void setId(ObjectId id) {
-			this.id = id;
-		}
-
-	}
-	
-	public static class SoundSocial
-	{
-		private Integer playedCount;
-		
-		private Integer likesCount;
-		
-		private Integer reportsCount;
-		
-		private Integer commentsCount;
-
-		public SoundSocial()
-		{
-			playedCount = 0;
-			likesCount = 0;
-			reportsCount = 0;
-			commentsCount = 0;
-		}
-		
-		public Integer getPlayedCount() {
-			return playedCount;
-		}
-
-		public void setPlayedCount(Integer playedCount) {
-			this.playedCount = playedCount;
-		}
-
-		public Integer getLikesCount() {
-			return likesCount;
-		}
-
-		public void setLikesCount(Integer likesCount) {
-			this.likesCount = likesCount;
-		}
-
-		public Integer getReportsCount() {
-			return reportsCount;
-		}
-
-		public void setReportsCount(Integer reportsCount) {
-			this.reportsCount = reportsCount;
-		}
-
-		public Integer getCommentsCount() {
-			return commentsCount;
-		}
-
-		public void setCommentsCount(Integer commentsCount) {
-			this.commentsCount = commentsCount;
-		}
-		
-	}
-
-	public static class UserPrefer{
-		
-		private Integer like;
-		
-		private Integer repost;
-
-		public Integer getLike() {
-			return like;
-		}
-
-		public void setLike(Integer like) {
-			this.like = like;
-		}
-
-		public Integer getRepost() {
-			return repost;
-		}
-
-		public void setRepost(Integer repost) {
-			this.repost = repost;
-		}
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((profile == null) ? 0 : profile.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Sound other = (Sound) obj;
-		if (profile == null) {
-			if (other.profile != null)
-				return false;
-		} else if (!profile.equals(other.profile))
-			return false;
-		return true;
-	}
-	
+    private Date modifiedTime;
+
+    private boolean downloadable;
+
+    public User getOwner() {
+      return owner;
+    }
+
+    public void setOwner(User owner) {
+      this.owner = owner;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+
+    public String getAlias() {
+      return alias;
+    }
+
+    public void setAlias(String alias) {
+      this.alias = alias;
+    }
+
+    public String getStatus() {
+      return SoundState.getStateName(status);
+    }
+
+    public void setStatus(String status) {
+      this.status = SoundState.getStateId(status);
+    }
+
+    public String getType() {
+      return SoundType.getTypeName(this.type);
+    }
+
+    public void setType(String type) {
+      this.type = SoundType.getTypeId(type);
+    }
+
+    public String getDescription() {
+      return description;
+    }
+
+    public void setDescription(String description) {
+      this.description = description;
+    }
+
+    public Date getCreatedTime() {
+      return createdTime;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+      this.createdTime = createdTime;
+    }
+
+    public Date getModifiedTime() {
+      return modifiedTime;
+    }
+
+    public void setModifiedTime(Date modifiedTime) {
+      this.modifiedTime = modifiedTime;
+    }
+
+    public SoundPoster getPoster() {
+      return poster;
+    }
+
+    public void setPoster(SoundPoster poster) {
+      this.poster = poster;
+    }
+
+    public boolean isDownloadable() {
+      return downloadable;
+    }
+
+    public void setDownloadable(boolean downloadable) {
+      this.downloadable = downloadable;
+    }
+
+    public static class SoundPoster {
+      // Id of stored poster
+      private String posterId;
+
+      private String extension;
+
+      private String url;
+
+      public String getPosterId() {
+        return posterId;
+      }
+
+      public void setPosterId(String posterId) {
+        this.posterId = posterId;
+      }
+
+      public String getExtension() {
+        return extension;
+      }
+
+      public void setExtension(String extension) {
+        this.extension = extension;
+      }
+
+      public String getUrl() {
+        return url;
+      }
+
+      public void setUrl(String url) {
+        this.url = url;
+      }
+
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((name == null) ? 0 : name.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
+      SoundProfile other = (SoundProfile) obj;
+      if (name == null) {
+        if (other.name != null) return false;
+      } else if (!name.equals(other.name)) return false;
+      return true;
+    }
+
+  }
+
+  @Entity(noClassnameStored = true)
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static class SoundData {
+    @Id
+    private ObjectId id;
+
+    @Reference(lazy = true)
+    private User owner;
+
+    private String originName;
+
+    // meide route in resource server.
+    private String objectId;
+
+    private Long duration;
+
+    private String url;
+
+    @Serialized
+    private float[][] wave;
+
+    public String getObjectId() {
+      return objectId;
+    }
+
+    public void setObjectId(String objectId) {
+      this.objectId = objectId;
+    }
+
+    public User getOwner() {
+      return owner;
+    }
+
+    public void setOwner(User owner) {
+      this.owner = owner;
+    }
+
+    public String getOriginName() {
+      return originName;
+    }
+
+    public void setOriginName(String originName) {
+      this.originName = originName;
+    }
+
+    public Long getDuration() {
+      return duration;
+    }
+
+    public void setDuration(Long duration) {
+      this.duration = duration;
+    }
+
+    public String getUrl() {
+      return url;
+    }
+
+    public void setUrl(String url) {
+      this.url = url;
+    }
+
+    public float[][] getWave() {
+      return wave;
+    }
+
+    public void setWave(float[][] wave) {
+      this.wave = wave;
+    }
+
+    @JsonIgnore
+    public ObjectId getId() {
+      return id;
+    }
+
+    public void setId(ObjectId id) {
+      this.id = id;
+    }
+
+  }
+
+  public static class SoundSocial {
+    private Integer playedCount;
+
+    private Integer likesCount;
+
+    private Integer reportsCount;
+
+    private Integer commentsCount;
+
+    public SoundSocial() {
+      playedCount = 0;
+      likesCount = 0;
+      reportsCount = 0;
+      commentsCount = 0;
+    }
+
+    public Integer getPlayedCount() {
+      return playedCount;
+    }
+
+    public void setPlayedCount(Integer playedCount) {
+      this.playedCount = playedCount;
+    }
+
+    public Integer getLikesCount() {
+      return likesCount;
+    }
+
+    public void setLikesCount(Integer likesCount) {
+      this.likesCount = likesCount;
+    }
+
+    public Integer getReportsCount() {
+      return reportsCount;
+    }
+
+    public void setReportsCount(Integer reportsCount) {
+      this.reportsCount = reportsCount;
+    }
+
+    public Integer getCommentsCount() {
+      return commentsCount;
+    }
+
+    public void setCommentsCount(Integer commentsCount) {
+      this.commentsCount = commentsCount;
+    }
+
+  }
+
+  public static class UserPrefer {
+
+    private Integer like;
+
+    private Integer repost;
+
+    public Integer getLike() {
+      return like;
+    }
+
+    public void setLike(Integer like) {
+      this.like = like;
+    }
+
+    public Integer getRepost() {
+      return repost;
+    }
+
+    public void setRepost(Integer repost) {
+      this.repost = repost;
+    }
+  }
+
+  @Entity(noClassnameStored = true)
+  public static class QueueNode {
+    @Id
+    private ObjectId id;
+
+    private String originFileName;
+
+    private String remoteId;
+
+    private String ownerAlias;
+
+    public ObjectId getId() {
+      return id;
+    }
+
+    public void setId(ObjectId id) {
+      this.id = id;
+    }
+
+    public String getOriginFileName() {
+      return originFileName;
+    }
+
+    public void setOriginFileName(String originFileName) {
+      this.originFileName = originFileName;
+    }
+
+    public String getRemoteId() {
+      return remoteId;
+    }
+
+    public void setRemoteId(String remoteId) {
+      this.remoteId = remoteId;
+    }
+
+    public String getOwnerAlias() {
+      return ownerAlias;
+    }
+
+    public void setOwnerAlias(String ownerAlias) {
+      this.ownerAlias = ownerAlias;
+    }
+
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((profile.getAlias() == null) ? 0 : profile.getAlias().hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    Sound other = (Sound) obj;
+    if (profile.getAlias() == null) {
+      if (other.profile.getAlias() != null) return false;
+    } else if (!profile.getAlias().equals(other.profile.getAlias())) return false;
+    return true;
+  }
+
 }

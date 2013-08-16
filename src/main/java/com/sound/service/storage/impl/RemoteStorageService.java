@@ -19,6 +19,7 @@ import com.aliyun.openservices.oss.model.GetObjectRequest;
 import com.aliyun.openservices.oss.model.ObjectMetadata;
 import com.sound.exception.RemoteStorageException;
 import com.sound.model.enums.FileType;
+import com.sound.model.file.SoundLocal;
 
 @Service
 @Scope("singleton")
@@ -123,17 +124,17 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
   }
 
   @Override
-  public void upload(String fileName, InputStream content, FileType type)
+  public void upload(SoundLocal sound, FileType type)
       throws RemoteStorageException {
-    if (content == null) {
+    if (sound.getSoundStream() == null) {
       throw new RemoteStorageException("Nothing to upload.");
     }
 
     try {
-      ObjectMetadata meta = generateObjectMetadata(content);
-      client.putObject(config.getString(type.getBucketKey()), fileName, content, meta);
+      ObjectMetadata meta = generateObjectMetadata(sound.getLength());
+      client.putObject(config.getString(type.getBucketKey()), sound.getFileName(), sound.getSoundStream(), meta);
     } catch (Exception e) {
-      throw new RemoteStorageException("Cannot upload file : " + fileName, e);
+      throw new RemoteStorageException("Cannot upload file : " + sound.getFileName(), e);
     }
   }
 
@@ -178,10 +179,10 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     return getObjectRequest;
   }
 
-  private ObjectMetadata generateObjectMetadata(InputStream content) throws IOException {
+  private ObjectMetadata generateObjectMetadata(Long length) throws IOException {
     ObjectMetadata meta = new ObjectMetadata();
 
-    meta.setContentLength(content.available());
+    meta.setContentLength(length);
     Date expire = new Date(new Date().getTime() + this.expires);
     meta.setExpirationTime(expire);
 

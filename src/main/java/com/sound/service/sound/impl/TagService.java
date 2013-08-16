@@ -68,10 +68,10 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 			tags.add(this.getOrCreate(label, userAlias, null));
 		}
 
-		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		Sound sound = soundDAO.findOne("profile.alias", soundAlias);
 		sound.addTags(tags);
 		
-		soundDAO.updateProperty("profile.name", soundAlias, "tags", sound.getTags());
+		soundDAO.updateProperty("profile.alias", soundAlias, "tags", sound.getTags());
 	}
 
 	@Override
@@ -81,10 +81,10 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 			tags.add(this.getOrCreate(label, userAlias, null));
 		}
 
-		Sound sound = soundDAO.findOne("profile.name", soundAlias);
+		Sound sound = soundDAO.findOne("profile.alias", soundAlias);
 		sound.getTags().removeAll(tags);
 		
-		soundDAO.updateProperty("profile.name", soundAlias, "tags", sound.getTags());
+		soundDAO.updateProperty("profile.alias", soundAlias, "tags", sound.getTags());
 		deleteOrphanTags(tags);
 	}
 
