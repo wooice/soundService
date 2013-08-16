@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.sound.dao.UserAuthDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
+import com.sound.dto.UserBasicProfileDTO;
+import com.sound.dto.UserSnsProfileDTO;
 import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserExternal;
@@ -22,8 +24,6 @@ import com.sound.model.User.UserProfile;
 import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
-import com.sound.model.UserBasicProfileDTO;
-import com.sound.model.UserSnsProfileDTO;
 import com.sound.model.enums.FileType;
 import com.sound.service.storage.itf.RemoteStorageService;
 
