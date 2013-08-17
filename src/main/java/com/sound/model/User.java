@@ -361,6 +361,8 @@ public class User extends BaseModel {
 
   public static class UserEmail {
     private String emailAddress;
+    private boolean confirmed;
+    private String confirmCode;
 
     public String getEmailAddress() {
       return emailAddress;
@@ -369,6 +371,23 @@ public class User extends BaseModel {
     public void setEmailAddress(String emailAddress) {
       this.emailAddress = emailAddress;
     }
+
+    public boolean isConfirmed() {
+      return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+      this.confirmed = confirmed;
+    }
+
+    public String getConfirmCode() {
+      return confirmCode;
+    }
+
+    public void setConfirmCode(String confirmCode) {
+      this.confirmCode = confirmCode;
+    }
+    
 
   }
 

@@ -20,4 +20,10 @@ public interface UserService {
 	public User updateUserBasicProfile(String userAlias, UserBasicProfileDTO profileDTO) throws UserException;
 
 	public User updateUserSnsProfile(String userAlias, UserSnsProfileDTO snsDTO) throws UserException;
+
+	public User addEmailAddress(String userAlias, String emailAddress) throws UserException;
+	  
+	public void sendEmailAddressConfirmation(String userAlias, String emailAddress) throws UserException;
+	  
+	public void confirmEmailAddress(String confirmCode) throws UserException;
 }

@@ -3,10 +3,15 @@ package com.sound.service.user.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -16,6 +21,7 @@ import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.UserException;
 import com.sound.model.User;
+import com.sound.model.User.UserEmail;
 import com.sound.model.User.UserExternal;
 import com.sound.model.User.UserPrefer;
 import com.sound.model.User.UserProfile;
@@ -30,6 +36,8 @@ import com.sound.service.storage.itf.RemoteStorageService;
 @Service
 @Scope("singleton")
 public class UserService implements com.sound.service.user.itf.UserService {
+  
+  Logger logger = Logger.getLogger(UserService.class);
 
   @Autowired
   UserDAO userDAO;
@@ -46,6 +54,9 @@ public class UserService implements com.sound.service.user.itf.UserService {
   @Override
   public User getUserByAlias(String userAlias) {
     User user = userDAO.findOne("profile.alias", userAlias);
+    
+    if (user == null)
+      return null;
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
@@ -84,9 +95,11 @@ public class UserService implements com.sound.service.user.itf.UserService {
     User.UserProfile profile = new User.UserProfile();
     profile.setAlias(userAlias);
     profile.setPassword(password);
+    user.setProfile(profile);
     User.UserEmail email = new User.UserEmail();
     email.setEmailAddress(emailAddress);
-    user.setProfile(profile);
+    email.setConfirmCode(generateConfirmationCode());
+    email.setConfirmed(false);
     user.addEmail(email);
     User.UserSocial social = new User.UserSocial();
     social.setFollowed(0L);
@@ -240,6 +253,89 @@ public class UserService implements com.sound.service.user.itf.UserService {
       userDAO.updateProperty("profile.alias", userAlias, "external", external);
 
       return user;
-
   }
+  
+  @Override
+  public User addEmailAddress(String userAlias, String emailAddress) throws UserException {
+    User user = this.getUserByAlias(userAlias);
+    if (user == null) {
+        throw new UserException("Cannot find user : " + userAlias);
+    }
+    
+    List<UserEmail> emails = user.getEmails();
+    UserEmail email = new UserEmail();
+    email.setConfirmed(false);
+    email.setEmailAddress(emailAddress);
+    email.setConfirmCode(generateConfirmationCode());
+    userDAO.updateProperty("_id", user.getId(), "email", emails);
+    
+    return user;
+  }
+
+  @Override
+  public void sendEmailAddressConfirmation(String userAlias, String emailAddress)
+      throws UserException {
+    User user = this.getUserByAlias(userAlias);
+    if (user == null) {
+        throw new UserException("Cannot find user : " + userAlias);
+    }
+    List<UserEmail> emails = user.getEmails();
+    for (UserEmail email : emails) {
+      if (email.getEmailAddress().equals(emailAddress)) {
+        doSendEmail(emailAddress, userAlias, email.getConfirmCode());
+      }
+    }
+  }
+
+  @Override
+  public void confirmEmailAddress(String confirmCode) throws UserException {
+    User user = userDAO.findOne("emails.confirmCode", confirmCode);
+    if (user == null) {
+      throw new UserException("Cannot find user by email confirm code: " + confirmCode);
+      
+    }
+    List<UserEmail> emails = user.getEmails();
+    for (UserEmail email : emails) {
+      if (email.getConfirmCode().equals(confirmCode)) {
+        email.setConfirmed(true);
+      }
+    }
+    
+    userDAO.updateProperty("_id", user.getId(), "emails", emails);
+  }
+  
+  private String generateConfirmationCode() {
+    return RandomStringUtils.random(32, true, true);
+  }
+  
+  private static void doSendEmail(String emailAddress, String userAlias, String confirmCode) {
+    try {
+      HtmlEmail email = new HtmlEmail();
+      email.setAuthentication("wooice", "dxd123456");
+      email.setCharset("utf-8");
+      email.setSubject("Wooice Email Address Confirmation");
+      email.setHostName("smtp.126.com");
+      email.setFrom("wooice@126.com", "Wooice");
+      email.addTo(emailAddress, userAlias);
+      email.setContent(generateHtmlEmailBody(confirmCode, userAlias), "text/html; charset=UTF-8");
+      email.send();
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  private static String generateHtmlEmailBody(String code, String userAlias) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<h2>Welcome to Wooice Family</h2>");
+    sb.append("Hi " + userAlias +",<br/><br/>");
+    sb.append("We've received a request to add this email address to a Wooice account. Please click ");
+    sb.append("<a href=\"http://localhost:8080/commonService/confirmEmail/"+ code + "\">this link to confirm that it's OK.</a> <br/><br/>");
+    sb.append("<h4>The WOOICE Team<h4/>");
+    return sb.toString();
+  }
+  
+  public static void main(String[] args) {
+    doSendEmail("dugu108@qq.com", "TEST", "");
+  }
+  
 }
