@@ -142,6 +142,9 @@ public class Sound extends BaseModel {
      */
     private int status;
 
+    private String remoteId;
+
+    private String extension;
     /**
      * sound, set
      */
@@ -184,6 +187,22 @@ public class Sound extends BaseModel {
 
     public void setStatus(String status) {
       this.status = SoundState.getStateId(status);
+    }
+
+    public String getRemoteId() {
+      return remoteId;
+    }
+
+    public void setRemoteId(String remoteId) {
+      this.remoteId = remoteId;
+    }
+    
+    public String getExtension() {
+      return extension;
+    }
+
+    public void setExtension(String extension) {
+      this.extension = extension;
     }
 
     public String getType() {
@@ -303,6 +322,8 @@ public class Sound extends BaseModel {
 
     // meide route in resource server.
     private String objectId;
+    
+    private String extension;
 
     private Long duration;
 
@@ -325,6 +346,14 @@ public class Sound extends BaseModel {
 
     public void setOwner(User owner) {
       this.owner = owner;
+    }
+
+    public String getExtension() {
+      return extension;
+    }
+
+    public void setExtension(String extension) {
+      this.extension = extension;
     }
 
     public String getOriginName() {
@@ -450,9 +479,11 @@ public class Sound extends BaseModel {
 
     private String originFileName;
 
-    private String remoteId;
+    private String fileName;
 
     private String ownerAlias;
+    
+    private Date createdDate;
 
     public ObjectId getId() {
       return id;
@@ -470,12 +501,12 @@ public class Sound extends BaseModel {
       this.originFileName = originFileName;
     }
 
-    public String getRemoteId() {
-      return remoteId;
+    public String getFileName() {
+      return fileName;
     }
 
-    public void setRemoteId(String remoteId) {
-      this.remoteId = remoteId;
+    public void setFileName(String fileName) {
+      this.fileName = fileName;
     }
 
     public String getOwnerAlias() {
@@ -484,6 +515,14 @@ public class Sound extends BaseModel {
 
     public void setOwnerAlias(String ownerAlias) {
       this.ownerAlias = ownerAlias;
+    }
+
+    public Date getCreatedDate() {
+      return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+      this.createdDate = createdDate;
     }
 
   }

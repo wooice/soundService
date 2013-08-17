@@ -38,7 +38,7 @@ public class User extends BaseModel {
   private List<Group> groups;
 
   @Embedded
-  private UserSocial social;
+  private UserSocial userSocial;
 
   @NotSaved
   @Embedded
@@ -74,12 +74,12 @@ public class User extends BaseModel {
   }
 
 
-  public UserSocial getSocial() {
-    return social;
+  public UserSocial getUserSocial() {
+    return userSocial;
   }
 
-  public void setSocial(UserSocial social) {
-    this.social = social;
+  public void setUserSocial(UserSocial social) {
+    this.userSocial = social;
   }
 
   public void setExternal(UserExternal external) {

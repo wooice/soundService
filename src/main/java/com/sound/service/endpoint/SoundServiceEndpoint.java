@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,13 +56,11 @@ public class SoundServiceEndpoint {
   @Path("/{soundName}")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveProfile(@NotNull @PathParam("soundName") String soundName,
-      @NotNull JSONObject inputJsonObj) {
+                              @NotNull SoundProfile soundProfile) {
     SoundProfile profile = null;
     try {
       profile =
-          soundService.saveProfile(inputJsonObj.getString("objectId"), soundName,
-              inputJsonObj.getString("description"), inputJsonObj.getString("ownerAlias"),
-              inputJsonObj.getString("status"));
+          soundService.saveProfile(soundProfile, "robot");
     } catch (SoundException e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (Exception e) {
