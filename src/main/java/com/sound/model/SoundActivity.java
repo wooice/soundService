@@ -1,5 +1,6 @@
 package com.sound.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,129 +15,167 @@ import com.sound.jackson.extension.DateSerializer;
 
 public class SoundActivity {
 
-	@Id
-	private ObjectId id;
-	
-	@Reference
-	private Sound sound;
-	
-	@Reference
-	private User owner;
+  @Id
+  private ObjectId id;
 
-	private Date createdTime;
-	
-	public ObjectId getId() {
-		return id;
-	}
+  @Reference
+  protected Sound sound;
 
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
+  @Reference
+  protected User owner;
 
-	public Sound getSound() {
-		return sound;
-	}
+  protected Date createdTime;
 
-	public void setSound(Sound sound) {
-		this.sound = sound;
-	}
+  public ObjectId getId() {
+    return id;
+  }
 
-	public User getOwner() {
-		return owner;
-	}
+  public void setId(ObjectId id) {
+    this.id = id;
+  }
 
-	public void setOwner(User owner) {
-		this.owner = owner;
-	}
+  public Sound getSound() {
+    return sound;
+  }
 
-	@JsonSerialize(using = DateSerializer.class) 
-	public Date getCreatedTime() {
-		return createdTime;
-	}
+  public void setSound(Sound sound) {
+    this.sound = sound;
+  }
 
-	public void setCreatedTime(Date createdTime) {
-		this.createdTime = createdTime;
-	}
-	
-	@Entity
-	public static class SoundComment extends SoundActivity
-	{
-		private String comment;
+  public User getOwner() {
+    return owner;
+  }
 
-		private float pointAt;
+  public void setOwner(User owner) {
+    this.owner = owner;
+  }
 
-		@Embedded
-		private List<SoundCommentReply> replies;
-		
-		public String getComment() {
-			return comment;
-		}
+  @JsonSerialize(using = DateSerializer.class)
+  public Date getCreatedTime() {
+    return createdTime;
+  }
 
-		public void setComment(String comment) {
-			this.comment = comment;
-		}
+  public void setCreatedTime(Date createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  @Entity
+  public static class SoundComment extends SoundActivity {
+    private String comment;
+
+    private float pointAt;
+
+    @Embedded
+    private List<SoundCommentReply> replies;
+
+    public String getComment() {
+      return comment;
+    }
+
+    public void setComment(String comment) {
+      this.comment = comment;
+    }
+
+    public float getPointAt() {
+      return pointAt;
+    }
+
+    public void setPointAt(float pointAt) {
+      this.pointAt = pointAt;
+    }
+
+    public List<SoundCommentReply> getReplies() {
+      return replies;
+    }
+
+
+    public void setReplies(List<SoundCommentReply> replies) {
+      this.replies = replies;
+    }
+
+    public class SoundCommentReply extends SoundActivity {
+      private String reply;
+
+      public String getReply() {
+        return reply;
+      }
+
+      public void setReply(String reply) {
+        this.reply = reply;
+      }
+    }
+  }
+
+  @Entity
+  public static class SoundLike extends SoundActivity {}
+
+  @Entity
+  public static class SoundPlay extends SoundActivity {}
+
+  @Entity
+  public static class SoundRecord extends SoundActivity {
+    public static final String CREATE = "create";
+
+    public static final String REPOST = "repost";
+
+    private List<String> actions;
+
+    public List<String> getActions() {
+      return actions;
+    }
+
+    public void setActions(List<String> actions) {
+      this.actions = actions;
+    }
+
+    public void addAction(String action) {
+      if (null == actions) {
+        actions = new ArrayList<String>();
+      }
+      if (!actions.contains(action)) {
+        actions.add(action);
+      }
+    }
+
+    public void removeAction(String action) {
+      if (null == actions) {
+        actions = new ArrayList<String>();
+      }
+      if (actions.contains(action)) {
+        actions.remove(action);
+      }
+    }
+    
+    public boolean hasAction(String action) {
+      if (null == actions) {
+        actions = new ArrayList<String>();
+      }
+      
+      return actions.contains(action);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((sound == null) ? 0 : sound.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
+      SoundRecord other = (SoundRecord) obj;
+      if (sound == null) {
+        if (other.sound != null) return false;
+      } else if (!sound.equals(other.sound)) return false;
+      return true;
+    }
  
-		public float getPointAt() {
-			return pointAt;
-		}
+  }
 
-		public void setPointAt(float pointAt) {
-			this.pointAt = pointAt;
-		}
-
-		public List<SoundCommentReply> getReplies() {
-			return replies;
-		}
-
-
-		public void setReplies(List<SoundCommentReply> replies) {
-			this.replies = replies;
-		}
-
-		public class SoundCommentReply extends SoundActivity
-		{
-			private String reply;
-
-			public String getReply() {
-				return reply;
-			}
-
-			public void setReply(String reply) {
-				this.reply = reply;
-			}
-		}
-	}
-
-	@Entity
-	public static class SoundLike extends SoundActivity
-	{
-	}
-	
-	@Entity
-	public static class SoundPlay extends SoundActivity
-	{
-	}
-
-	@Entity
-	public static class SoundRecord extends SoundActivity
-	{
-		public static final String CREATE = "create";
-		
-		public static final String REPOST = "repost";
-		
-		private String recordType;
-
-		public String getRecordType() {
-			return recordType;
-		}
-
-		public void setRecordType(String recordType) {
-			this.recordType = recordType;
-		}
-	}
-
-	@Entity
-	public static class SoundShare extends SoundActivity
-	{
-	}
+  @Entity
+  public static class SoundShare extends SoundActivity {}
 }

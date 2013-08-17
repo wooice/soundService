@@ -1,4 +1,4 @@
-package com.sound.service.impl;
+package com.sound.service.endpoint;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -76,7 +76,6 @@ public class UserServiceEndpoint {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (Exception e) {
-      logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to create user " + userAlias)).build();
     }
@@ -148,6 +147,49 @@ public class UserServiceEndpoint {
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+  }
+  
+  @GET
+  @Path("/confirmEmail/{confirmCode}")
+  public Response confirmEmailAddress(@NotNull @PathParam("confirmCode") String confirmCode) {
+    try {
+      userService.confirmEmailAddress(confirmCode);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot confirm email")).build();
+    }
+
+    return Response.status(Status.OK).entity("Confirm Successfully").build();
+  }
+  
+  @PUT
+  @Path("/addEmail/{userAlias}/{emailAddress}")
+  public Response addEmailAddress(@NotNull @PathParam("userAlias") String userAlias, @NotNull @PathParam("emailAddress") String emailAddress) {
+    User user = null;
+    try {
+      user = userService.addEmailAddress(userAlias, emailAddress);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot add email " + emailAddress + " for user " + userAlias)).build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+  }
+  
+  @PUT
+  @Path("/sendEmailConfirm/{userAlias}/{emailAddress}")
+  public Response sendEmailAddressConfirmation(@NotNull @PathParam("userAlias") String userAlias, @NotNull @PathParam("emailAddress") String emailAddress) {
+    try {
+      userService.sendEmailAddressConfirmation(userAlias, emailAddress);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot send confirmation to email " + emailAddress + " for user " + userAlias)).build();
+    }
+
+    return Response.status(Status.OK).entity("send confirmation email successfully").build();
   }
 
 }

@@ -1,6 +1,8 @@
-package com.sound.model;
+package com.sound.dto;
 
 import java.util.List;
+
+import com.sound.model.BaseModel;
 
 public class UserBasicProfileDTO extends BaseModel{
   private String alias;

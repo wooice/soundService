@@ -1,9 +1,9 @@
 package com.sound.service.user.itf;
 
+import com.sound.dto.UserBasicProfileDTO;
+import com.sound.dto.UserSnsProfileDTO;
 import com.sound.exception.UserException;
 import com.sound.model.User;
-import com.sound.model.UserBasicProfileDTO;
-import com.sound.model.UserSnsProfileDTO;
 
 public interface UserService {
 

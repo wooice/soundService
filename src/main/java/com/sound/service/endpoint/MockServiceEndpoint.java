@@ -1,4 +1,4 @@
-package com.sound.service.impl;
+package com.sound.service.endpoint;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,26 +32,6 @@ public class MockServiceEndpoint {
 		{
 			userService.deleteByAlias("robot");
 			userService.createUser("robot", "robot@wooice.com", "robot123");
-			
-			soundService.delete("firstSound");
-			soundDataService.delete("sound.mp3");
-			float[][] soundWave = new float[1][1800];
-			for(int i=0; i<1800;i++)
-			{
-				soundWave[0][i] = (float) Math.random();
-			}
-			soundDataService.save("sound.mp3", 256, soundWave);
-			soundService.saveProfile("sound.mp3", "firstSound", "sound used to test", "robot", "private", "poster.jpg");
-			
-			soundService.delete("secondSound");
-			soundDataService.delete("sound2.mp3");
-			float[][] sound2Wave = new float[1][1800];
-			for(int i=0; i<1800;i++)
-			{
-				sound2Wave[0][i] = (float) Math.random();
-			}
-			soundDataService.save("sound2.mp3", 284, sound2Wave);
-			soundService.saveProfile("sound2.mp3", "secondSound", "sound used to test", "robot", "public", "poster.jpg");
 		}
 		catch(Exception e)
 		{

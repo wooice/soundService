@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import com.sound.dao.UserAuthDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
+import com.sound.dto.UserBasicProfileDTO;
+import com.sound.dto.UserSnsProfileDTO;
 import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail;
@@ -28,8 +30,6 @@ import com.sound.model.User.UserProfile;
 import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
-import com.sound.model.UserBasicProfileDTO;
-import com.sound.model.UserSnsProfileDTO;
 import com.sound.model.enums.FileType;
 import com.sound.service.storage.itf.RemoteStorageService;
 
@@ -213,7 +213,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
           profile.setOccupations(profileDTO.getOccupations());
       }
 
-      userDAO.updateProperty("profile.alias", userAlias, "profile", profile);
+      userDAO.updateProperty("_id", user.getId(), "profile", profile);
 
       return user;
 
@@ -250,7 +250,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
           external.setDouban(snsDTO.getDouban());
       }
 
-      userDAO.updateProperty("profile.alias", userAlias, "external", external);
+      userDAO.updateProperty("_id", user.getId(), "external", external);
 
       return user;
   }
@@ -267,7 +267,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
     email.setConfirmed(false);
     email.setEmailAddress(emailAddress);
     email.setConfirmCode(generateConfirmationCode());
-    userDAO.updateProperty("_id", user.getId(), "email", emails);
+    emails.add(email);
+    userDAO.updateProperty("_id", user.getId(), "emails", emails);
     
     return user;
   }
@@ -304,7 +305,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
   }
   
-  private String generateConfirmationCode() {
+  private static String generateConfirmationCode() {
     return RandomStringUtils.random(32, true, true);
   }
   

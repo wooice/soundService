@@ -30,7 +30,7 @@ public class SoundRecordDAO extends BaseDAO<SoundRecord, ObjectId>{
 		}
 		
 		query.field("owner").in(users);
-		query.offset(start).limit(range);
+		query.offset(start).limit(range).order("-createdTime");
 		
 		return this.find(query).asList();
 	}

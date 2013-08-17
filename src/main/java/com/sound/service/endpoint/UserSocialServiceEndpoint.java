@@ -1,4 +1,4 @@
-package com.sound.service.impl;
+package com.sound.service.endpoint;
 
 import java.util.ArrayList;
 import java.util.HashMap;

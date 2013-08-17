@@ -1,4 +1,4 @@
-package com.sound.service.impl;
+package com.sound.service.endpoint;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -158,7 +158,7 @@ public class SoundSocialServiceEndpoint {
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
-    return Response.status(Status.OK).entity(String.valueOf(result)).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @DELETE
@@ -177,7 +177,7 @@ public class SoundSocialServiceEndpoint {
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
-    return Response.status(Status.OK).entity(String.valueOf(result)).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @GET
@@ -212,6 +212,6 @@ public class SoundSocialServiceEndpoint {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     }
-    return Response.status(Status.OK).entity(sounds).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
   }
 }

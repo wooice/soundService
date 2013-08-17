@@ -145,7 +145,7 @@ public class User extends BaseModel {
     private int age;
     private boolean gender;
     private boolean hasAvatar = false;
-    private List<Integer> occupations;
+    private List<Integer> occupations = new ArrayList<Integer>();
 
     public List<UserOccupationType> getOccupations() {
       return UserOccupationType.getTypesByIds(occupations);
@@ -276,6 +276,8 @@ public class User extends BaseModel {
 
     private Long reposts;
 
+    private Long soundDuration;
+
     public Long getFollowing() {
       return following;
     }
@@ -306,6 +308,14 @@ public class User extends BaseModel {
 
     public void setReposts(Long reposts) {
       this.reposts = reposts;
+    }
+
+    public Long getSoundDuration() {
+      return soundDuration;
+    }
+
+    public void setSoundDuration(Long soundDuration) {
+      this.soundDuration = soundDuration;
     }
 
   }
