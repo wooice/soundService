@@ -11,16 +11,18 @@ import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.file.SoundLocal;
 
 public interface SoundService {
-
+  
     public SoundProfile updateProfile(SoundProfile soundProfile) throws SoundException ;
   
-	public SoundProfile saveProfile(String objectId, String soundAlias, String description, String ownerAlias, String status) throws SoundException;
+	public SoundProfile saveProfile(SoundProfile soundProfile, String ownerAlias) throws SoundException;
 
 	public void addToSet(String soundId, String setId);
 
 	public void delete(String soundAlias);
 
 	public Sound load(String userAlias, String soundId);
+	
+	public Sound loadByRemoteId(String remoteId);
 	
 	public List<SoundRecord> getSoundsByUser(String userAlias, Integer pageNum, Integer soundsPerPage) throws SoundException;
 	

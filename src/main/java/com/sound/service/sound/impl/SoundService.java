@@ -99,7 +99,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   public Sound load(String userAlias, String soundAlias) {
     Sound sound = soundDAO.findOne("profile.alias", soundAlias);
     sound.getSoundData().setUrl(
-        remoteStorageService.generateDownloadUrl(sound.getSoundData().getObjectId(),
+        remoteStorageService.generateDownloadUrl(
+            sound.getSoundData().getObjectId() + "." + sound.getSoundData().getExtension(),
             FileType.getFileType("sound")).toString());
 
     if (null != sound.getProfile().getPoster()
@@ -109,8 +110,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
           .getPoster()
           .setUrl(
               remoteStorageService.generateDownloadUrl(
-                  sound.getProfile().getPoster().getPosterId(), FileType.getFileType("image"))
-                  .toString());
+                  sound.getProfile().getPoster().getPosterId() + "."
+                      + sound.getProfile().getPoster().getExtension(),
+                  FileType.getFileType("image")).toString());
     }
 
     User currentUser = userDAO.findOne("profile.alias", userAlias);
@@ -122,11 +124,14 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   @Override
   public void saveData(SoundLocal soundLocal, String ownerAlias) {
     User owner = userDAO.findOne("profile.alias", ownerAlias);
+    String[] fileNames = soundLocal.getFileName().split("\\.");
 
-    SoundData soundData = soundDataService.load(soundLocal.getFileName());
+    SoundData soundData = soundDataService.load(fileNames[0]);
+
     if (null == soundData) {
       soundData = new SoundData();
-      soundData.setObjectId(soundLocal.getFileName());
+      soundData.setObjectId(fileNames[0]);
+      soundData.setExtension(fileNames[1]);
       soundData.setOriginName(soundLocal.getOriginName());
       soundData.setDuration(soundLocal.getDuration());
       soundData.setOwner(owner);
@@ -137,76 +142,79 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       soundData.setOriginName(soundLocal.getOriginName());
       soundData.setWave(soundLocal.getWave().getWaveData());
       soundDataService.update(soundData);
-
-      Sound sound = soundDAO.findOne("soundData", soundData);
-
-
-      if (null != sound) {
-        Map<String, Object> cratiaries = new HashMap<String, Object>();
-        cratiaries.put("sound", sound);
-        cratiaries.put("owner", owner);
-        SoundRecord activityRecord = soundRecordDAO.findOne(cratiaries);
-
-        if (null == activityRecord || !activityRecord.hasAction(SoundRecord.CREATE)) {
-          SoundRecord soundRecord = new SoundRecord();
-          soundRecord.setOwner(owner);
-          soundRecord.addAction(SoundRecord.CREATE);
-          soundRecord.setSound(sound);
-          soundRecord.setCreatedTime(new Date());
-          soundRecordDAO.save(soundRecord);
-
-          // Add one sound count to user social
-          userDAO.increase("profile.alias", ownerAlias, "social.sounds");
-        }
-      }
-
-      userDAO.updateProperty("profile.alias", ownerAlias, "social.soundDuration", (owner
-          .getSocial().getSoundDuration() + soundLocal.getDuration()));
     }
+
+    boolean profileSaved = false;
+    Sound sound = soundDAO.findOne("profile.remoteId", fileNames[0]);
+    if (null != sound) {
+      profileSaved = true;
+      sound.setSoundData(soundData);
+      soundDAO.save(sound);
+    }
+
+    if (profileSaved) {
+      SoundRecord soundRecord = new SoundRecord();
+      soundRecord.setOwner(owner);
+      soundRecord.addAction(SoundRecord.CREATE);
+      soundRecord.setSound(sound);
+      soundRecord.setCreatedTime(new Date());
+      soundRecordDAO.save(soundRecord);
+
+      // Add one sound count to user social
+      userDAO.increase("profile.alias", ownerAlias, "social.sounds");
+    }
+
+    userDAO.updateProperty("profile.alias", ownerAlias, "social.soundDuration", (owner
+        .getUserSocial().getSoundDuration() + soundLocal.getDuration()));
   }
 
   @Override
-  public SoundProfile saveProfile(String remoteId, String soundName, String description,
-      String ownerAlias, String status) throws SoundException {
+  public SoundProfile saveProfile(SoundProfile soundProfile, String ownerAlias)
+      throws SoundException {
+    if (null == soundProfile.getName()) {
+      throw new SoundException("Sound name can't be null.");
+    }
+
+    if (null == soundProfile.getRemoteId()) {
+      throw new SoundException("Remote id can't be null.");
+    }
+
     Sound sound = new Sound();
 
-    SoundProfile soundProfile = new SoundProfile();
     soundProfile.setCreatedTime(new Date());
     soundProfile.setDownloadable(false);
     soundProfile.setModifiedTime(new Date());
 
-    soundProfile.setName(soundName);
-
-    String alias = calculateAlias(soundName);
+    String alias = calculateAlias(soundProfile.getName());
 
     soundProfile.setAlias(alias);
-    soundProfile.setDescription(description);
-    soundProfile.setStatus(status);
     soundProfile.setType(SoundType.SOUND.getTypeName());
 
     User owner = userDAO.findOne("profile.alias", ownerAlias);
     soundProfile.setOwner(owner);
 
-    SoundPoster soundPoster = new SoundPoster();
-    soundProfile.setPoster(soundPoster);
+    if (null == soundProfile.getPoster()) {
+      SoundPoster soundPoster = new SoundPoster();
+      soundProfile.setPoster(soundPoster);
+    }
 
     sound.setProfile(soundProfile);
 
     SoundSocial soundSocial = new SoundSocial();
     sound.setSoundSocial(soundSocial);
 
+    boolean dataSaved = false;
+    String remoteId = soundProfile.getRemoteId();
+
     SoundData soundData = soundDataService.load(remoteId);
-    boolean dataProcessed = true;
-    if (null == soundData) {
-      dataProcessed = false;
-      soundData = new SoundData();
-      soundData.setObjectId(remoteId);
-      soundData = soundDataService.save(soundData);
+    if (null != soundData) {
+      sound.setSoundData(soundData);
+      dataSaved = true;
     }
-    sound.setSoundData(soundData);
+
     soundDAO.save(sound);
 
-    if (dataProcessed) {
+    if (dataSaved) {
       SoundRecord soundRecord = new SoundRecord();
       soundRecord.setOwner(owner);
       soundRecord.addAction(SoundRecord.CREATE);
@@ -242,7 +250,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
               .getPoster()
               .setUrl(
                   remoteStorageService.generateDownloadUrl(
-                      oneSound.getSound().getProfile().getPoster().getPosterId(),
+                      oneSound.getSound().getProfile().getPoster().getPosterId() + "."
+                          + oneSound.getSound().getProfile().getPoster().getExtension(),
                       FileType.getFileType("image")).toString());
         }
         oneSound.getSound().setUserPrefer(getUserPreferOfSound(oneSound.getSound(), owner));
@@ -283,7 +292,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
               .getPoster()
               .setUrl(
                   remoteStorageService.generateDownloadUrl(
-                      oneSound.getSound().getProfile().getPoster().getPosterId(),
+                      oneSound.getSound().getProfile().getPoster().getPosterId() + "."
+                          + oneSound.getSound().getProfile().getPoster().getExtension(),
                       FileType.getFileType("image")).toString());
         }
         oneSound.getSound().setUserPrefer(getUserPreferOfSound(oneSound.getSound(), currentUser));
@@ -312,11 +322,15 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
       User user = userDAO.findOne("profile.alias", userAlias);
 
-      if ((user.getSocial().getSoundDuration() + soundInfo.getDuration() / 1000) > 120 * 60) {
+      if ((user.getUserSocial().getSoundDuration() + soundInfo.getDuration() / 1000) > 120 * 60) {
         throw new SoundException("User " + userAlias + " can't upload more sounds.");
       }
 
-      mp3File = mp3Cconverter.convert(wavFile);
+      if (!originSoundFile.getName().endsWith(".mp3")) {
+        mp3File = mp3Cconverter.convert(originSoundFile);
+      } else {
+        mp3File = originSoundFile;
+      }
 
       SoundLocal soundLocal = new SoundLocal();
       soundLocal.setDuration(soundInfo.getDuration() / 1000);
@@ -374,7 +388,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     }
 
     if (null != soundProfile.getPoster()) {
-      soundDAO.updateProperty("profile.alias", soundProfile.getAlias(), "profileposter",
+      soundDAO.updateProperty("profile.alias", soundProfile.getAlias(), "profile.poster",
           soundProfile.getPoster());
     }
 
@@ -385,7 +399,15 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
   @Override
   public void enqueue(QueueNode queueNode) {
-    queueNodeDAO.save(queueNode);
+    QueueNode node = queueNodeDAO.findOne("fileName", queueNode.getFileName());
+    if (null == node) {
+      node = new QueueNode();
+    }
+    node.setOwnerAlias(queueNode.getOwnerAlias());
+    node.setFileName(queueNode.getFileName());
+    node.setOriginFileName(queueNode.getOriginFileName());
+    node.setCreatedDate(new Date());
+    queueNodeDAO.save(node);
   }
 
   @Override
@@ -406,7 +428,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     User user = userDAO.findOne("profile.alias", userAlias);
 
-    if ((user.getSocial().getSoundDuration() + soundInfo.getDuration() / 1000) > 120 * 60) {
+    if ((user.getUserSocial().getSoundDuration() + soundInfo.getDuration() / 1000) > 120 * 60) {
       throw new SoundException("User " + userAlias + " can't upload more sounds.");
     }
   }
@@ -419,13 +441,14 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   @Override
   public Sound getUnfinishedUpload(String userAlias) {
     User owner = userDAO.findOne("profile.alias", userAlias);
-
     List<Sound> unfinishedSounds = new ArrayList<Sound>();
+
     List<Sound> sounds = soundDAO.find("profile.owner", owner);
     for (Sound sound : sounds) {
-      if (null == sound.getSoundData().getWave()) {
-        QueueNode node = queueNodeDAO.findOne("remoteId", sound.getSoundData().getObjectId());
-
+      if (null == sound.getSoundData()) {
+        QueueNode node =
+            queueNodeDAO.findOne("fileName", sound.getProfile().getRemoteId() + "."
+                + sound.getProfile().getExtension());
         if (null == node) {
           unfinishedSounds.add(sound);
         }
@@ -444,23 +467,30 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     List<QueueNode> nodes = queueNodeDAO.find("ownerAlias", userAlias);
     for (QueueNode node : nodes) {
-      SoundData soundData = soundDataService.load(node.getRemoteId());
-      if (null == soundData) {
-        Sound ownerSound = new Sound();
-        soundData = new SoundData();
-        soundData.setObjectId(node.getRemoteId());
+      Sound sound = soundDAO.findOne("profile.remoteId", node.getFileName().split("\\.")[0]);
+      if (null == sound) {
+        sound = new Sound();
+        SoundData soundData = new SoundData();
+        soundData.setObjectId(node.getFileName().split("\\.")[0]);
+        soundData.setExtension(node.getFileName().split("\\.")[1]);
         soundData.setOriginName(node.getOriginFileName());
-        ownerSound.setSoundData(soundData);
-        unfinishedSounds.add(ownerSound);
+        sound.setSoundData(soundData);
+        unfinishedSounds.add(sound);
       }
     }
 
     if (unfinishedSounds.size() > 0) {
-      return unfinishedSounds.get(0);
+      Sound soundToUpload = unfinishedSounds.get(0);
+      soundToUpload.getSoundData().setWave(null);
+      return soundToUpload;
     } else {
       return null;
     }
+  }
 
+  @Override
+  public Sound loadByRemoteId(String remoteId) {
+    return soundDAO.findOne("profile.remoteId", remoteId);
   }
 
   private String calculateAlias(String soundName) {

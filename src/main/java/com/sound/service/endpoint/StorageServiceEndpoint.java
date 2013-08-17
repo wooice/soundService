@@ -26,8 +26,11 @@ import org.springframework.stereotype.Component;
 import com.sound.constant.Constant;
 import com.sound.exception.RemoteStorageException;
 import com.sound.model.OssAuth;
+import com.sound.model.Sound;
 import com.sound.model.Sound.QueueNode;
+import com.sound.model.Sound.SoundProfile.SoundPoster;
 import com.sound.model.enums.FileType;
+import com.sound.model.file.SoundLocal;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.util.JsonHandler;
 import com.sun.jersey.core.header.FormDataContentDisposition;
@@ -84,12 +87,55 @@ public class StorageServiceEndpoint {
   }
 
   @POST
+  @Path("/upload/poster")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response uploadPoster(@FormDataParam("file") InputStream uploadedInputStream,
+      @FormDataParam("file") FormDataContentDisposition fileDetail,
+      @FormDataParam("fileName") InputStream nameStream,
+      @FormDataParam("length") InputStream posterlengthStream) {
+
+    try {
+      StringWriter writer = new StringWriter();
+      IOUtils.copy(nameStream, writer);
+      String fileName = writer.toString();
+
+      writer = new StringWriter();
+      IOUtils.copy(posterlengthStream, writer);
+      String length = writer.toString();
+
+      SoundLocal soundLocal = new SoundLocal();
+      soundLocal.setFileName(fileName);
+      soundLocal.setSoundStream(uploadedInputStream);
+      soundLocal.setLength(Long.parseLong(length));
+      remoteStorageService.upload(soundLocal, FileType.IMAGE);
+
+      Sound sound = soundService.loadByRemoteId(fileName.split("\\.")[0]);
+
+      if (null != sound) {
+        String [] fileNames = fileName.split("\\.");
+        SoundPoster poster = new SoundPoster();
+        poster.setPosterId(fileNames[0]);
+        poster.setExtension(fileNames[1]);
+        sound.getProfile().setPoster(poster);
+
+        soundService.updateProfile(sound.getProfile());
+      }
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("unable to upload sound.").build();
+    }
+
+    return Response.status(Response.Status.OK).entity(JsonHandler.toJson("true")).build();
+  }
+
+  @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public Response upload(@FormDataParam("file") InputStream uploadedInputStream,
       @FormDataParam("file") FormDataContentDisposition fileDetail,
       @FormDataParam("fileName") InputStream nameStream) {
-    File queueNodeFile  = null;
+    File queueNodeFile = null;
     try {
       StringWriter writer = new StringWriter();
       IOUtils.copy(nameStream, writer);
@@ -101,17 +147,16 @@ public class StorageServiceEndpoint {
         queueNodeFile.getParentFile().mkdirs();
       }
       IOUtils.copy(uploadedInputStream, new FileOutputStream(queueNodeFile));
-      
+
       QueueNode node = new QueueNode();
-      node.setRemoteId(fileName);
+      node.setFileName(fileName);
       node.setOriginFileName(fileDetail.getFileName());
       node.setOwnerAlias("robot");
 
       soundService.checkUploadCap("robot", queueNodeFile);
       soundService.enqueue(node);
     } catch (Exception e) {
-      if (null != queueNodeFile)
-      {
+      if (null != queueNodeFile) {
         queueNodeFile.delete();
       }
       logger.error(e);
