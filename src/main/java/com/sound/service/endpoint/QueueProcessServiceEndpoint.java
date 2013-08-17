@@ -38,7 +38,7 @@ public class QueueProcessServiceEndpoint {
     List<QueueNode> soundProcessNodes = soundService.listQueue();
 
     for (QueueNode node : soundProcessNodes) {
-      String queueNodeFilePath = Constant.UPLOAD_QUEUE_FOLDER + File.separator + node.getRemoteId();
+      String queueNodeFilePath = Constant.UPLOAD_QUEUE_FOLDER + File.separator + node.getFileName();
 
       File originFile = new File(queueNodeFilePath);
 
@@ -47,7 +47,7 @@ public class QueueProcessServiceEndpoint {
       }
       SoundLocal sound = null;
       try {
-        sound = soundService.processSound("robot", originFile, node.getRemoteId());
+        sound = soundService.processSound("robot", originFile, node.getFileName());
         remoteStorageService.upload(sound, FileType.SOUND);
 
         sound.setOriginName(node.getOriginFileName());

@@ -80,7 +80,8 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     playResult.put("played", String.valueOf(sound.getSoundSocial().getPlayedCount() + 1));
     playResult.put(
         "url",
-        remoteStorageService.generateDownloadUrl(sound.getSoundData().getObjectId(),
+        remoteStorageService.generateDownloadUrl(
+            sound.getSoundData().getObjectId() + "." + sound.getSoundData().getExtension(),
             FileType.getFileType("sound")).toString());
 
     return playResult;
@@ -246,7 +247,8 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     Map<String, Object> cratiaries = new HashMap<String, Object>();
     cratiaries.put("sound", sound);
     List<SoundComment> comments =
-        soundCommentDAO.findWithRange(cratiaries, (pageNum - 1) * commentsPerPage, commentsPerPage, "-createdTime");
+        soundCommentDAO.findWithRange(cratiaries, (pageNum - 1) * commentsPerPage, commentsPerPage,
+            "-createdTime");
 
     for (SoundComment comment : comments) {
       comment.getSound().setSoundData(null);

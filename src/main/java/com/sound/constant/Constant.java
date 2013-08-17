@@ -8,4 +8,5 @@ public class Constant {
 	
 	public static final String UPLOAD_QUEUE_FOLDER = System.getProperty("java.io.tmpdir") + File.separator +  "WOOICE" + File.separator + "QUEUE";
 
+	public static final String UNIFORM_SOUND_TYPE = "mp3";
 }

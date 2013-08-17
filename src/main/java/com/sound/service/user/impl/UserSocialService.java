@@ -76,7 +76,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     userDAO.increase("profile.alias", fromUserAlias, "social.following");
     userDAO.increase("profile.alias", toUserAlias, "social.followed");
 
-    return (int) (toUser.getSocial().getFollowed() + 1);
+    return (int) (toUser.getUserSocial().getFollowed() + 1);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     userDAO.decrease("profile.alias", fromUserAlias, "social.following");
     userDAO.decrease("profile.alias", toUserAlias, "social.followed");
 
-    return (int) (toUser.getSocial().getFollowed() - 1);
+    return (int) (toUser.getUserSocial().getFollowed() - 1);
   }
 
   @Override

@@ -92,7 +92,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     social.setFollowed(0L);
     social.setFollowing(0L);
     social.setSounds(0L);
-    user.setSocial(social);
+    user.setUserSocial(social);
 
     userDAO.save(user);
 
