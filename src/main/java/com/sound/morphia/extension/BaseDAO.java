@@ -92,7 +92,7 @@ public class BaseDAO<T, PK>  extends BasicDAO<T, PK>{
 		this.update(updateQuery, ops); 
 	}
 	
-	public void updateProperty(String key, String value, String property, Object object)
+	public void updateProperty(String key, Object value, String property, Object object)
 	{
 		Query<T> updateQuery = ds.createQuery(this.clazz).field(key).equal(value);
 		UpdateOperations<T> ops = ds.createUpdateOperations(this.clazz).set(property, object);

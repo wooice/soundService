@@ -1,5 +1,8 @@
 package com.sound.service.endpoint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -13,15 +16,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sound.dto.UserBasicProfileDTO;
-import com.sound.dto.UserSnsProfileDTO;
 import com.sound.exception.UserException;
 import com.sound.model.User;
+import com.sound.model.User.UserEmail.EmailSetting;
+import com.sound.model.User.UserExternal;
+import com.sound.model.User.UserProfile;
 import com.sound.util.JsonHandler;
-import com.sun.jersey.multipart.FormDataParam;
 
 @Component
 @Path("/user")
@@ -101,12 +106,25 @@ public class UserServiceEndpoint {
 
   @POST
   @Path("/updateBasic")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Consumes(MediaType.APPLICATION_JSON)
   public Response updateUserBasicProfile(@NotNull @FormParam("userAlias") String userAlias,
-      @NotNull @FormDataParam("basicProfile") UserBasicProfileDTO basicProfileDTO) {
+      @NotNull JSONObject inputJsonObj) {
     User user = null;
+    UserProfile profile = new UserProfile();
     try {
-      user = userService.updateUserBasicProfile(userAlias, basicProfileDTO);
+      profile.setAlias(inputJsonObj.getString("alias"));
+      profile.setAvatorUrl(inputJsonObj.getString("avatorUrl"));
+      profile.setFirstName(inputJsonObj.getString("firstName"));
+      profile.setLastName(inputJsonObj.getString("lastName"));
+      profile.setCity(inputJsonObj.getString("city"));
+      profile.setCountry(inputJsonObj.getString("country"));
+      JSONArray occs = inputJsonObj.getJSONArray("occupations");
+      List<Integer> occList = new ArrayList<Integer>();
+      for (int i = 0 ; i < occs.length() ; i++) {
+        occList.add(occs.getInt(i));
+      }
+      profile.setOccupations(occList);
+      user = userService.updateUserBasicProfile(userAlias, profile);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -120,10 +138,10 @@ public class UserServiceEndpoint {
   @Path("/updateSns")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public Response updateUserSnsProfile(@NotNull @FormParam("userAlias") String userAlias,
-      @NotNull @FormDataParam("snsProfile") UserSnsProfileDTO snsProfileDTO) {
+      @NotNull UserExternal external) {
     User user = null;
     try {
-      user = userService.updateUserSnsProfile(userAlias, snsProfileDTO);
+      user = userService.updateUserSnsProfile(userAlias, external);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -144,6 +162,84 @@ public class UserServiceEndpoint {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Cannot update password for " + emailAddress)).build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+  }
+
+  @GET
+  @Path("/confirmEmail/{confirmCode}")
+  public Response confirmEmailAddress(@NotNull @PathParam("confirmCode") String confirmCode) {
+    try {
+      userService.confirmEmailAddress(confirmCode);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Cannot confirm email")).build();
+    }
+
+    return Response.status(Status.OK).entity("Confirm Successfully").build();
+  }
+
+  @PUT
+  @Path("/addEmail/{userAlias}/{emailAddress}")
+  public Response addEmailAddress(@NotNull @PathParam("userAlias") String userAlias,
+      @NotNull @PathParam("emailAddress") String emailAddress) {
+    User user = null;
+    try {
+      user = userService.addEmailAddress(userAlias, emailAddress);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot add email " + emailAddress + " for user " + userAlias)).build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+  }
+
+  @PUT
+  @Path("/sendEmailConfirm/{userAlias}/{emailAddress}")
+  public Response sendEmailAddressConfirmation(@NotNull @PathParam("userAlias") String userAlias,
+      @NotNull @PathParam("emailAddress") String emailAddress) {
+    try {
+      userService.sendEmailAddressConfirmation(userAlias, emailAddress);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot send confirmation to email " + emailAddress + " for user " + userAlias))
+          .build();
+    }
+
+    return Response.status(Status.OK).entity("send confirmation email successfully").build();
+  }
+
+  @GET
+  @Path("/changeContactEmail/{userAlias}/{emailAddress}")
+  public Response changeContactEmail(@NotNull @PathParam("userAlias") String userAlias,
+      @NotNull @PathParam("emailAddress") String emailAddress) {
+    try {
+      userService.changeContactEmailAddress(userAlias, emailAddress);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot change contact email " + emailAddress + " for user " + userAlias))
+          .build();
+    }
+
+    return Response.status(Status.OK).entity("change contact email successfully").build();
+  }
+
+  @PUT
+  @Path("/updateEmailSetting/{emailAddress}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response saveProfile(@NotNull @PathParam("emailAddress") String emailAddress,
+      @NotNull EmailSetting setting) {
+    User user = null;
+    try {
+      user = userService.updateEmailSetting(emailAddress, setting);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot update email setting of " + emailAddress)).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();

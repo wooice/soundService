@@ -43,6 +43,12 @@ public class User extends BaseModel {
   @NotSaved
   @Embedded
   private UserPrefer userPrefer;
+  
+  @Reference(lazy = true)
+  private List<UserMessage> inputMessages;
+  
+  @Reference(lazy = true)
+  private List<UserMessage> outputMessages;
 
   @JsonIgnore
   public ObjectId getId() {
@@ -132,6 +138,42 @@ public class User extends BaseModel {
     this.groups.remove(group);
   }
 
+  public List<UserMessage> getInputMessages() {
+    return inputMessages;
+  }
+
+  public void setInputMessages(List<UserMessage> inputMessages) {
+    this.inputMessages = inputMessages;
+  }
+  
+  public void addInputMessage(UserMessage message) {
+    this.inputMessages = (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
+    this.inputMessages.add(message);
+  }
+  
+  public void removeInputMessage(UserMessage message) {
+    this.inputMessages = (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
+    this.inputMessages.remove(message);
+  }
+
+  public List<UserMessage> getOutputMessages() {
+    return outputMessages;
+  }
+
+  public void setOutputMessages(List<UserMessage> outputMessages) {
+    this.outputMessages = outputMessages;
+  }
+  
+  public void addOutputMessage(UserMessage message) {
+    this.outputMessages = (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
+    this.outputMessages.add(message);
+  }
+  
+  public void removeOutputMessage(UserMessage message) {
+    this.outputMessages = (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
+    this.outputMessages.remove(message);
+  }
+
   @Entity
   public static class UserProfile {
     private String avatorUrl;
@@ -147,8 +189,12 @@ public class User extends BaseModel {
     private boolean hasAvatar = false;
     private List<Integer> occupations = new ArrayList<Integer>();
 
-    public List<UserOccupationType> getOccupations() {
+    public List<UserOccupationType> getOccupationTypes() {
       return UserOccupationType.getTypesByIds(occupations);
+    }
+    
+    public List<Integer> getOccupations() {
+      return this.occupations;
     }
 
     public void setOccupations(List<Integer> occupations) {
@@ -371,6 +417,19 @@ public class User extends BaseModel {
 
   public static class UserEmail {
     private String emailAddress;
+    private boolean confirmed;
+    private String confirmCode;
+    private boolean isContact;
+    @Embedded
+    private EmailSetting setting;
+
+    public EmailSetting getSetting() {
+      return setting;
+    }
+
+    public void setSetting(EmailSetting setting) {
+      this.setting = setting;
+    }
 
     public String getEmailAddress() {
       return emailAddress;
@@ -380,6 +439,116 @@ public class User extends BaseModel {
       this.emailAddress = emailAddress;
     }
 
+    public boolean isConfirmed() {
+      return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+      this.confirmed = confirmed;
+    }
+
+    public String getConfirmCode() {
+      return confirmCode;
+    }
+
+    public void setConfirmCode(String confirmCode) {
+      this.confirmCode = confirmCode;
+    }
+
+    public boolean isContact() {
+      return isContact;
+    }
+
+    public void setContact(boolean isContact) {
+      this.isContact = isContact;
+    }
+    
+    public static class EmailSetting {
+      private boolean exclusiveTracksAndSets;
+      private boolean incomingTracks;
+      private boolean message;
+      private boolean activity;
+      private boolean pendingGroup;
+      private boolean newFollower;
+      private boolean repost;
+      private boolean newsLetter;
+      private boolean productUpdate;
+      private boolean survey;
+      
+      public EmailSetting() {
+        exclusiveTracksAndSets = true;
+        incomingTracks = true;
+        message = true;
+        activity = true;
+        pendingGroup = true;
+        newFollower = true;
+        repost = true;
+        newsLetter = true;
+        productUpdate = true;
+        survey = true;
+      }
+      
+      public boolean isExclusiveTracksAndSets() {
+        return exclusiveTracksAndSets;
+      }
+      public void setExclusiveTracksAndSets(boolean exclusiveTracksAndSets) {
+        this.exclusiveTracksAndSets = exclusiveTracksAndSets;
+      }
+      public boolean isIncomingTracks() {
+        return incomingTracks;
+      }
+      public void setIncomingTracks(boolean incomingTracks) {
+        this.incomingTracks = incomingTracks;
+      }
+      public boolean isMessage() {
+        return message;
+      }
+      public void setMessage(boolean message) {
+        this.message = message;
+      }
+      public boolean isActivity() {
+        return activity;
+      }
+      public void setActivity(boolean activity) {
+        this.activity = activity;
+      }
+      public boolean isPendingGroup() {
+        return pendingGroup;
+      }
+      public void setPendingGroup(boolean pendingGroup) {
+        this.pendingGroup = pendingGroup;
+      }
+      public boolean isNewFollower() {
+        return newFollower;
+      }
+      public void setNewFollower(boolean newFollower) {
+        this.newFollower = newFollower;
+      }
+      public boolean isRepost() {
+        return repost;
+      }
+      public void setRepost(boolean repost) {
+        this.repost = repost;
+      }
+      public boolean isNewsLetter() {
+        return newsLetter;
+      }
+      public void setNewsLetter(boolean newsLetter) {
+        this.newsLetter = newsLetter;
+      }
+      public boolean isProductUpdate() {
+        return productUpdate;
+      }
+      public void setProductUpdate(boolean productUpdate) {
+        this.productUpdate = productUpdate;
+      }
+      public boolean isSurvey() {
+        return survey;
+      }
+      public void setSurvey(boolean survey) {
+        this.survey = survey;
+      }
+    }
   }
 
   public static class UserPrefer {
