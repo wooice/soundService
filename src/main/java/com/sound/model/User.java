@@ -43,6 +43,12 @@ public class User extends BaseModel {
   @NotSaved
   @Embedded
   private UserPrefer userPrefer;
+  
+  @Reference(lazy = true)
+  private List<UserMessage> inputMessages;
+  
+  @Reference(lazy = true)
+  private List<UserMessage> outputMessages;
 
   @JsonIgnore
   public ObjectId getId() {
@@ -130,6 +136,42 @@ public class User extends BaseModel {
   public void removeGroup(Group group) {
     this.groups = (null == this.groups) ? new ArrayList<Group>() : this.groups;
     this.groups.remove(group);
+  }
+
+  public List<UserMessage> getInputMessages() {
+    return inputMessages;
+  }
+
+  public void setInputMessages(List<UserMessage> inputMessages) {
+    this.inputMessages = inputMessages;
+  }
+  
+  public void addInputMessage(UserMessage message) {
+    this.inputMessages = (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
+    this.inputMessages.add(message);
+  }
+  
+  public void removeInputMessage(UserMessage message) {
+    this.inputMessages = (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
+    this.inputMessages.remove(message);
+  }
+
+  public List<UserMessage> getOutputMessages() {
+    return outputMessages;
+  }
+
+  public void setOutputMessages(List<UserMessage> outputMessages) {
+    this.outputMessages = outputMessages;
+  }
+  
+  public void addOutputMessage(UserMessage message) {
+    this.outputMessages = (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
+    this.outputMessages.add(message);
+  }
+  
+  public void removeOutputMessage(UserMessage message) {
+    this.outputMessages = (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
+    this.outputMessages.remove(message);
   }
 
   @Entity
