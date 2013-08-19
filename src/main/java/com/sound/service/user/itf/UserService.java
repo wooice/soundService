@@ -31,4 +31,8 @@ public interface UserService {
 	public User changeContactEmailAddress(String userAlias, String targetEmailAddress) throws UserException;
 	
 	public User updateEmailSetting(String emailAddress, EmailSetting emailSetting) throws UserException;
+	
+	public void sendUserMessage(String fromUser, String toUser, String topic, String content) throws UserException;
+
+	public void removeUserMessage(String fromUser, String toUser, String messageId) throws UserException;
 }
