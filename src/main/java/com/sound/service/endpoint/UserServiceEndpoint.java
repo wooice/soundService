@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -120,7 +121,7 @@ public class UserServiceEndpoint {
       profile.setCountry(inputJsonObj.getString("country"));
       JSONArray occs = inputJsonObj.getJSONArray("occupations");
       List<Integer> occList = new ArrayList<Integer>();
-      for (int i = 0 ; i < occs.length() ; i++) {
+      for (int i = 0; i < occs.length(); i++) {
         occList.add(occs.getInt(i));
       }
       profile.setOccupations(occList);
@@ -243,6 +244,41 @@ public class UserServiceEndpoint {
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+  }
+
+  @PUT
+  @Path("/sendMessage")
+  public Response sendUserMessage(@NotNull @FormParam("from") String fromUser,
+      @NotNull @FormParam("to") String toUser, @NotNull @FormParam("topic") String topic,
+      @NotNull @FormParam("content") String content) {
+    try {
+      userService.sendUserMessage(fromUser, toUser, topic, content);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(("Cannot send user message from " + fromUser + " to " + toUser)).build();
+    }
+
+    return Response.status(Status.OK).entity("send sucessfully").build();
+
+  }
+
+  @DELETE
+  @Path("/removeMessage")
+  public Response removeUserMessage(@NotNull @FormParam("from") String fromUser,
+      @NotNull @FormParam("to") String toUser, @NotNull @FormParam("messageId") String messageId) {
+    try {
+      userService.removeUserMessage(fromUser, toUser, messageId);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response
+          .status(Status.INTERNAL_SERVER_ERROR)
+          .entity(
+              ("Cannot remove user message " + messageId + " from " + fromUser + " to " + toUser))
+          .build();
+    }
+
+    return Response.status(Status.OK).entity("remove sucessfully").build();
   }
 
 }

@@ -3,7 +3,6 @@ package com.sound.model;
 import java.util.Date;
 
 import org.bson.types.ObjectId;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.github.jmkgreen.morphia.annotations.Entity;
@@ -27,7 +26,6 @@ public class UserMessage extends BaseModel {
   private String summary;
   private Date date;
 
-  @JsonIgnore
   public ObjectId getId() {
     return id;
   }
