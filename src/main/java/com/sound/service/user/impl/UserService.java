@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.sound.dao.UserAuthDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
+import com.sound.dao.UserMessageDAO;
 import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail;
@@ -29,6 +30,7 @@ import com.sound.model.User.UserProfile;
 import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
+import com.sound.model.UserMessage;
 import com.sound.model.enums.FileType;
 import com.sound.service.storage.itf.RemoteStorageService;
 
@@ -49,6 +51,9 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Autowired
   UserAuthDAO userAuthDAO;
+  
+  @Autowired
+  UserMessageDAO userMessageDAO;
 
   @Override
   public User getUserByAlias(String userAlias) {
@@ -373,5 +378,60 @@ public class UserService implements com.sound.service.user.itf.UserService {
     
     return user;
   }
+
+  @Override
+  public void sendUserMessage(String fromUser, String toUser, String topic, String content)
+      throws UserException {
+    User from = this.getUserByAlias(fromUser);
+    User to = this.getUserByAlias(toUser);
+    if (from == null) {
+      throw new UserException("Cannot find user : " + fromUser);
+    }
+    if (to == null) {
+      throw new UserException("Cannot find user : " + toUser);
+    }
+    
+    String summary = content.length() <= 50 ? content : content.substring(0, 49) + "...";
+    
+    UserMessage message = new UserMessage();
+    message.setFrom(from);
+    message.setTo(to);
+    message.setTopic(topic);
+    message.setContent(content);
+    message.setSummary(summary);
+    message.setDate(new Date());
+    userMessageDAO.save(message);
+    
+    from.addOutputMessage(message);
+    to.addInputMessage(message);
+    
+    userDAO.updateProperty("_id", from.getId(), "outputMessages", from.getOutputMessages());
+    userDAO.updateProperty("_id", to.getId(), "inputMessages", to.getInputMessages());
+    
+  }
+
+  @Override
+  public void removeUserMessage(String fromUser, String toUser, String messageId)
+      throws UserException {
+    User from = this.getUserByAlias(fromUser);
+    User to = this.getUserByAlias(toUser);
+    if (from == null) {
+      throw new UserException("Cannot find user : " + fromUser);
+    }
+    if (to == null) {
+      throw new UserException("Cannot find user : " + toUser);
+    }
+    
+    UserMessage message = userMessageDAO.findOne("_id", messageId);
+    userMessageDAO.delete(message);
+
+    from.removeOutputMessage(message);
+    to.removeInputMessage(message);
+    
+    userDAO.updateProperty("_id", from.getId(), "outputMessages", from.getOutputMessages());
+    userDAO.updateProperty("_id", to.getId(), "inputMessages", to.getInputMessages());
+    
+  }
+
 
 }

@@ -46,6 +46,12 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
+	<bean id="userMessageDAO" class="com.sound.dao.UserMessageDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
 	<bean id="soundLikeDAO" class="com.sound.dao.SoundLikeDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  
