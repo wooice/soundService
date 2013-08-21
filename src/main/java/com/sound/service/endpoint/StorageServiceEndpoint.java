@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -38,6 +39,7 @@ import com.sun.jersey.multipart.FormDataParam;
 
 @Component
 @Path("/storage")
+@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
 public class StorageServiceEndpoint {
 
   Logger logger = Logger.getLogger(StorageServiceEndpoint.class);
