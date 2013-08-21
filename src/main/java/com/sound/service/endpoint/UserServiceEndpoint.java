@@ -3,6 +3,8 @@ package com.sound.service.endpoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -12,6 +14,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -22,6 +25,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.constant.Constant;
 import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail.EmailSetting;
@@ -31,6 +35,7 @@ import com.sound.util.JsonHandler;
 
 @Component
 @Path("/user")
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
 public class UserServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserServiceEndpoint.class);
@@ -38,11 +43,14 @@ public class UserServiceEndpoint {
   @Autowired
   com.sound.service.user.itf.UserService userService;
 
+  @Context
+  HttpServletRequest req;
+
   @GET
   @Path("/{userAlias}/checkAlias")
   public Response checkAlias(@NotNull @PathParam("userAlias") String userAlias) {
     User user = null;
-
+    userService.getCurrentUser(req);
     try {
       user = userService.getUserByAlias(userAlias);
     } catch (Exception e) {
@@ -157,7 +165,16 @@ public class UserServiceEndpoint {
   public Response updateUserPassword(@NotNull @FormParam("emailAddress") String emailAddress,
       @NotNull @FormParam("password") String password, @NotNull @FormParam("ip") String ip) {
     User user = null;
+    
     try {
+      user = userService.getUserByEmail(emailAddress);
+      User currentUser = userService.getCurrentUser(req);
+      
+      if (user != currentUser)
+      {
+        throw new RuntimeException("The user " + currentUser.getProfile().getAlias() + " can't update password of user " + emailAddress);
+      }
+      
       user = userService.updatePassword(emailAddress, password, ip);
     } catch (Exception e) {
       logger.error(e);

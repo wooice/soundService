@@ -3,6 +3,7 @@ package com.sound.service.endpoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -21,6 +22,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
@@ -29,6 +31,7 @@ import com.sound.util.JsonHandler;
 
 @Component
 @Path("/tag")
+@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
 public class TagServiceEndpoint {
 
   Logger logger = Logger.getLogger(TagServiceEndpoint.class);

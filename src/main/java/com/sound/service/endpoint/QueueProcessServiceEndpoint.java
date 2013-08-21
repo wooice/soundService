@@ -3,6 +3,7 @@ package com.sound.service.endpoint;
 import java.io.File;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -22,6 +23,7 @@ import com.sound.service.sound.itf.SoundService;
 
 @Component
 @Path("/queue")
+@RolesAllowed(Constant.ADMIN_ROLE)
 public class QueueProcessServiceEndpoint {
 
   Logger logger = Logger.getLogger(QueueProcessServiceEndpoint.class);

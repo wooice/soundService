@@ -2,6 +2,7 @@ package com.sound.service.endpoint;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -20,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Sound.SoundProfile;
@@ -29,6 +31,7 @@ import com.sound.util.JsonHandler;
 
 @Component
 @Path("/sound")
+@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
 public class SoundServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundServiceEndpoint.class);
