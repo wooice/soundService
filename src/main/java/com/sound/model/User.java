@@ -14,6 +14,7 @@ import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.sound.model.enums.GenderEnum;
 import com.sound.model.enums.UserOccupationType;
+import com.sound.model.enums.UserRoleEnum;
 
 @Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,13 +41,16 @@ public class User extends BaseModel {
   @Embedded
   private UserSocial userSocial;
 
+  @Embedded
+  private List<UserRole> userRoles;
+
   @NotSaved
   @Embedded
   private UserPrefer userPrefer;
-  
+
   @Reference(lazy = true)
   private List<UserMessage> inputMessages;
-  
+
   @Reference(lazy = true)
   private List<UserMessage> outputMessages;
 
@@ -79,13 +83,20 @@ public class User extends BaseModel {
     return external;
   }
 
-
   public UserSocial getUserSocial() {
     return userSocial;
   }
 
   public void setUserSocial(UserSocial social) {
     this.userSocial = social;
+  }
+
+  public List<UserRole> getUserRoles() {
+    return userRoles;
+  }
+
+  public void setUserRoles(List<UserRole> userRoles) {
+    this.userRoles = userRoles;
   }
 
   public void setExternal(UserExternal external) {
@@ -145,14 +156,16 @@ public class User extends BaseModel {
   public void setInputMessages(List<UserMessage> inputMessages) {
     this.inputMessages = inputMessages;
   }
-  
+
   public void addInputMessage(UserMessage message) {
-    this.inputMessages = (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
+    this.inputMessages =
+        (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
     this.inputMessages.add(message);
   }
-  
+
   public void removeInputMessage(UserMessage message) {
-    this.inputMessages = (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
+    this.inputMessages =
+        (null == this.inputMessages) ? new ArrayList<UserMessage>() : this.inputMessages;
     this.inputMessages.remove(message);
   }
 
@@ -163,14 +176,16 @@ public class User extends BaseModel {
   public void setOutputMessages(List<UserMessage> outputMessages) {
     this.outputMessages = outputMessages;
   }
-  
+
   public void addOutputMessage(UserMessage message) {
-    this.outputMessages = (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
+    this.outputMessages =
+        (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
     this.outputMessages.add(message);
   }
-  
+
   public void removeOutputMessage(UserMessage message) {
-    this.outputMessages = (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
+    this.outputMessages =
+        (null == this.outputMessages) ? new ArrayList<UserMessage>() : this.outputMessages;
     this.outputMessages.remove(message);
   }
 
@@ -192,7 +207,7 @@ public class User extends BaseModel {
     public List<UserOccupationType> getOccupationTypes() {
       return UserOccupationType.getTypesByIds(occupations);
     }
-    
+
     public List<Integer> getOccupations() {
       return this.occupations;
     }
@@ -462,7 +477,7 @@ public class User extends BaseModel {
     public void setContact(boolean isContact) {
       this.isContact = isContact;
     }
-    
+
     public static class EmailSetting {
       private boolean exclusiveTracksAndSets;
       private boolean incomingTracks;
@@ -474,7 +489,7 @@ public class User extends BaseModel {
       private boolean newsLetter;
       private boolean productUpdate;
       private boolean survey;
-      
+
       public EmailSetting() {
         exclusiveTracksAndSets = true;
         incomingTracks = true;
@@ -487,64 +502,83 @@ public class User extends BaseModel {
         productUpdate = true;
         survey = true;
       }
-      
+
       public boolean isExclusiveTracksAndSets() {
         return exclusiveTracksAndSets;
       }
+
       public void setExclusiveTracksAndSets(boolean exclusiveTracksAndSets) {
         this.exclusiveTracksAndSets = exclusiveTracksAndSets;
       }
+
       public boolean isIncomingTracks() {
         return incomingTracks;
       }
+
       public void setIncomingTracks(boolean incomingTracks) {
         this.incomingTracks = incomingTracks;
       }
+
       public boolean isMessage() {
         return message;
       }
+
       public void setMessage(boolean message) {
         this.message = message;
       }
+
       public boolean isActivity() {
         return activity;
       }
+
       public void setActivity(boolean activity) {
         this.activity = activity;
       }
+
       public boolean isPendingGroup() {
         return pendingGroup;
       }
+
       public void setPendingGroup(boolean pendingGroup) {
         this.pendingGroup = pendingGroup;
       }
+
       public boolean isNewFollower() {
         return newFollower;
       }
+
       public void setNewFollower(boolean newFollower) {
         this.newFollower = newFollower;
       }
+
       public boolean isRepost() {
         return repost;
       }
+
       public void setRepost(boolean repost) {
         this.repost = repost;
       }
+
       public boolean isNewsLetter() {
         return newsLetter;
       }
+
       public void setNewsLetter(boolean newsLetter) {
         this.newsLetter = newsLetter;
       }
+
       public boolean isProductUpdate() {
         return productUpdate;
       }
+
       public void setProductUpdate(boolean productUpdate) {
         this.productUpdate = productUpdate;
       }
+
       public boolean isSurvey() {
         return survey;
       }
+
       public void setSurvey(boolean survey) {
         this.survey = survey;
       }
@@ -570,6 +604,19 @@ public class User extends BaseModel {
 
     public void setFollowed(boolean followed) {
       this.followed = followed;
+    }
+
+  }
+
+  public static class UserRole {
+    private Integer role;
+
+    public String getRole() {
+      return UserRoleEnum.getTypeName(this.role);
+    }
+
+    public void setRole(String role) {
+      this.role = UserRoleEnum.getTypeId(role);
     }
 
   }

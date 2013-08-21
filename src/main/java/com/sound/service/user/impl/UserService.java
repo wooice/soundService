@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -51,7 +54,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Autowired
   UserAuthDAO userAuthDAO;
-  
+
   @Autowired
   UserMessageDAO userMessageDAO;
 
@@ -173,8 +176,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public User updateUserBasicProfile(String userAlias, UserProfile newProfile)
-      throws UserException {
+  public User updateUserBasicProfile(String userAlias, UserProfile newProfile) throws UserException {
     User user = this.getUserByAlias(userAlias);
 
     if (null == user) {
@@ -375,7 +377,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
       }
     }
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
-    
+
     return user;
   }
 
@@ -390,9 +392,9 @@ public class UserService implements com.sound.service.user.itf.UserService {
     if (to == null) {
       throw new UserException("Cannot find user : " + toUser);
     }
-    
+
     String summary = content.length() <= 50 ? content : content.substring(0, 49) + "...";
-    
+
     UserMessage message = new UserMessage();
     message.setFrom(from);
     message.setTo(to);
@@ -401,13 +403,13 @@ public class UserService implements com.sound.service.user.itf.UserService {
     message.setSummary(summary);
     message.setDate(new Date());
     userMessageDAO.save(message);
-    
+
     from.addOutputMessage(message);
     to.addInputMessage(message);
-    
+
     userDAO.updateProperty("_id", from.getId(), "outputMessages", from.getOutputMessages());
     userDAO.updateProperty("_id", to.getId(), "inputMessages", to.getInputMessages());
-    
+
   }
 
   @Override
@@ -421,17 +423,24 @@ public class UserService implements com.sound.service.user.itf.UserService {
     if (to == null) {
       throw new UserException("Cannot find user : " + toUser);
     }
-    
+
     UserMessage message = userMessageDAO.findOne("_id", messageId);
     userMessageDAO.delete(message);
 
     from.removeOutputMessage(message);
     to.removeInputMessage(message);
-    
+
     userDAO.updateProperty("_id", from.getId(), "outputMessages", from.getOutputMessages());
     userDAO.updateProperty("_id", to.getId(), "inputMessages", to.getInputMessages());
-    
+
   }
 
+  @Override
+  public User getCurrentUser(HttpServletRequest req) {
+    HttpSession session = req.getSession(false);
+    String userAlias = (null == session) ? null : (String) session.getAttribute("userAlias");
+
+    return (null == userAlias)? null:userDAO.findOne("profile.alias", userAlias);
+  }
 
 }

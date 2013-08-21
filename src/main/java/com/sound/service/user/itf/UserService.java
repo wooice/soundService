@@ -1,5 +1,7 @@
 package com.sound.service.user.itf;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail.EmailSetting;
@@ -35,4 +37,6 @@ public interface UserService {
 	public void sendUserMessage(String fromUser, String toUser, String topic, String content) throws UserException;
 
 	public void removeUserMessage(String fromUser, String toUser, String messageId) throws UserException;
+	
+	public User getCurrentUser(HttpServletRequest req);
 }

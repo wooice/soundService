@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -20,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
 import com.sound.model.User;
@@ -28,6 +30,7 @@ import com.sound.util.JsonHandler;
 
 @Component
 @Path("/userActivity")
+@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
 public class UserSocialServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserSocialServiceEndpoint.class);
