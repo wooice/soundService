@@ -17,7 +17,7 @@ public class UserAuth extends BaseModel {
 
   @Id
   private ObjectId id;
-
+  
   private String password;
 
   @Embedded
@@ -44,7 +44,6 @@ public class UserAuth extends BaseModel {
   public List<ChangeHistory> getHistories() {
     return histories;
   }
-
 
   public void setHistories(List<ChangeHistory> histories) {
     this.histories = histories;
