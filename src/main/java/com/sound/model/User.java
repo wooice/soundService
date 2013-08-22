@@ -19,6 +19,7 @@ import com.sound.model.enums.UserRoleEnum;
 @Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User extends BaseModel {
+
   @Id
   private ObjectId id;
 
@@ -41,6 +42,7 @@ public class User extends BaseModel {
   @Embedded
   private UserSocial userSocial;
 
+  // One user one role. List for future extension.
   @Embedded
   private List<UserRole> userRoles;
 
@@ -98,7 +100,7 @@ public class User extends BaseModel {
   public void setUserRoles(List<UserRole> userRoles) {
     this.userRoles = userRoles;
   }
-
+  
   public void setExternal(UserExternal external) {
     this.external = external;
   }
@@ -193,7 +195,6 @@ public class User extends BaseModel {
   public static class UserProfile {
     private String avatorUrl;
     private String alias;
-    private String password;
     private String firstName;
     private String lastName;
     private String city;
@@ -222,15 +223,6 @@ public class User extends BaseModel {
 
     public void setAvatorUrl(String avatorUrl) {
       this.avatorUrl = avatorUrl;
-    }
-
-    @JsonIgnore
-    public String getPassword() {
-      return password;
-    }
-
-    public void setPassword(String password) {
-      this.password = password;
     }
 
     public String getAlias() {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -26,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
-import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
@@ -47,57 +47,6 @@ public class UserServiceEndpoint {
   HttpServletRequest req;
 
   @GET
-  @Path("/{userAlias}/checkAlias")
-  public Response checkAlias(@NotNull @PathParam("userAlias") String userAlias) {
-    User user = null;
-    userService.getCurrentUser(req);
-    try {
-      user = userService.getUserByAlias(userAlias);
-    } catch (Exception e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to get user by alias " + userAlias)).build();
-    }
-    String result = (null == user) ? "true" : "false";
-
-    return Response.status(Status.OK).entity(result).build();
-  }
-
-  @GET
-  @Path("/{emailAddress}/checkEmail")
-  public Response checkEmail(@NotNull @PathParam("emailAddress") String emailAddress) {
-    User user = null;
-    try {
-      user = userService.getUserByEmail(emailAddress);
-    } catch (Exception e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to check emailaddress " + emailAddress)).build();
-    }
-    String result = (null == user) ? "true" : "false";
-
-    return Response.status(Status.OK).entity(result).build();
-  }
-
-  @PUT
-  @Path("/create")
-  public Response create(@NotNull @FormParam("userAlias") String userAlias,
-      @NotNull @FormParam("emailAddress") String emailAddress,
-      @NotNull @FormParam("password") String password) {
-    try {
-      userService.createUser(userAlias, emailAddress, password);
-    } catch (UserException e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-    } catch (Exception e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to create user " + userAlias)).build();
-    }
-
-    return Response.status(Status.OK).entity("true").build();
-  }
-
-  @GET
   @Path("/{userAlias}")
   public Response load(@NotNull @PathParam("userAlias") String userAlias) {
     User user = null;
@@ -111,7 +60,6 @@ public class UserServiceEndpoint {
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
   }
-
 
   @POST
   @Path("/updateBasic")
@@ -298,4 +246,28 @@ public class UserServiceEndpoint {
     return Response.status(Status.OK).entity("remove sucessfully").build();
   }
 
+  @POST
+  @Path("/logout")
+  public Response logout() {
+    User user = null;
+    try {
+      user = userService.getCurrentUser(req);
+
+      if (null == user)
+      {
+        throw new RuntimeException("You are not logged in.");
+      }
+      HttpSession session = req.getSession(false);
+
+      if (null != session)
+      {
+        session.invalidate();
+      }
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();
+  }
 }
