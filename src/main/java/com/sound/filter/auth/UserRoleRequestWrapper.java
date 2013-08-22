@@ -25,7 +25,8 @@ public class UserRoleRequestWrapper extends HttpServletRequestWrapper {
   @Override
   public boolean isUserInRole(String role) {
     if (roles == null) {
-      if (role == "guest")
+      // If no role on current user, treat him as a guest.
+      if ("guest".equals(role))
       {
         return true;
       }

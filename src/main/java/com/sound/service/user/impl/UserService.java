@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.sound.constant.Constant;
 import com.sound.dao.UserAuthDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
@@ -30,6 +31,8 @@ import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
 import com.sound.model.User.UserPrefer;
 import com.sound.model.User.UserProfile;
+import com.sound.model.User.UserRole;
+import com.sound.model.User.UserSocial;
 import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
@@ -98,18 +101,30 @@ public class UserService implements com.sound.service.user.itf.UserService {
     }
 
     user = new User();
-    User.UserProfile profile = new User.UserProfile();
+    UserProfile profile = new UserProfile();
     profile.setAlias(userAlias);
-    profile.setPassword(password);
+
+    UserAuth auth = new UserAuth();
+    auth.setPassword(password);
+    userAuthDAO.save(auth);
+
     user.setProfile(profile);
-    User.UserEmail email = new User.UserEmail();
+    user.setAuth(auth);
+
+    UserRole role = new UserRole();
+    role.setRole(Constant.USER_ROLE);
+    List<UserRole> roles = new ArrayList<UserRole>();
+    roles.add(role);
+    user.setUserRoles(roles);
+
+    UserEmail email = new UserEmail();
     email.setEmailAddress(emailAddress);
     email.setConfirmCode(generateConfirmationCode());
     email.setConfirmed(false);
     email.setContact(true);
     email.setSetting(new EmailSetting());
     user.addEmail(email);
-    User.UserSocial social = new User.UserSocial();
+    UserSocial social = new UserSocial();
     social.setFollowed(0L);
     social.setFollowing(0L);
     social.setSounds(0L);
@@ -134,7 +149,6 @@ public class UserService implements com.sound.service.user.itf.UserService {
       user.setAuth(auth);
       auth.setHistories(new ArrayList<ChangeHistory>());
     }
-    auth.setId(user.getId());
     auth.setPassword(password);
     ChangeHistory history = new ChangeHistory();
     history.setIp(ip);
@@ -440,7 +454,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     HttpSession session = req.getSession(false);
     String userAlias = (null == session) ? null : (String) session.getAttribute("userAlias");
 
-    return (null == userAlias)? null:userDAO.findOne("profile.alias", userAlias);
+    return (null == userAlias) ? null : userDAO.findOne("profile.alias", userAlias);
   }
 
 }
