@@ -39,4 +39,6 @@ public interface UserService {
 	public void removeUserMessage(String fromUser, String toUser, String messageId) throws UserException;
 	
 	public User getCurrentUser(HttpServletRequest req);
+	
+	public User grantRole(User user, String role);
 }

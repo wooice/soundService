@@ -4,7 +4,7 @@ import com.sound.constant.Constant;
 
 public enum UserRoleEnum {
 
- GUEST(0, Constant.GUEST_ROLE), USER(1, Constant.USER_ROLE), ADMIN(5, Constant.ADMIN_ROLE);
+  GUEST(0, Constant.GUEST_ROLE), USER(1, Constant.USER_ROLE), ADMIN(5, Constant.ADMIN_ROLE);
 
   private Integer typeId;
 

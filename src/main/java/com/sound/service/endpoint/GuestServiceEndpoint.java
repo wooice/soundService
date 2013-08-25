@@ -9,6 +9,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,10 +17,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +34,7 @@ import com.sound.util.JsonHandler;
 
 @Component
 @Path("/guest")
-@RolesAllowed(Constant.GUEST_ROLE)
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.GUEST_ROLE})
 public class GuestServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserServiceEndpoint.class);
@@ -44,10 +47,14 @@ public class GuestServiceEndpoint {
 
   @POST
   @Path("/login")
-  public Response login(@NotNull @FormParam("userId") String userId,
-      @NotNull @FormParam("password") String password) {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response login(@NotNull JSONObject inputJsonObj) {
     User user = null;
+
     try {
+      String userId = inputJsonObj.getString("userId");
+      String password = inputJsonObj.getString("password");
+
       String emailRegex =
           "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
       Pattern regex = Pattern.compile(emailRegex);
@@ -81,7 +88,7 @@ public class GuestServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
   }
 
   @GET

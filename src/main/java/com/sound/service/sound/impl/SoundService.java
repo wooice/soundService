@@ -161,10 +161,10 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       soundRecordDAO.save(soundRecord);
 
       // Add one sound count to user social
-      userDAO.increase("profile.alias", ownerAlias, "social.sounds");
+      userDAO.increase("profile.alias", ownerAlias, "userSocial.sounds");
     }
 
-    userDAO.updateProperty("profile.alias", ownerAlias, "social.soundDuration", (owner
+    userDAO.updateProperty("profile.alias", ownerAlias, "userSocial.soundDuration", (owner
         .getUserSocial().getSoundDuration() + soundLocal.getDuration()));
   }
 
@@ -223,7 +223,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       soundRecordDAO.save(soundRecord);
 
       // Add one sound count to user social
-      userDAO.increase("profile.alias", ownerAlias, "social.sounds");
+      userDAO.increase("profile.alias", ownerAlias, "userSocial.sounds");
     }
 
     return soundProfile;
