@@ -128,6 +128,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     social.setFollowed(0L);
     social.setFollowing(0L);
     social.setSounds(0L);
+    social.setSoundDuration(0L);
     user.setUserSocial(social);
 
     userDAO.save(user);
@@ -455,6 +456,19 @@ public class UserService implements com.sound.service.user.itf.UserService {
     String userAlias = (null == session) ? null : (String) session.getAttribute("userAlias");
 
     return (null == userAlias) ? null : userDAO.findOne("profile.alias", userAlias);
+  }
+
+  @Override
+  public User grantRole(User user, String role) {
+    UserRole userRole = new UserRole();
+    userRole.setRole(role);
+    List<UserRole> newUserRole = new ArrayList<UserRole>();
+    newUserRole.add(userRole);
+    user.setUserRoles(newUserRole);
+
+    userDAO.save(user);
+
+    return user;
   }
 
 }

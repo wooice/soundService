@@ -246,6 +246,25 @@ public class UserServiceEndpoint {
     return Response.status(Status.OK).entity("remove sucessfully").build();
   }
 
+  @GET
+  @Path("/isAlive")
+  public Response isAlive() {
+    User user = null;
+    try {
+      user = userService.getCurrentUser(req);
+
+      if (null == user)
+      {
+        throw new RuntimeException("You are not logged in.");
+      }
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+  }
+  
   @POST
   @Path("/logout")
   public Response logout() {
@@ -265,7 +284,7 @@ public class UserServiceEndpoint {
       }
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();

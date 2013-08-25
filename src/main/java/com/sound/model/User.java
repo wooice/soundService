@@ -44,7 +44,7 @@ public class User extends BaseModel {
 
   // One user one role. List for future extension.
   @Embedded
-  private List<UserRole> userRoles;
+  private List<UserRole> userRoles = new ArrayList<UserRole>();
 
   @NotSaved
   @Embedded
