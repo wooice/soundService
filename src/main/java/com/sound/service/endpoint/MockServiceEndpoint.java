@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sound.model.User;
 import com.sound.service.sound.impl.SoundDataService;
 import com.sound.service.sound.itf.SoundService;
 
@@ -31,7 +32,8 @@ public class MockServiceEndpoint {
 		try
 		{
 			userService.deleteByAlias("robot");
-			userService.createUser("robot", "robot@wooice.com", "robot123");
+			User user = userService.createUser("robot", "robot@wooice.com", "robot123");
+			userService.grantRole(user, "admin");
 		}
 		catch(Exception e)
 		{
