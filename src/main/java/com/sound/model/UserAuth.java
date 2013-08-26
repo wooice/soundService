@@ -1,5 +1,6 @@
 package com.sound.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +48,14 @@ public class UserAuth extends BaseModel {
 
   public void setHistories(List<ChangeHistory> histories) {
     this.histories = histories;
+  }
+  
+  public void addHistory(ChangeHistory history){
+    if (null == this.histories)
+    {
+      this.histories = new ArrayList<ChangeHistory>();
+    }
+    this.histories.add(history);
   }
 
 

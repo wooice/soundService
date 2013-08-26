@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.net.URL;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -14,6 +15,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -30,6 +32,8 @@ import com.sound.model.OssAuth;
 import com.sound.model.Sound;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.Sound.SoundProfile.SoundPoster;
+import com.sound.model.User;
+import com.sound.model.User.UserProfile;
 import com.sound.model.enums.FileType;
 import com.sound.model.file.SoundLocal;
 import com.sound.service.sound.itf.SoundService;
@@ -39,7 +43,7 @@ import com.sun.jersey.multipart.FormDataParam;
 
 @Component
 @Path("/storage")
-@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
 public class StorageServiceEndpoint {
 
   Logger logger = Logger.getLogger(StorageServiceEndpoint.class);
@@ -48,7 +52,13 @@ public class StorageServiceEndpoint {
   com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
 
   @Autowired
+  com.sound.service.user.itf.UserService userService;
+
+  @Autowired
   SoundService soundService;
+
+  @Context
+  HttpServletRequest req;
 
   @GET
   @Path("/ossauth")
@@ -89,9 +99,50 @@ public class StorageServiceEndpoint {
   }
 
   @POST
+  @Path("/upload/avatar")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response uploadUserAvatar(@FormDataParam("file") InputStream uploadedInputStream,
+      @FormDataParam("file") FormDataContentDisposition fileDetail,
+      @FormDataParam("fileLenth") InputStream fileLenthStream) {
+
+    try {
+      User user = userService.getCurrentUser(req);
+
+      if (null == user) {
+        return Response.status(Response.Status.FORBIDDEN).entity(JsonHandler.toJson("failed"))
+            .build();
+      }
+
+      StringWriter writer = new StringWriter();
+      IOUtils.copy(fileLenthStream, writer);
+      String fileLenth = writer.toString();
+
+      SoundLocal soundLocal = new SoundLocal();
+
+      String[] temp = fileDetail.getFileName().split("\\.");
+      String avatarName = user.getProfile().getAlias() + "." + temp[1];
+      soundLocal.setFileName(avatarName);
+      soundLocal.setSoundStream(uploadedInputStream);
+      soundLocal.setLength(Long.parseLong(fileLenth));
+      remoteStorageService.upload(soundLocal, FileType.IMAGE);
+
+      UserProfile profile = user.getProfile();
+      profile.setAvatorUrl(avatarName);
+      userService.updateUserBasicProfile(user, profile);
+
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("unable to upload sound.").build();
+    }
+
+    return Response.status(Response.Status.OK).entity(JsonHandler.toJson("true")).build();
+  }
+
+  @POST
   @Path("/upload/poster")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public Response uploadPoster(@FormDataParam("file") InputStream uploadedInputStream,
+  public Response uploadSoundPoster(@FormDataParam("file") InputStream uploadedInputStream,
       @FormDataParam("file") FormDataContentDisposition fileDetail,
       @FormDataParam("fileName") InputStream nameStream,
       @FormDataParam("length") InputStream posterlengthStream) {
@@ -114,7 +165,7 @@ public class StorageServiceEndpoint {
       Sound sound = soundService.loadByRemoteId(fileName.split("\\.")[0]);
 
       if (null != sound) {
-        String [] fileNames = fileName.split("\\.");
+        String[] fileNames = fileName.split("\\.");
         SoundPoster poster = new SoundPoster();
         poster.setPosterId(fileNames[0]);
         poster.setExtension(fileNames[1]);

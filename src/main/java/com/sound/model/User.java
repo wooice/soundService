@@ -377,9 +377,11 @@ public class User extends BaseModel {
   public static class UserExternal {
     private String website;
     private String sina;
+    private String tencent;
     private String qq;
     private String renren;
     private String douban;
+    private String xiami;
 
     public String getWebsite() {
       return website;
@@ -420,6 +422,23 @@ public class User extends BaseModel {
     public void setDouban(String douban) {
       this.douban = douban;
     }
+
+    public String getTencent() {
+      return tencent;
+    }
+
+    public void setTencent(String tencent) {
+      this.tencent = tencent;
+    }
+
+    public String getXiami() {
+      return xiami;
+    }
+
+    public void setXiami(String xiami) {
+      this.xiami = xiami;
+    }
+    
   }
 
   public static class UserEmail {
