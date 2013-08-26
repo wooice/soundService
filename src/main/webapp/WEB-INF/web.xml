@@ -50,12 +50,10 @@
 			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
 			<param-value>false</param-value>
 		</init-param>
-		<!-- 
 		<init-param>
     		<param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
     		<param-value>com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory</param-value>
   		</init-param>
-  		 -->
 		<load-on-startup>1</load-on-startup>
 	</servlet>
  

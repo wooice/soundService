@@ -14,15 +14,15 @@ public interface UserService {
 
 	public User createUser(String userAlias, String emailAddress, String password) throws UserException;
 	
-	public User updatePassword(String emailAddress, String password, String ip) throws UserException;
+	public User updatePassword(User user, String password, String ip) throws UserException;
 
 	public User getUserByAlias(String userAlias);
 	
 	public void deleteByAlias(String userAlias);
 	
-	public User updateUserBasicProfile(String userAlias, UserProfile profile) throws UserException;
+	public User updateUserBasicProfile(User user, UserProfile profile) throws UserException;
 
-	public User updateUserSnsProfile(String userAlias, UserExternal external) throws UserException;
+	public User updateUserSnsProfile(User user, UserExternal external) throws UserException;
 
 	public User addEmailAddress(String userAlias, String emailAddress) throws UserException;
 	  

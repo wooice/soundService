@@ -69,7 +69,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
-          remoteStorageService.generateDownloadUrl(user.getProfile().getAlias(),
+          remoteStorageService.generateDownloadUrl(user.getProfile().getAvatorUrl(),
               FileType.getFileType("image")).toString());
     }
 
@@ -82,6 +82,15 @@ public class UserService implements com.sound.service.user.itf.UserService {
   public User getUserByEmail(String emailAddress) {
     User user = userDAO.findOne("emails.emailAddress", emailAddress);
 
+    if (user == null) return null;
+
+    if (user.getProfile().hasAvatar()) {
+      user.getProfile().setAvatorUrl(
+          remoteStorageService.generateDownloadUrl(user.getProfile().getAlias(),
+              FileType.getFileType("image")).toString());
+    }
+
+    user.setUserPrefer(getUserPreferOfSound(user, user));
     return user;
   }
 
@@ -137,13 +146,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public User updatePassword(String emailAddress, String password, String ip) throws UserException {
-    User user = this.getUserByEmail(emailAddress);
-
-    if (null == user) {
-      throw new UserException("Cannot find user with email address : " + emailAddress);
-    }
-
+  public User updatePassword(User user, String password, String ip) throws UserException {
     UserAuth auth = user.getAuth();
     if (auth == null) {
       auth = new UserAuth();
@@ -155,7 +158,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     history.setIp(ip);
     history.setModifiedDate(new Date());
     history.setPassword(password);
-    auth.getHistories().add(history);
+    auth.addHistory(history);
 
     userAuthDAO.save(auth);
 
@@ -191,12 +194,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public User updateUserBasicProfile(String userAlias, UserProfile newProfile) throws UserException {
-    User user = this.getUserByAlias(userAlias);
-
-    if (null == user) {
-      throw new UserException("Cannot find user : " + userAlias);
-    }
+  public User updateUserBasicProfile(User user, UserProfile newProfile) throws UserException {
 
     UserProfile profile = user.getProfile();
 
@@ -240,14 +238,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public User updateUserSnsProfile(String userAlias, UserExternal newExternal) throws UserException {
-    User user = this.getUserByAlias(userAlias);
-
-    if (null == user) {
-      throw new UserException("Cannot find user : " + userAlias);
-    }
-
-    UserExternal external = user.getExternal();
+  public User updateUserSnsProfile(User user, UserExternal newExternal) throws UserException {
+    UserExternal external = (null == user.getExternal()) ? new UserExternal() : user.getExternal();
 
     if (StringUtils.isNotBlank(newExternal.getWebsite())) {
       external.setWebsite(newExternal.getWebsite());
@@ -255,6 +247,10 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (StringUtils.isNotBlank(newExternal.getSina())) {
       external.setSina(newExternal.getSina());
+    }
+
+    if (StringUtils.isNotBlank(newExternal.getTencent())) {
+      external.setTencent(newExternal.getTencent());
     }
 
     if (StringUtils.isNotBlank(newExternal.getQq())) {
@@ -267,6 +263,10 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (StringUtils.isNotBlank(newExternal.getDouban())) {
       external.setDouban(newExternal.getDouban());
+    }
+
+    if (StringUtils.isNotBlank(newExternal.getXiami())) {
+      external.setXiami(newExternal.getXiami());
     }
 
     userDAO.updateProperty("_id", user.getId(), "external", external);

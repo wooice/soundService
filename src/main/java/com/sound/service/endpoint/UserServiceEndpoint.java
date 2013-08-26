@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
+import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
@@ -64,28 +65,29 @@ public class UserServiceEndpoint {
   @POST
   @Path("/updateBasic")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUserBasicProfile(@NotNull @FormParam("userAlias") String userAlias,
-      @NotNull JSONObject inputJsonObj) {
+  public Response updateUserBasicProfile(@NotNull JSONObject inputJsonObj) {
     User user = null;
     UserProfile profile = new UserProfile();
     try {
-      profile.setAlias(inputJsonObj.getString("alias"));
-      profile.setAvatorUrl(inputJsonObj.getString("avatorUrl"));
+      user = userService.getCurrentUser(req);
+
+      // profile.setAlias(inputJsonObj.getString("alias"));
       profile.setFirstName(inputJsonObj.getString("firstName"));
       profile.setLastName(inputJsonObj.getString("lastName"));
       profile.setCity(inputJsonObj.getString("city"));
       profile.setCountry(inputJsonObj.getString("country"));
-      JSONArray occs = inputJsonObj.getJSONArray("occupations");
-      List<Integer> occList = new ArrayList<Integer>();
-      for (int i = 0; i < occs.length(); i++) {
-        occList.add(occs.getInt(i));
-      }
-      profile.setOccupations(occList);
-      user = userService.updateUserBasicProfile(userAlias, profile);
+      profile.setDescription(inputJsonObj.getString("description"));
+      // JSONArray occs = inputJsonObj.getJSONArray("occupations");
+      // List<Integer> occList = new ArrayList<Integer>();
+      // for (int i = 0; i < occs.length(); i++) {
+      // occList.add(occs.getInt(i));
+      // }
+      // profile.setOccupations(occList);
+      user = userService.updateUserBasicProfile(user, profile);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot update user basic profile for " + userAlias)).build();
+          .entity(("Cannot update user basic profile for " + user.getProfile().getAlias())).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -93,16 +95,16 @@ public class UserServiceEndpoint {
 
   @POST
   @Path("/updateSns")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public Response updateUserSnsProfile(@NotNull @FormParam("userAlias") String userAlias,
-      @NotNull UserExternal external) {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response updateUserSnsProfile(@NotNull UserExternal external) {
     User user = null;
     try {
-      user = userService.updateUserSnsProfile(userAlias, external);
+      user = userService.getCurrentUser(req);
+      user = userService.updateUserSnsProfile(user, external);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot update user sns profile for " + userAlias)).build();
+          .entity(("Cannot update user sns profile for " + user.getProfile().getAlias())).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -110,24 +112,35 @@ public class UserServiceEndpoint {
 
   @POST
   @Path("/updatePassword")
-  public Response updateUserPassword(@NotNull @FormParam("emailAddress") String emailAddress,
-      @NotNull @FormParam("password") String password, @NotNull @FormParam("ip") String ip) {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response updateUserPassword(@NotNull JSONObject inputJsonObj) {
     User user = null;
-    
+
     try {
-      user = userService.getUserByEmail(emailAddress);
-      User currentUser = userService.getCurrentUser(req);
-      
-      if (user != currentUser)
+      user = userService.getCurrentUser(req);
+
+      if (null == user) {
+        return Response.status(Status.FORBIDDEN).entity(JsonHandler.toJson("falied")).build();
+      }
+
+      String oldPassword = inputJsonObj.getString("oldPassword");
+
+      if (!user.getAuth().getPassword().equals(oldPassword)) {
+        throw new UserException("Old password not match!");
+      }
+
+      String newPassword = inputJsonObj.getString("newPassword");
+
+      if (oldPassword.equals(newPassword))
       {
-        throw new RuntimeException("The user " + currentUser.getProfile().getAlias() + " can't update password of user " + emailAddress);
+        throw new UserException("Password not changed!");
       }
       
-      user = userService.updatePassword(emailAddress, password, ip);
+      user = userService.updatePassword(user, newPassword, null);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot update password for " + emailAddress)).build();
+          .entity(("Cannot update password for " + user.getProfile().getAlias())).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -253,8 +266,7 @@ public class UserServiceEndpoint {
     try {
       user = userService.getCurrentUser(req);
 
-      if (null == user)
-      {
+      if (null == user) {
         throw new RuntimeException("You are not logged in.");
       }
     } catch (Exception e) {
@@ -264,7 +276,7 @@ public class UserServiceEndpoint {
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
   }
-  
+
   @POST
   @Path("/logout")
   public Response logout() {
@@ -272,14 +284,12 @@ public class UserServiceEndpoint {
     try {
       user = userService.getCurrentUser(req);
 
-      if (null == user)
-      {
+      if (null == user) {
         throw new RuntimeException("You are not logged in.");
       }
       HttpSession session = req.getSession(false);
 
-      if (null != session)
-      {
+      if (null != session) {
         session.invalidate();
       }
     } catch (Exception e) {
