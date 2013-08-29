@@ -122,6 +122,30 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   }
 
   @Override
+  public List<Sound> loadByKeyWords(User currentUser, String keyWord, Integer pageNum,
+      Integer soundsPerPage) {
+    List<Sound> sounds =
+        soundDAO.findByKeyWord(keyWord, (pageNum - 1) * soundsPerPage, soundsPerPage);
+
+    for (Sound sound : sounds) {
+      if (null != sound.getProfile().getPoster()
+          && null != sound.getProfile().getPoster().getPosterId()) {
+        sound
+            .getProfile()
+            .getPoster()
+            .setUrl(
+                remoteStorageService.generateDownloadUrl(
+                    sound.getProfile().getPoster().getPosterId() + "."
+                        + sound.getProfile().getPoster().getExtension(),
+                    FileType.getFileType("image")).toString());
+      }
+      sound.setUserPrefer(getUserPreferOfSound(sound, currentUser));
+    }
+
+    return sounds;
+  }
+
+  @Override
   public void saveData(SoundLocal soundLocal, String ownerAlias) {
     User owner = userDAO.findOne("profile.alias", ownerAlias);
     String[] fileNames = soundLocal.getFileName().split("\\.");

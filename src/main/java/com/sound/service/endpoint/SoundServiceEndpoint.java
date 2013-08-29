@@ -3,6 +3,7 @@ package com.sound.service.endpoint;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -13,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -26,18 +28,25 @@ import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.User;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.util.JsonHandler;
 
 @Component
 @Path("/sound")
-@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
 public class SoundServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundServiceEndpoint.class);
 
   @Autowired
   SoundService soundService;
+
+  @Autowired
+  com.sound.service.user.itf.UserService userService;
+
+  @Context
+  HttpServletRequest req;
 
   @GET
   @Path("/{soundAlias}")
@@ -59,11 +68,10 @@ public class SoundServiceEndpoint {
   @Path("/{soundName}")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveProfile(@NotNull @PathParam("soundName") String soundName,
-                              @NotNull SoundProfile soundProfile) {
+      @NotNull SoundProfile soundProfile) {
     SoundProfile profile = null;
     try {
-      profile =
-          soundService.saveProfile(soundProfile, "robot");
+      profile = soundService.saveProfile(soundProfile, "robot");
     } catch (SoundException e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (Exception e) {
@@ -116,6 +124,27 @@ public class SoundServiceEndpoint {
   }
 
   @GET
+  @Path("/streams")
+  public Response listSoundsByKeyword(@NotNull @QueryParam("keyword") String keyword,
+      @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
+    pageNum = (null == pageNum) ? 0 : pageNum;
+    soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
+
+    List<Sound> sounds = null;
+    User currentUser = null;
+    try {
+      currentUser = userService.getCurrentUser(req);
+      sounds = soundService.loadByKeyWords(currentUser, keyword, pageNum, soundsPerPage);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to load sound streams.")
+          .build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
+  }
+
+  @GET
   @Path("/streams/{userAlias}")
   public Response listUsersSounds(@NotNull @PathParam("userAlias") String userAlias,
       @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
@@ -156,7 +185,7 @@ public class SoundServiceEndpoint {
     }
     return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
   }
-  
+
   @GET
   @Path("/toupload")
   public Response getSoundToUpload() {
