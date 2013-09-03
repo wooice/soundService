@@ -124,8 +124,8 @@ public class SoundServiceEndpoint {
   }
 
   @GET
-  @Path("/streams")
-  public Response listSoundsByKeyword(@NotNull @QueryParam("keyword") String keyword,
+  @Path("/streams/search")
+  public Response listSoundsByKeyword(@NotNull @QueryParam("q") String keyword,
       @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
     soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
