@@ -50,11 +50,11 @@ public class SoundServiceEndpoint {
 
   @GET
   @Path("/{soundAlias}")
-  public Response loadSound(@QueryParam("userAlias") String userAlias,
-      @NotNull @PathParam("soundAlias") String soundAlias) {
+  public Response loadSound(@NotNull @PathParam("soundAlias") String soundAlias) {
     Sound sound = null;
+    User currentUser = userService.getCurrentUser(req);
     try {
-      sound = soundService.load(userAlias, soundAlias);
+      sound = soundService.load(currentUser, soundAlias);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -88,8 +88,15 @@ public class SoundServiceEndpoint {
   public Response updateProfile(@NotNull @PathParam("soundAlias") String soundAlias,
       @NotNull SoundProfile soundProfile) {
     SoundProfile profile = null;
+    User currentUser = null;
     try {
-      soundProfile.setAlias(soundAlias);
+      currentUser = userService.getCurrentUser(req);
+
+      if (soundService.isOwner(currentUser, soundAlias)) {
+        soundProfile.setAlias(soundAlias);
+      } else {
+        return Response.status(Status.FORBIDDEN).entity("You don't have write access").build();
+      }
       profile = soundService.updateProfile(soundProfile);
     } catch (SoundException e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -113,8 +120,15 @@ public class SoundServiceEndpoint {
   @DELETE
   @Path("/{soundAlias}")
   public Response delete(@NotNull @PathParam("soundAlias") String soundAlias) {
+    User currentUser = null;
     try {
-      soundService.delete(soundAlias);
+      currentUser = userService.getCurrentUser(req);
+
+      if (soundService.isOwner(currentUser, soundAlias)) {
+        soundService.delete(soundAlias);
+      } else {
+        return Response.status(Status.FORBIDDEN).entity("You don't have write access").build();
+      }
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -146,14 +160,16 @@ public class SoundServiceEndpoint {
 
   @GET
   @Path("/streams/{userAlias}")
-  public Response listUsersSounds(@NotNull @PathParam("userAlias") String userAlias,
-      @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
+  public Response listUsersSounds(@QueryParam("pageNum") Integer pageNum,
+      @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
     soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
 
     List<SoundRecord> sounds = null;
+    User currentUser = null;
     try {
-      sounds = soundService.getSoundsByUser(userAlias, pageNum, soundsPerPage);
+      currentUser = userService.getCurrentUser(req);
+      sounds = soundService.getSoundsByUser(currentUser, pageNum, soundsPerPage);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -168,20 +184,22 @@ public class SoundServiceEndpoint {
 
   @GET
   @Path("/streams")
-  public Response listObservingSounds(@NotNull @QueryParam("userAlias") String userAlias,
-      @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
+  public Response listObservingSounds(@QueryParam("pageNum") Integer pageNum,
+      @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
     soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
 
     List<SoundRecord> sounds = null;
+    User currentUser = null;
     try {
-      sounds = soundService.getObservingSounds(userAlias, pageNum, soundsPerPage);
+      currentUser = userService.getCurrentUser(req);
+      sounds = soundService.getObservingSounds(currentUser, pageNum, soundsPerPage);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (Exception e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to load sounds for user " + userAlias)).build();
+          .entity(("Failed to load sounds for current user.")).build();
     }
     return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
   }
@@ -189,14 +207,14 @@ public class SoundServiceEndpoint {
   @GET
   @Path("/toupload")
   public Response getSoundToUpload() {
-
-    String userAlias = "robot";
     Sound sound = null;
+    User currentUser = null;
     try {
-      sound = soundService.getUnfinishedUpload(userAlias);
+      currentUser = userService.getCurrentUser(req);
+      sound = soundService.getUnfinishedUpload(currentUser);
     } catch (Exception e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to load sounds for user " + userAlias)).build();
+          .entity(("Failed to load sounds for user")).build();
     }
     return Response.status(Status.OK).entity(JsonHandler.toJson(sound)).build();
   }

@@ -118,6 +118,7 @@ public class User extends BaseModel {
     this.emails.add(email);
   }
 
+  @JsonIgnore
   public UserAuth getAuth() {
     return auth;
   }

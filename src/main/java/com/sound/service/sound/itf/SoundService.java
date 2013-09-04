@@ -22,25 +22,25 @@ public interface SoundService {
 
   public void delete(String soundAlias);
 
-  public Sound load(String userAlias, String soundId);
+  public Sound load(User user, String soundId);
 
   public Sound loadByRemoteId(String remoteId);
 
-  public List<Sound> loadByKeyWords(User currentUser, String keyWords, Integer pageNum,
+  public List<Sound> loadByKeyWords(User user, String keyWords, Integer pageNum,
       Integer soundsPerPage);
 
-  public List<SoundRecord> getSoundsByUser(String userAlias, Integer pageNum, Integer soundsPerPage)
+  public List<SoundRecord> getSoundsByUser(User user, Integer pageNum, Integer soundsPerPage)
       throws SoundException;
 
-  public List<SoundRecord> getObservingSounds(String userAlias, Integer pageNum,
+  public List<SoundRecord> getObservingSounds(User user, Integer pageNum,
       Integer soundsPerPage) throws SoundException;
 
-  public SoundLocal processSound(String userAlias, File originSoundFile, String fileName)
+  public SoundLocal processSound(User currentUser, File originSoundFile, String fileName)
       throws SoundException;
 
   public void saveData(SoundLocal soundFile, String ownerAlias);
 
-  public void checkUploadCap(String userAlias, File soundFile) throws SoundException;
+  public void checkUploadCap(User user, File soundFile) throws SoundException;
 
   public void enqueue(QueueNode node);
 
@@ -48,5 +48,7 @@ public interface SoundService {
 
   public void dequeue(QueueNode node);
 
-  public Sound getUnfinishedUpload(String userAlias);
+  public Sound getUnfinishedUpload(User user);
+  
+  public boolean isOwner(User user, String soundAlias);
 }

@@ -17,6 +17,7 @@ import com.sound.constant.Constant;
 import com.sound.exception.RemoteStorageException;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound.QueueNode;
+import com.sound.model.User;
 import com.sound.model.enums.FileType;
 import com.sound.model.file.SoundLocal;
 import com.sound.service.sound.itf.SoundService;
@@ -34,6 +35,9 @@ public class QueueProcessServiceEndpoint {
   @Autowired
   SoundService soundService;
 
+  @Autowired
+  com.sound.service.user.itf.UserService userService;
+  
   @POST
   @Path("/process")
   public Response process() {
@@ -49,7 +53,8 @@ public class QueueProcessServiceEndpoint {
       }
       SoundLocal sound = null;
       try {
-        sound = soundService.processSound("robot", originFile, node.getFileName());
+        User owner = userService.getUserByAlias(node.getOwnerAlias());
+        sound = soundService.processSound(owner, originFile, node.getFileName());
         remoteStorageService.upload(sound, FileType.SOUND);
 
         sound.setOriginName(node.getOriginFileName());
