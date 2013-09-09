@@ -122,8 +122,6 @@ public class Sound extends BaseModel {
     this.userPrefer = userPrefer;
   }
 
-
-
   public static class SoundProfile {
     @Reference(lazy = true)
     private User owner;
@@ -481,10 +479,11 @@ public class Sound extends BaseModel {
 
     private String fileName;
 
-    private String ownerAlias;
+    private User owner;
     
     private Date createdDate;
 
+    @JsonIgnore
     public ObjectId getId() {
       return id;
     }
@@ -509,12 +508,12 @@ public class Sound extends BaseModel {
       this.fileName = fileName;
     }
 
-    public String getOwnerAlias() {
-      return ownerAlias;
+    public User getOwner() {
+      return owner;
     }
 
-    public void setOwnerAlias(String ownerAlias) {
-      this.ownerAlias = ownerAlias;
+    public void setOwner(User owner) {
+      this.owner = owner;
     }
 
     public Date getCreatedDate() {

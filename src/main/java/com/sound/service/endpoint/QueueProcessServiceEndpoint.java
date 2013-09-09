@@ -53,12 +53,12 @@ public class QueueProcessServiceEndpoint {
       }
       SoundLocal sound = null;
       try {
-        User owner = userService.getUserByAlias(node.getOwnerAlias());
+        User owner = node.getOwner();
         sound = soundService.processSound(owner, originFile, node.getFileName());
         remoteStorageService.upload(sound, FileType.SOUND);
 
         sound.setOriginName(node.getOriginFileName());
-        soundService.saveData(sound, node.getOwnerAlias());
+        soundService.saveData(sound, owner);
         
         soundService.dequeue(node);
       } catch (SoundException e) {

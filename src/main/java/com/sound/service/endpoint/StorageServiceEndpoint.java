@@ -207,7 +207,7 @@ public class StorageServiceEndpoint {
       QueueNode node = new QueueNode();
       node.setFileName(fileName);
       node.setOriginFileName(fileDetail.getFileName());
-      node.setOwnerAlias("robot");
+      node.setOwner(currentUser);
 
       soundService.checkUploadCap(currentUser, queueNodeFile);
       soundService.enqueue(node);

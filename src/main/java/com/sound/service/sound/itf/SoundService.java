@@ -15,7 +15,7 @@ public interface SoundService {
 
   public SoundProfile updateProfile(SoundProfile soundProfile) throws SoundException;
 
-  public SoundProfile saveProfile(SoundProfile soundProfile, String ownerAlias)
+  public SoundProfile saveProfile(SoundProfile soundProfile, User user)
       throws SoundException;
 
   public void addToSet(String soundId, String setId);
@@ -38,7 +38,7 @@ public interface SoundService {
   public SoundLocal processSound(User currentUser, File originSoundFile, String fileName)
       throws SoundException;
 
-  public void saveData(SoundLocal soundFile, String ownerAlias);
+  public void saveData(SoundLocal soundFile, User owner);
 
   public void checkUploadCap(User user, File soundFile) throws SoundException;
 

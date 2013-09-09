@@ -70,8 +70,10 @@ public class SoundServiceEndpoint {
   public Response saveProfile(@NotNull @PathParam("soundName") String soundName,
       @NotNull SoundProfile soundProfile) {
     SoundProfile profile = null;
+    User currentUser = null;
     try {
-      profile = soundService.saveProfile(soundProfile, "robot");
+      currentUser = userService.getCurrentUser(req);
+      profile = soundService.saveProfile(soundProfile, currentUser);
     } catch (SoundException e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (Exception e) {
@@ -161,15 +163,16 @@ public class SoundServiceEndpoint {
   @GET
   @Path("/streams/{userAlias}")
   public Response listUsersSounds(@QueryParam("pageNum") Integer pageNum,
+      @PathParam("userAlias") String userAlias,
       @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
     soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
 
     List<SoundRecord> sounds = null;
-    User currentUser = null;
+    User user = null;
     try {
-      currentUser = userService.getCurrentUser(req);
-      sounds = soundService.getSoundsByUser(currentUser, pageNum, soundsPerPage);
+      user = userService.getUserByAlias(userAlias);
+      sounds = soundService.getSoundsByUser(user, pageNum, soundsPerPage);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

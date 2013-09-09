@@ -145,8 +145,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   }
 
   @Override
-  public void saveData(SoundLocal soundLocal, String ownerAlias) {
-    User owner = userDAO.findOne("profile.alias", ownerAlias);
+  public void saveData(SoundLocal soundLocal, User owner) {
     String[] fileNames = soundLocal.getFileName().split("\\.");
 
     SoundData soundData = soundDataService.load(fileNames[0]);
@@ -184,15 +183,15 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       soundRecordDAO.save(soundRecord);
 
       // Add one sound count to user social
-      userDAO.increase("profile.alias", ownerAlias, "userSocial.sounds");
+      userDAO.increase("profile.alias", owner.getProfile().getAlias(), "userSocial.sounds");
     }
 
-    userDAO.updateProperty("profile.alias", ownerAlias, "userSocial.soundDuration", (owner
+    userDAO.updateProperty("profile.alias", owner.getProfile().getAlias(), "userSocial.soundDuration", (owner
         .getUserSocial().getSoundDuration() + soundLocal.getDuration()));
   }
 
   @Override
-  public SoundProfile saveProfile(SoundProfile soundProfile, String ownerAlias)
+  public SoundProfile saveProfile(SoundProfile soundProfile, User owner)
       throws SoundException {
     if (null == soundProfile.getName()) {
       throw new SoundException("Sound name can't be null.");
@@ -213,7 +212,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     soundProfile.setAlias(alias);
     soundProfile.setType(SoundType.SOUND.getTypeName());
 
-    User owner = userDAO.findOne("profile.alias", ownerAlias);
     soundProfile.setOwner(owner);
 
     if (null == soundProfile.getPoster()) {
@@ -246,7 +244,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       soundRecordDAO.save(soundRecord);
 
       // Add one sound count to user social
-      userDAO.increase("profile.alias", ownerAlias, "userSocial.sounds");
+      userDAO.increase("profile.alias", owner.getProfile().getAlias(), "userSocial.sounds");
     }
 
     return soundProfile;
@@ -293,7 +291,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     List<User> users = new ArrayList<User>();
 
     for (UserConnect connect : connections) {
-      users.add(connect.getFromUser());
+      users.add(connect.getToUser());
     }
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -423,7 +421,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     if (null == node) {
       node = new QueueNode();
     }
-    node.setOwnerAlias(queueNode.getOwnerAlias());
+    node.setOwner(queueNode.getOwner());
     node.setFileName(queueNode.getFileName());
     node.setOriginFileName(queueNode.getOriginFileName());
     node.setCreatedDate(new Date());

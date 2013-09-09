@@ -14,6 +14,7 @@ import com.sound.dao.TagCategoryDAO;
 import com.sound.dao.TagDAO;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
+import com.sound.model.User;
 import com.sound.model.Tag.TagCategory;
 import com.sound.service.user.itf.UserService;
 
@@ -33,7 +34,7 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	UserService userService;
 
 	@Override
-	public Tag getOrCreate(String label, String userAlias, String tagCategory) {
+	public Tag getOrCreate(String label, User owner, String tagCategory) {
 		Tag tag = tagDAO.findOne("label", label);
 
 		if (tag != null && tag.getId() != null) {
@@ -43,7 +44,7 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 		TagCategory category = tagCategoryDAO.findOne("name", tagCategory);
 		tag = new Tag();
 		tag.setLabel(label);
-		tag.setCreatedUser(userService.getUserByAlias(userAlias));
+		tag.setCreatedUser(owner);
 		tag.setCategory(category);
 		tag.setCreatedDate(new Date());
 		tagDAO.save(tag);
@@ -62,10 +63,10 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	}
 
 	@Override
-	public void attachToSound(String soundAlias, List<String> tagLabels, String userAlias) {
+	public void attachToSound(String soundAlias, List<String> tagLabels, User owner) {
 		List<Tag> tags = new ArrayList<Tag>();
 		for (String label : tagLabels) {
-			tags.add(this.getOrCreate(label, userAlias, null));
+			tags.add(this.getOrCreate(label, owner, null));
 		}
 
 		Sound sound = soundDAO.findOne("profile.alias", soundAlias);
@@ -75,10 +76,10 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	}
 
 	@Override
-	public void detachFromSound(String soundAlias, List<String> tagLabels, String userAlias) {
+	public void detachFromSound(String soundAlias, List<String> tagLabels, User owner) {
 		List<Tag> tags = new ArrayList<Tag>();
 		for (String label : tagLabels) {
-			tags.add(this.getOrCreate(label, userAlias, null));
+			tags.add(this.getOrCreate(label, owner, null));
 		}
 
 		Sound sound = soundDAO.findOne("profile.alias", soundAlias);

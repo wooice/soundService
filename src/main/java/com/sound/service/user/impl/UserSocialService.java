@@ -71,8 +71,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     userConnectDAO.save(userConnect);
 
-    userDAO.increase("profile.alias", fromUser.getProfile().getAlias(), "social.following");
-    userDAO.increase("profile.alias", toUser.getProfile().getAlias(), "social.followed");
+    userDAO.increase("profile.alias", fromUser.getProfile().getAlias(), "userSocial.following");
+    userDAO.increase("profile.alias", toUser.getProfile().getAlias(), "userSocial.followed");
 
     return toUser.getUserSocial().getFollowed() + 1;
   }
@@ -98,8 +98,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     userConnectDAO.delete(userConnected);
 
-    userDAO.decrease("profile.alias", fromUser.getProfile().getAlias(), "social.following");
-    userDAO.decrease("profile.alias", toUser.getProfile().getAlias(), "social.followed");
+    userDAO.decrease("profile.alias", fromUser.getProfile().getAlias(), "userSocial.following");
+    userDAO.decrease("profile.alias", toUser.getProfile().getAlias(), "userSocial.followed");
 
     return toUser.getUserSocial().getFollowed() - 1;
   }
@@ -350,7 +350,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   private List<User> recommandRandomUsers(int number) {
-    return userDAO.findTopOnes(number, "social.followed");
+    return userDAO.findTopOnes(number, "userSocial.followed");
   }
 
   private List<User> combineSocialAndTagsRecommandation(List<User> bySocial, List<User> byTags) {

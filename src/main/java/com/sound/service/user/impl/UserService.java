@@ -29,6 +29,7 @@ import com.sound.model.User;
 import com.sound.model.User.UserEmail;
 import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
+import com.sound.model.User.UserExternal.Site;
 import com.sound.model.User.UserPrefer;
 import com.sound.model.User.UserProfile;
 import com.sound.model.User.UserRole;
@@ -140,6 +141,15 @@ public class UserService implements com.sound.service.user.itf.UserService {
     social.setSoundDuration(0L);
     social.setReposts(0L);
     user.setUserSocial(social);
+    
+    UserExternal userExternal = new UserExternal();
+    userExternal.addSite(new Site("site", "个人网站", ""));
+    userExternal.addSite(new Site("sina", "新浪微博", ""));
+    userExternal.addSite(new Site("tencent", "腾讯微博", ""));
+    userExternal.addSite(new Site("renren", "人人网", ""));
+    userExternal.addSite(new Site("douban", "豆瓣", ""));
+    userExternal.addSite(new Site("xiami", "虾米", ""));
+    user.setExternal(userExternal);
 
     userDAO.save(user);
 
@@ -240,37 +250,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Override
   public User updateUserSnsProfile(User user, UserExternal newExternal) throws UserException {
-    UserExternal external = (null == user.getExternal()) ? new UserExternal() : user.getExternal();
-
-    if (StringUtils.isNotBlank(newExternal.getWebsite())) {
-      external.setWebsite(newExternal.getWebsite());
-    }
-
-    if (StringUtils.isNotBlank(newExternal.getSina())) {
-      external.setSina(newExternal.getSina());
-    }
-
-    if (StringUtils.isNotBlank(newExternal.getTencent())) {
-      external.setTencent(newExternal.getTencent());
-    }
-
-    if (StringUtils.isNotBlank(newExternal.getQq())) {
-      external.setQq(newExternal.getQq());
-    }
-
-    if (StringUtils.isNotBlank(newExternal.getRenren())) {
-      external.setRenren(newExternal.getRenren());
-    }
-
-    if (StringUtils.isNotBlank(newExternal.getDouban())) {
-      external.setDouban(newExternal.getDouban());
-    }
-
-    if (StringUtils.isNotBlank(newExternal.getXiami())) {
-      external.setXiami(newExternal.getXiami());
-    }
-
-    userDAO.updateProperty("_id", user.getId(), "external", external);
+    userDAO.updateProperty("_id", user.getId(), "external", newExternal);
 
     return user;
   }

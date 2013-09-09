@@ -159,7 +159,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     soundRecordDAO.save(activityRecord);
 
     soundDAO.increase("profile.alias", soundAlias, "soundSocial.reportsCount");
-    userDAO.increase("profile.alias", user.getProfile().getAlias(), "social.reposts");
+    userDAO.increase("profile.alias", user.getProfile().getAlias(), "userSocial.reposts");
 
     return sound.getSoundSocial().getReportsCount() + 1;
   }
@@ -183,7 +183,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     reposted.removeAction(SoundRecord.REPOST);
     soundRecordDAO.save(reposted);
     soundDAO.decrease("profile.alias", soundAlias, "soundSocial.reportsCount");
-    userDAO.decrease("profile.alias", user.getProfile().getAlias(), "social.reposts");
+    userDAO.decrease("profile.alias", user.getProfile().getAlias(), "userSocial.reposts");
 
     return sound.getSoundSocial().getReportsCount() - 1;
   }
