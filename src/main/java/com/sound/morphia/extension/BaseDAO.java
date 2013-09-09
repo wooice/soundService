@@ -35,7 +35,7 @@ public class BaseDAO<T, PK> extends BasicDAO<T, PK> {
     return this.find(query).asList();
   }
 
-  public List<T> find(Map<String, String> cratiaries) {
+  public List<T> find(Map<String, Object> cratiaries) {
     Query<T> query = this.ds.createQuery(clazz);
 
     for (String key : cratiaries.keySet()) {

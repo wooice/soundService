@@ -189,7 +189,10 @@ public class StorageServiceEndpoint {
       @FormDataParam("file") FormDataContentDisposition fileDetail,
       @FormDataParam("fileName") InputStream nameStream) {
     File queueNodeFile = null;
+    User currentUser = null;
     try {
+      currentUser = userService.getCurrentUser(req);
+      
       StringWriter writer = new StringWriter();
       IOUtils.copy(nameStream, writer);
       String fileName = writer.toString();
@@ -204,9 +207,9 @@ public class StorageServiceEndpoint {
       QueueNode node = new QueueNode();
       node.setFileName(fileName);
       node.setOriginFileName(fileDetail.getFileName());
-      node.setOwnerAlias("robot");
+      node.setOwner(currentUser);
 
-      soundService.checkUploadCap("robot", queueNodeFile);
+      soundService.checkUploadCap(currentUser, queueNodeFile);
       soundService.enqueue(node);
     } catch (Exception e) {
       if (null != queueNodeFile) {

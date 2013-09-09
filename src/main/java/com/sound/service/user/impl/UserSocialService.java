@@ -46,15 +46,13 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   SoundSocialService soundSocialService;
 
   @Override
-  public Integer follow(String fromUserAlias, String toUserAlias) throws UserException {
-    User fromUser = userDAO.findOne("profile.alias", fromUserAlias);
+  public Long follow(User fromUser, User toUser) throws UserException {
     if (null == fromUser) {
-      throw new UserException("The user " + fromUserAlias + " not found.");
+      throw new UserException("From user not found.");
     }
 
-    User toUser = userDAO.findOne("profile.alias", toUserAlias);
     if (null == toUser) {
-      throw new UserException("The user " + toUserAlias + " not found.");
+      throw new UserException("To user not found.");
     }
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -63,7 +61,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     UserConnect userConnected = userConnectDAO.findOne(cratiaries);
 
     if (userConnected != null) {
-      throw new UserException("The user " + fromUserAlias + " has followed user " + toUserAlias);
+      return toUser.getUserSocial().getFollowed();
     }
 
     UserConnect userConnect = new UserConnect();
@@ -73,22 +71,20 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     userConnectDAO.save(userConnect);
 
-    userDAO.increase("profile.alias", fromUserAlias, "social.following");
-    userDAO.increase("profile.alias", toUserAlias, "social.followed");
+    userDAO.increase("profile.alias", fromUser.getProfile().getAlias(), "userSocial.following");
+    userDAO.increase("profile.alias", toUser.getProfile().getAlias(), "userSocial.followed");
 
-    return (int) (toUser.getUserSocial().getFollowed() + 1);
+    return toUser.getUserSocial().getFollowed() + 1;
   }
 
   @Override
-  public Integer unfollow(String fromUserAlias, String toUserAlias) throws UserException {
-    User fromUser = userDAO.findOne("profile.alias", fromUserAlias);
+  public Long unfollow(User fromUser, User toUser) throws UserException {
     if (null == fromUser) {
-      throw new UserException("The user " + fromUserAlias + " not found.");
+      throw new UserException("From user not found.");
     }
 
-    User toUser = userDAO.findOne("profile.alias", toUserAlias);
     if (null == toUser) {
-      throw new UserException("The user " + toUserAlias + " not found.");
+      throw new UserException("To user not found.");
     }
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -97,24 +93,23 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     UserConnect userConnected = userConnectDAO.findOne(cratiaries);
 
     if (userConnected == null) {
-      throw new UserException("The user " + fromUserAlias + "hasn't followed user " + toUserAlias);
+      return toUser.getUserSocial().getFollowed();
     }
 
     userConnectDAO.delete(userConnected);
 
-    userDAO.decrease("profile.alias", fromUserAlias, "social.following");
-    userDAO.decrease("profile.alias", toUserAlias, "social.followed");
+    userDAO.decrease("profile.alias", fromUser.getProfile().getAlias(), "userSocial.following");
+    userDAO.decrease("profile.alias", toUser.getProfile().getAlias(), "userSocial.followed");
 
-    return (int) (toUser.getUserSocial().getFollowed() - 1);
+    return toUser.getUserSocial().getFollowed() - 1;
   }
 
   @Override
-  public void createGroup(String userAlias, String groupName, String description)
+  public void createGroup(User user, String groupName, String description)
       throws UserException {
-    User user = userDAO.findOne("profile.alias", userAlias);
 
     if (null == user) {
-      throw new UserException("User " + userAlias + " not found.");
+      throw new UserException("User not found.");
     }
     Group group = new Group();
     group.setName(groupName);
@@ -123,19 +118,18 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     groupDAO.save(group);
 
     user.addGroup(group);
-    userDAO.updateProperty("profile.alias", userAlias, "groups", user.getGroups());
+    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups", user.getGroups());
   }
 
   @Override
-  public void dismissGroup(String userAlias, String groupName) throws UserException {
-    User user = userDAO.findOne("profile.alias", userAlias);
+  public void dismissGroup(User user, String groupName) throws UserException {
 
     if (null == user) {
-      throw new UserException("User " + userAlias + " not found.");
+      throw new UserException("User not found.");
     }
 
     Group group = groupDAO.findOne("name", groupName);
-    if (group.getOwner().getProfile().getAlias() == userAlias) {
+    if (group.getOwner().equals(user)) {
       List<User> users = userDAO.find("group.name", groupName);
       for (User groupUser : users) {
         groupUser.removeGroup(group);
@@ -145,88 +139,81 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
       groupDAO.delete(group);
     } else {
-      throw new UserException("User " + userAlias + " don't have rights to delete the group "
+      throw new UserException("User " + user.getProfile().getAlias() + " don't have rights to delete the group "
           + groupName);
     }
   }
 
   @Override
-  public void joinGroup(String userAlias, String groupName) throws UserException {
-    User user = userDAO.findOne("profile.alias", userAlias);
+  public void joinGroup(User user, String groupName) throws UserException {
 
     if (null == user) {
-      throw new UserException("User " + userAlias + " not found.");
+      throw new UserException("User not found.");
     }
 
     Group group = groupDAO.findOne("name", groupName);
     user.addGroup(group);
-    userDAO.updateProperty("profile.alias", userAlias, "groups", user.getGroups());
+    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups", user.getGroups());
   }
 
   @Override
-  public void leaveGroup(String userAlias, String groupName) throws UserException {
-    User user = userDAO.findOne("profile.alias", userAlias);
-
+  public void leaveGroup(User user, String groupName) throws UserException {
     if (null == user) {
-      throw new UserException("User " + userAlias + " not found.");
+      throw new UserException("User not found.");
     }
 
     Group group = groupDAO.findOne("name", groupName);
     user.removeGroup(group);
-    userDAO.updateProperty("profile.alias", userAlias, "groups", user.getGroups());
+    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups", user.getGroups());
   }
 
   @Override
-  public void promoteGroupAdmin(String ownerAlias, String adminAlias, String groupName)
+  public void promoteGroupAdmin(User owner, User admin, String groupName)
       throws UserException {
-    User owner = userDAO.findOne("profile.alias", ownerAlias);
     if (null == owner) {
-      throw new UserException("User " + ownerAlias + " not found.");
+      throw new UserException("Owner not found.");
     }
 
-    User admin = userDAO.findOne("profile.alias", adminAlias);
     if (null == admin) {
-      throw new UserException("User " + adminAlias + " not found.");
+      throw new UserException("Admin  not found.");
     }
 
     Group group = groupDAO.findOne("name", groupName);
-    if (group.getOwner().getProfile().getAlias() == ownerAlias) {
+    if (group.getOwner().equals(admin)) {
       group.addAdmin(admin);
       groupDAO.updateProperty("name", groupName, "admins", group.getAdmins());
     } else {
-      throw new UserException("User " + ownerAlias
+      throw new UserException("User " + owner.getProfile().getAlias()
           + " don't have rights to promote admin of the group " + groupName);
     }
   }
 
   @Override
-  public void demoteGroupAdmin(String ownerAlias, String adminAlias, String groupName)
+  public void demoteGroupAdmin(User owner, User admin, String groupName)
       throws UserException {
-    User owner = userDAO.findOne("profile.alias", ownerAlias);
     if (null == owner) {
-      throw new UserException("User " + ownerAlias + " not found.");
+      throw new UserException("Owner not found.");
     }
 
-    User admin = userDAO.findOne("profile.alias", adminAlias);
     if (null == admin) {
-      throw new UserException("User " + adminAlias + " not found.");
+      throw new UserException("Admin not found.");
     }
 
     Group group = groupDAO.findOne("name", groupName);
-    if (group.getOwner().getProfile().getAlias() == ownerAlias) {
+    if (group.getOwner().equals(admin)) {
       group.removeAdmin(admin);
       groupDAO.updateProperty("name", groupName, "admins", group.getAdmins());
     } else {
-      throw new UserException("User " + ownerAlias
+      throw new UserException("User " + owner.getProfile().getAlias()
           + " don't have rights to promote admin of the group " + groupName);
     }
   }
 
   @Override
-  public List<User> getFollowedUsers(String toUserAlias, Integer pageNum, Integer pageSize)
+  public List<User> getFollowedUsers(User toUser, Integer pageNum, Integer pageSize)
       throws UserException {
-    Map<String, String> cratiaries = new HashMap<String, String>();
-    cratiaries.put("toUser.profile.alias", toUserAlias);
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("toUser", toUser);
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
@@ -236,10 +223,10 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   @Override
-  public List<User> getFollowingUsers(String fromUserAlias, Integer pageNum, Integer pageSize)
+  public List<User> getFollowingUsers(User fromUser, Integer pageNum, Integer pageSize)
       throws UserException {
-    Map<String, String> cratiaries = new HashMap<String, String>();
-    cratiaries.put("fromUser.profile.alias", fromUserAlias);
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("fromUser", fromUser);
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
@@ -248,9 +235,9 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     return SocialUtils.sliceList(result, pageNum, pageSize);
   }
 
-  private List<User> getAllFollowingUsers(String fromUserAlias) throws UserException {
-    Map<String, String> cratiaries = new HashMap<String, String>();
-    cratiaries.put("fromUser.profile.alias", fromUserAlias);
+  private List<User> getAllFollowingUsers(User fromUser) throws UserException {
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("fromUser", fromUser);
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
@@ -259,9 +246,9 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     return result;
   }
 
-  private List<User> recommandUsersBySocial(String userAlias) throws UserException, SoundException {
+  private List<User> recommandUsersBySocial(User user) throws UserException, SoundException {
 
-    List<User> followingUsers = this.getAllFollowingUsers(userAlias);
+    List<User> followingUsers = this.getAllFollowingUsers(user);
 
     if (followingUsers.size() == 0) {
       return new ArrayList<User>();
@@ -270,8 +257,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     Map<User, Long> potentialFollowing = new HashMap<User, Long>();
 
     // find 1-class potential follow targets
-    for (User user : followingUsers) {
-      List<User> firstClass = this.getAllFollowingUsers(user.getProfile().getAlias());
+    for (User oneUser : followingUsers) {
+      List<User> firstClass = this.getAllFollowingUsers(oneUser);
       firstClass.removeAll(followingUsers);
       for (User firstUser : firstClass) {
         if (potentialFollowing.containsKey(firstUser)) {
@@ -283,13 +270,13 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     }
 
     // add weight to impress 1-class
-    for (User user : potentialFollowing.keySet()) {
-      potentialFollowing.put(user, potentialFollowing.get(user) + SocialUtils.FIRST_CLASS_WEIGHT);
+    for (User oneUser : potentialFollowing.keySet()) {
+      potentialFollowing.put(oneUser, potentialFollowing.get(oneUser) + SocialUtils.FIRST_CLASS_WEIGHT);
     }
 
     // find 2-class potential follow targets
-    for (User user : potentialFollowing.keySet()) {
-      List<User> secondClass = this.getAllFollowingUsers(user.getProfile().getAlias());
+    for (User oneUser : potentialFollowing.keySet()) {
+      List<User> secondClass = this.getAllFollowingUsers(oneUser);
       secondClass.removeAll(followingUsers);
       secondClass.removeAll(potentialFollowing.keySet());
       for (User secondUser : secondClass) {
@@ -340,11 +327,11 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   @Override
-  public List<User> recommandUsersForUser(String userAlias, Integer pageNum, Integer pageSize)
+  public List<User> recommandUsersForUser(User user, Integer pageNum, Integer pageSize)
       throws UserException, SoundException {
-    List<User> bySocial = recommandUsersBySocial(userAlias);
+    List<User> bySocial = recommandUsersBySocial(user);
 
-    List<Sound> liked = soundSocialService.getLikedSoundsByUser(userAlias);
+    List<Sound> liked = soundSocialService.getLikedSoundsByUser(user);
     Set<Tag> tags = new HashSet<Tag>();
     for (Sound sound : liked) {
       tags.addAll(sound.getTags());
@@ -363,7 +350,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   private List<User> recommandRandomUsers(int number) {
-    return userDAO.findTopOnes(number, "social.followed");
+    return userDAO.findTopOnes(number, "userSocial.followed");
   }
 
   private List<User> combineSocialAndTagsRecommandation(List<User> bySocial, List<User> byTags) {
