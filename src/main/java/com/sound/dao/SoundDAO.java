@@ -22,7 +22,7 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.or(query.criteria("profile.name").containsIgnoreCase(keyWord)).or(
         query.criteria("profile.description").containsIgnoreCase(keyWord));
 
-    query.offset(start).limit(range).order("-profile。createdTime");
+    query.offset(start).limit(range).order("-profile.createdTime");
 
     return this.find(query).asList();
   }

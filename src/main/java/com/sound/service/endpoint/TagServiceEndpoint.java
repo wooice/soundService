@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -13,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -26,6 +28,7 @@ import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
+import com.sound.model.User;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.util.JsonHandler;
 
@@ -42,13 +45,20 @@ public class TagServiceEndpoint {
   @Autowired
   SoundService soundService;
 
+  @Autowired
+  com.sound.service.user.itf.UserService userService;
+
+  @Context
+  HttpServletRequest req;
+
   @PUT
   @Path("/{userAlias}/create/{tag}")
   public Response createTag(@NotNull @PathParam("tag") String label,
       @NotNull @PathParam("userAlias") String userAlias, @PathParam("userAlias") String categoryName) {
+    User curUser = null;
     try {
-      tagService.getOrCreate(label, userAlias, categoryName);
-
+      curUser = userService.getCurrentUser(req);
+      tagService.getOrCreate(label, curUser, categoryName);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -66,13 +76,15 @@ public class TagServiceEndpoint {
   public Response attachTagsToSound(@NotNull @PathParam("soundAlias") String soundAlias,
       @NotNull JSONObject inputJsonObj) {
 
+    User curUser = null;
     try {
+      curUser = userService.getCurrentUser(req);
       JSONArray tags = inputJsonObj.getJSONArray("tags");
       List<String> tagList = new ArrayList<String>();
       for (int i = 0; i < tags.length(); ++i) {
         tagList.add(tags.getString(i));
       }
-      tagService.attachToSound(soundAlias, tagList, "robot");
+      tagService.attachToSound(soundAlias, tagList, curUser);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -87,8 +99,10 @@ public class TagServiceEndpoint {
   public Response detachTagsFromSound(@NotNull @PathParam("soundAlias") String soundAlias,
       @NotNull @FormParam("tags") List<String> tagLabels,
       @NotNull @PathParam("userAlias") String userAlias) {
+    User curUser = null;
     try {
-      tagService.detachFromSound(soundAlias, tagLabels, userAlias);
+      curUser = userService.getCurrentUser(req);
+      tagService.detachFromSound(soundAlias, tagLabels, curUser);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

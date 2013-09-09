@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -15,6 +16,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -27,6 +29,7 @@ import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundComment;
+import com.sound.model.User;
 import com.sound.service.sound.itf.SoundSocialService;
 import com.sound.util.JsonHandler;
 
@@ -39,16 +42,23 @@ public class SoundSocialServiceEndpoint {
 
   @Autowired
   SoundSocialService soundSocialService;
+ 
+  @Autowired
+  com.sound.service.user.itf.UserService userService;
+
+  @Context
+  HttpServletRequest req;
 
   @PUT
-  @Path("/{userAlias}/play/{soundAlias}")
+  @Path("/play/{soundAlias}")
   public Response play(
-      @NotNull @PathParam("userAlias") String userAlias,
       @NotNull @PathParam("soundAlias") String soundAlias
       ) {
     Map<String, String> result = null;
+    User currentUser = null;
     try {
-      result = soundSocialService.play(soundAlias, userAlias);
+      currentUser = userService.getCurrentUser(req);
+      result = soundSocialService.play(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -61,12 +71,13 @@ public class SoundSocialServiceEndpoint {
   }
 
   @PUT
-  @Path("/{userAlias}/like/{soundAlias}")
-  public Response like(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull @PathParam("userAlias") String userAlias) {
+  @Path("/like/{soundAlias}")
+  public Response like(@NotNull @PathParam("soundAlias") String soundAlias) {
     Integer liked = 0;
+    User currentUser = null;
     try {
-      liked = soundSocialService.like(soundAlias, userAlias);
+      currentUser = userService.getCurrentUser(req);
+      liked = soundSocialService.like(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -81,12 +92,13 @@ public class SoundSocialServiceEndpoint {
   }
 
   @DELETE
-  @Path("/{userAlias}/like/{soundAlias}")
-  public Response unlike(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull @PathParam("userAlias") String userAlias) {
+  @Path("/like/{soundAlias}")
+  public Response unlike(@NotNull @PathParam("soundAlias") String soundAlias) {
     Integer liked = 0;
+    User currentUser = null;
     try {
-      liked = soundSocialService.dislike(soundAlias, userAlias);
+      currentUser = userService.getCurrentUser(req);
+      liked = soundSocialService.dislike(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -101,12 +113,13 @@ public class SoundSocialServiceEndpoint {
   }
 
   @PUT
-  @Path("/{userAlias}/repost/{soundAlias}")
-  public Response repost(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull @PathParam("userAlias") String userAlias) {
+  @Path("/repost/{soundAlias}")
+  public Response repost(@NotNull @PathParam("soundAlias") String soundAlias) {
     Integer reposted = 0;
+    User currentUser = null;
     try {
-      reposted = soundSocialService.repost(soundAlias, userAlias);
+      currentUser = userService.getCurrentUser(req);
+      reposted = soundSocialService.repost(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -121,12 +134,13 @@ public class SoundSocialServiceEndpoint {
   }
 
   @DELETE
-  @Path("/{userAlias}/repost/{soundAlias}")
-  public Response unrepost(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull @PathParam("userAlias") String userAlias) {
+  @Path("/repost/{soundAlias}")
+  public Response unrepost(@NotNull @PathParam("soundAlias") String soundAlias) {
     Integer reposted = 0;
+    User currentUser = null;
     try {
-      reposted = soundSocialService.unrepost(soundAlias, userAlias);
+      currentUser = userService.getCurrentUser(req);
+      reposted = soundSocialService.unrepost(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -141,13 +155,14 @@ public class SoundSocialServiceEndpoint {
   }
 
   @PUT
-  @Path("/{userAlias}/comment/{soundAlias}")
+  @Path("/comment/{soundAlias}")
   public Response comment(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull @PathParam("userAlias") String userAlias,
       @NotNull @QueryParam("comment") String comment, @QueryParam("pointAt") Float pointAt) {
     Integer commentsCount = 0;
+    User currentUser = null;
     try {
-      commentsCount = soundSocialService.comment(soundAlias, userAlias, comment, pointAt);
+      currentUser = userService.getCurrentUser(req);
+      commentsCount = soundSocialService.comment(soundAlias, currentUser, comment, pointAt);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

@@ -100,7 +100,7 @@ public class User extends BaseModel {
   public void setUserRoles(List<UserRole> userRoles) {
     this.userRoles = userRoles;
   }
-  
+
   public void setExternal(UserExternal external) {
     this.external = external;
   }
@@ -118,6 +118,7 @@ public class User extends BaseModel {
     this.emails.add(email);
   }
 
+  @JsonIgnore
   public UserAuth getAuth() {
     return auth;
   }
@@ -375,70 +376,101 @@ public class User extends BaseModel {
 
   @Entity
   public static class UserExternal {
-    private String website;
-    private String sina;
-    private String tencent;
-    private String qq;
-    private String renren;
-    private String douban;
-    private String xiami;
 
-    public String getWebsite() {
-      return website;
+    @Embedded
+    List<Site> sites = new ArrayList<Site>();
+
+    public List<Site> getSites() {
+      return sites;
     }
 
-    public void setWebsite(String website) {
-      this.website = website;
+    public void setSites(List<Site> sites) {
+      this.sites = sites;
     }
 
-    public String getSina() {
-      return sina;
+    public void addSite(Site site) {
+      for (Site oneExternal : this.sites) {
+          if (oneExternal.equals(site))
+          {
+            return;
+          }
+      }
+      sites.add(site);
     }
 
-    public void setSina(String sina) {
-      this.sina = sina;
-    }
+    public static class Site {
+      String name;
 
-    public String getQq() {
-      return qq;
-    }
+      String displayName;
 
-    public void setQq(String qq) {
-      this.qq = qq;
-    }
+      String url;
 
-    public String getRenren() {
-      return renren;
-    }
+      boolean userCreated = false;
+      
+      public Site() {
+        super();
+      }
 
-    public void setRenren(String renren) {
-      this.renren = renren;
-    }
+      public Site(String name, String displayName, String url) {
+        super();
+        this.name = name;
+        this.displayName = displayName;
+        this.url = url;
+      }
 
-    public String getDouban() {
-      return douban;
-    }
+      public String getName() {
+        return name;
+      }
 
-    public void setDouban(String douban) {
-      this.douban = douban;
-    }
+      public void setName(String name) {
+        this.name = name;
+      }
 
-    public String getTencent() {
-      return tencent;
-    }
+      public String getDisplayName() {
+        return displayName;
+      }
 
-    public void setTencent(String tencent) {
-      this.tencent = tencent;
-    }
+      public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+      }
 
-    public String getXiami() {
-      return xiami;
-    }
+      public String getUrl() {
+        return url;
+      }
 
-    public void setXiami(String xiami) {
-      this.xiami = xiami;
+      public void setUrl(String url) {
+        this.url = url;
+      }
+
+      public boolean isUserCreated() {
+        return userCreated;
+      }
+
+      public void setUserCreated(boolean userCreated) {
+        this.userCreated = userCreated;
+      }
+
+      @Override
+      public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+      }
+
+      @Override
+      public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        Site other = (Site) obj;
+        if (name == null) {
+          if (other.name != null) return false;
+        } else if (!name.equals(other.name)) return false;
+        return true;
+      }
+      
     }
-    
   }
 
   public static class UserEmail {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -14,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -37,14 +39,24 @@ public class UserSocialServiceEndpoint {
 
   @Autowired
   UserSocialService userSocialService;
+  
+  @Autowired
+  com.sound.service.user.itf.UserService userService;
+  
+  @Context
+  HttpServletRequest req;
 
   @PUT
-  @Path("/{fromUserAlias}/follow/{toUserAlias}")
-  public Response follow(@NotNull @PathParam("fromUserAlias") String fromUserAlias,
+  @Path("/follow/{toUserAlias}")
+  public Response follow(
       @NotNull @PathParam("toUserAlias") String toUserAlias) {
-    Integer followed = 0;
+    Long followed = 0L;
+    User fromUser = null;
+    User toUser = null;
     try {
-      followed = userSocialService.follow(fromUserAlias, toUserAlias);
+      fromUser = userService.getCurrentUser(req);
+      toUser = userService.getUserByAlias(toUserAlias);
+      followed = userSocialService.follow(fromUser, toUser);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -54,18 +66,22 @@ public class UserSocialServiceEndpoint {
           .entity(("Failed to follow user " + toUserAlias)).build();
     }
 
-    Map<String, Integer> result = new HashMap<String, Integer>();
+    Map<String, Long> result = new HashMap<String, Long>();
     result.put("followed", followed);
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @DELETE
-  @Path("/{fromUserAlias}/follow/{toUserAlias}")
-  public Response unfollow(@NotNull @PathParam("fromUserAlias") String fromUserAlias,
+  @Path("/follow/{toUserAlias}")
+  public Response unfollow(
       @NotNull @PathParam("toUserAlias") String toUserAlias) {
-    Integer followed = 0;
+    Long followed = 0L;
+    User fromUser = null;
+    User toUser = null;
     try {
-      followed = userSocialService.unfollow(fromUserAlias, toUserAlias);
+      fromUser = userService.getCurrentUser(req);
+      toUser = userService.getUserByAlias(toUserAlias);
+      followed = userSocialService.unfollow(fromUser, toUser);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -74,18 +90,20 @@ public class UserSocialServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to follow user " + toUserAlias)).build();
     }
-    Map<String, Integer> result = new HashMap<String, Integer>();
+    Map<String, Long> result = new HashMap<String, Long>();
     result.put("followed", followed);
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @PUT
-  @Path("/{userAlias}/group/{groupName}")
-  public Response createGroup(@NotNull @PathParam("userAlias") String userAlias,
+  @Path("/group/{groupName}")
+  public Response createGroup(
       @NotNull @PathParam("groupName") String groupName,
       @NotNull @FormParam("description") String description) {
+    User currentUser = null;
     try {
-      userSocialService.createGroup(userAlias, groupName, description);
+      currentUser = userService.getCurrentUser(req);
+      userSocialService.createGroup(currentUser, groupName, description);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -98,11 +116,13 @@ public class UserSocialServiceEndpoint {
   }
 
   @DELETE
-  @Path("/{userAlias}/group/{groupName}")
-  public Response dismissGroup(@NotNull @PathParam("userAlias") String userAlias,
+  @Path("/group/{groupName}")
+  public Response dismissGroup(
       @NotNull @PathParam("groupName") String groupName) {
+    User currentUser = null;
     try {
-      userSocialService.dismissGroup(userAlias, groupName);
+      currentUser = userService.getCurrentUser(req);
+      userSocialService.dismissGroup(currentUser, groupName);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -115,11 +135,13 @@ public class UserSocialServiceEndpoint {
   }
 
   @PUT
-  @Path("/{userAlias}/joinGroup/{groupName}")
-  public Response joinGroup(@NotNull @PathParam("userAlias") String userAlias,
+  @Path("/joinGroup/{groupName}")
+  public Response joinGroup(
       @NotNull @PathParam("groupName") String groupName) {
+    User currentUser = null;
     try {
-      userSocialService.joinGroup(userAlias, groupName);
+      currentUser = userService.getCurrentUser(req);
+      userSocialService.joinGroup(currentUser, groupName);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -132,11 +154,13 @@ public class UserSocialServiceEndpoint {
   }
 
   @DELETE
-  @Path("/{userAlias}/joinGroup/{groupName}")
+  @Path("/joinGroup/{groupName}")
   public Response leaveGroup(@NotNull @PathParam("userAlias") String userAlias,
       @NotNull @PathParam("groupName") String groupName) {
+    User currentUser = null;
     try {
-      userSocialService.leaveGroup(userAlias, groupName);
+      currentUser = userService.getCurrentUser(req);
+      userSocialService.leaveGroup(currentUser, groupName);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -149,12 +173,16 @@ public class UserSocialServiceEndpoint {
   }
 
   @PUT
-  @Path("/{ownerAlias}/{groupName}/promoteAdmin/{adminAlias}")
-  public Response promoteGroupAdmin(@NotNull @PathParam("userAlias") String ownerAlias,
+  @Path("/{groupName}/promoteAdmin/{adminAlias}")
+  public Response promoteGroupAdmin(
       @NotNull @PathParam("userAlias") String adminAlias,
       @NotNull @PathParam("groupName") String groupName) {
+    User currentUser = null;
+    User adminUser = null;
     try {
-      userSocialService.promoteGroupAdmin(ownerAlias, adminAlias, groupName);
+      currentUser = userService.getCurrentUser(req);
+      adminUser = userService.getUserByAlias(adminAlias);
+      userSocialService.promoteGroupAdmin(currentUser, adminUser, groupName);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -167,12 +195,16 @@ public class UserSocialServiceEndpoint {
   }
 
   @DELETE
-  @Path("/{ownerAlias}/{groupName}/promoteAdmin/{adminAlias}")
-  public Response demoteGroupAdmin(@NotNull @PathParam("userAlias") String ownerAlias,
+  @Path("/{groupName}/promoteAdmin/{adminAlias}")
+  public Response demoteGroupAdmin(
       @NotNull @PathParam("userAlias") String adminAlias,
       @NotNull @PathParam("groupName") String groupName) {
+    User currentUser = null;
+    User adminUser = null;
     try {
-      userSocialService.promoteGroupAdmin(ownerAlias, adminAlias, groupName);
+      currentUser = userService.getCurrentUser(req);
+      adminUser = userService.getUserByAlias(adminAlias);
+      userSocialService.promoteGroupAdmin(currentUser, adminUser, groupName);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -204,12 +236,14 @@ public class UserSocialServiceEndpoint {
 
   @POST
   @Path("/recommand/user")
-  public Response getRecommandedUsersForUser(@NotNull @FormParam("userAlias") String userAlias,
+  public Response getRecommandedUsersForUser(
       @NotNull @FormParam("pageNum") Integer pageNum,
       @NotNull @FormParam("pageSize") Integer pageSize) {
     List<User> users = new ArrayList<User>();
+    User currentUser = null;
     try {
-      users.addAll(userSocialService.recommandUsersForUser(userAlias, pageNum, pageSize));
+      currentUser = userService.getCurrentUser(req);
+      users.addAll(userSocialService.recommandUsersForUser(currentUser, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -221,13 +255,15 @@ public class UserSocialServiceEndpoint {
   }
 
   @GET
-  @Path("/followed/{userAlias}/{pageSize}/{pageNum}")
-  public Response getFollowedUsers(@NotNull @PathParam("userAlias") String userAlias,
+  @Path("/followed/{pageSize}/{pageNum}")
+  public Response getFollowedUsers(
       @NotNull @FormParam("pageNum") Integer pageNum,
       @NotNull @FormParam("pageSize") Integer pageSize) {
     List<User> users = new ArrayList<User>();
+    User currentUser = null;
     try {
-      users.addAll(userSocialService.getFollowedUsers(userAlias, pageNum, pageSize));
+      currentUser = userService.getCurrentUser(req);
+      users.addAll(userSocialService.getFollowedUsers(currentUser, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -236,13 +272,15 @@ public class UserSocialServiceEndpoint {
   }
 
   @GET
-  @Path("/following/{userAlias}/{pageSize}/{pageNum}")
-  public Response getFollowingUsers(@NotNull @PathParam("userAlias") String userAlias,
+  @Path("/following/{pageSize}/{pageNum}")
+  public Response getFollowingUsers(
       @NotNull @FormParam("pageNum") Integer pageNum,
       @NotNull @FormParam("pageSize") Integer pageSize) {
     List<User> users = new ArrayList<User>();
+    User currentUser = null;
     try {
-      users.addAll(userSocialService.getFollowingUsers(userAlias, pageNum, pageSize));
+      currentUser = userService.getCurrentUser(req);
+      users.addAll(userSocialService.getFollowingUsers(currentUser, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
