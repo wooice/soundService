@@ -310,7 +310,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   @Override
   public List<Sound> getLikedSoundsByUser(User user) throws SoundException {
     List<Sound> sounds = new ArrayList<Sound>();
-    List<SoundLike> likes = soundLikeDAO.find("user", user);
+    List<SoundLike> likes = soundLikeDAO.find("owner", user);
     if (likes != null) {
       for (SoundLike like : likes) {
         sounds.add(like.getSound());

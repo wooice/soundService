@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -15,11 +16,15 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,24 +37,23 @@ import com.sound.util.JsonHandler;
 
 @Component
 @Path("/userActivity")
-@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
 public class UserSocialServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserSocialServiceEndpoint.class);
 
   @Autowired
   UserSocialService userSocialService;
-  
+
   @Autowired
   com.sound.service.user.itf.UserService userService;
-  
+
   @Context
   HttpServletRequest req;
 
   @PUT
   @Path("/follow/{toUserAlias}")
-  public Response follow(
-      @NotNull @PathParam("toUserAlias") String toUserAlias) {
+  public Response follow(@NotNull @PathParam("toUserAlias") String toUserAlias) {
     Long followed = 0L;
     User fromUser = null;
     User toUser = null;
@@ -73,8 +77,7 @@ public class UserSocialServiceEndpoint {
 
   @DELETE
   @Path("/follow/{toUserAlias}")
-  public Response unfollow(
-      @NotNull @PathParam("toUserAlias") String toUserAlias) {
+  public Response unfollow(@NotNull @PathParam("toUserAlias") String toUserAlias) {
     Long followed = 0L;
     User fromUser = null;
     User toUser = null;
@@ -97,8 +100,7 @@ public class UserSocialServiceEndpoint {
 
   @PUT
   @Path("/group/{groupName}")
-  public Response createGroup(
-      @NotNull @PathParam("groupName") String groupName,
+  public Response createGroup(@NotNull @PathParam("groupName") String groupName,
       @NotNull @FormParam("description") String description) {
     User currentUser = null;
     try {
@@ -117,8 +119,7 @@ public class UserSocialServiceEndpoint {
 
   @DELETE
   @Path("/group/{groupName}")
-  public Response dismissGroup(
-      @NotNull @PathParam("groupName") String groupName) {
+  public Response dismissGroup(@NotNull @PathParam("groupName") String groupName) {
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
@@ -136,8 +137,7 @@ public class UserSocialServiceEndpoint {
 
   @PUT
   @Path("/joinGroup/{groupName}")
-  public Response joinGroup(
-      @NotNull @PathParam("groupName") String groupName) {
+  public Response joinGroup(@NotNull @PathParam("groupName") String groupName) {
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
@@ -174,8 +174,7 @@ public class UserSocialServiceEndpoint {
 
   @PUT
   @Path("/{groupName}/promoteAdmin/{adminAlias}")
-  public Response promoteGroupAdmin(
-      @NotNull @PathParam("userAlias") String adminAlias,
+  public Response promoteGroupAdmin(@NotNull @PathParam("userAlias") String adminAlias,
       @NotNull @PathParam("groupName") String groupName) {
     User currentUser = null;
     User adminUser = null;
@@ -196,8 +195,7 @@ public class UserSocialServiceEndpoint {
 
   @DELETE
   @Path("/{groupName}/promoteAdmin/{adminAlias}")
-  public Response demoteGroupAdmin(
-      @NotNull @PathParam("userAlias") String adminAlias,
+  public Response demoteGroupAdmin(@NotNull @PathParam("userAlias") String adminAlias,
       @NotNull @PathParam("groupName") String groupName) {
     User currentUser = null;
     User adminUser = null;
@@ -218,31 +216,43 @@ public class UserSocialServiceEndpoint {
 
   @POST
   @Path("/recommand/users")
-  public Response getRecommandedUsersByTags(@NotNull @FormParam("tags") List<String> tags,
-      @NotNull @FormParam("pageNum") Integer pageNum,
-      @NotNull @FormParam("pageSize") Integer pageSize) {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response getRecommandedUsersByTags(@NotNull JSONObject inputJsonObj) {
     List<User> users = new ArrayList<User>();
     try {
-      users.addAll(userSocialService.recommandUsersByTags(tags, pageNum, pageSize));
+      Integer pageNum = inputJsonObj.getInt("pageNum");
+      Integer pageSize = inputJsonObj.getInt("pageSize");
+
+      List<String> tagList = new ArrayList<String>();
+      int len = inputJsonObj.getJSONArray("tags").length();
+      for (int i = 0; i < len; i++) {
+        tagList.add(inputJsonObj.getJSONArray("tags").get(i).toString());
+      }
+      users.addAll(userSocialService.recommandUsersByTags(tagList, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    } catch (JSONException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
     return Response.status(Status.OK).entity(users).build();
   }
 
   @POST
   @Path("/recommand/user")
-  public Response getRecommandedUsersForUser(
-      @NotNull @FormParam("pageNum") Integer pageNum,
-      @NotNull @FormParam("pageSize") Integer pageSize) {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response getRecommandedUsersForUser(@NotNull JSONObject inputJsonObj) {
     List<User> users = new ArrayList<User>();
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
+      Integer pageNum = inputJsonObj.getInt("pageNum");
+      Integer pageSize = inputJsonObj.getInt("pageSize");
+
       users.addAll(userSocialService.recommandUsersForUser(currentUser, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
@@ -250,15 +260,17 @@ public class UserSocialServiceEndpoint {
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    } catch (JSONException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
     return Response.status(Status.OK).entity(users).build();
   }
 
   @GET
-  @Path("/followed/{pageSize}/{pageNum}")
-  public Response getFollowedUsers(
-      @NotNull @FormParam("pageNum") Integer pageNum,
-      @NotNull @FormParam("pageSize") Integer pageSize) {
+  @Path("/followed")
+  public Response getFollowedUsers(@NotNull @QueryParam("pageNum") Integer pageNum,
+      @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<User> users = new ArrayList<User>();
     User currentUser = null;
     try {
@@ -272,10 +284,9 @@ public class UserSocialServiceEndpoint {
   }
 
   @GET
-  @Path("/following/{pageSize}/{pageNum}")
-  public Response getFollowingUsers(
-      @NotNull @FormParam("pageNum") Integer pageNum,
-      @NotNull @FormParam("pageSize") Integer pageSize) {
+  @Path("/following")
+  public Response getFollowingUsers(@NotNull @QueryParam("pageNum") Integer pageNum,
+      @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<User> users = new ArrayList<User>();
     User currentUser = null;
     try {

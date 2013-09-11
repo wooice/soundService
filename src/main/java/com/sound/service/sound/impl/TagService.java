@@ -2,7 +2,9 @@ package com.sound.service.sound.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,8 @@ import com.sound.dao.TagCategoryDAO;
 import com.sound.dao.TagDAO;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
-import com.sound.model.User;
 import com.sound.model.Tag.TagCategory;
+import com.sound.model.User;
 import com.sound.service.user.itf.UserService;
 
 @Service
@@ -58,8 +60,11 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 	}
 
 	@Override
-	public List<Tag> listAll() {
-		return tagDAO.find().asList();
+	public List<Tag> findCurated() {
+	    Map<String, Object> cratiaries = new HashMap<String, Object>();
+	    cratiaries.put("curated", true);
+	    
+		return tagDAO.find(cratiaries);
 	}
 
 	@Override
@@ -104,7 +109,14 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 			return new ArrayList<Sound>();
 		}
 		return soundDAO.fetchEntitiesPropertyContains("tags", tag);
-	
 	}
+
+  @Override
+  public List<TagCategory> listCategories() {
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("curated", true);
+ 
+    return tagCategoryDAO.find(cratiaries);
+  }
 
 }

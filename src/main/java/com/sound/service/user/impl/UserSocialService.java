@@ -217,7 +217,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
-      result.add(userDAO.findOne("profile.alias", uc.getFromUser()));
+      result.add(uc.getFromUser());
     }
     return SocialUtils.sliceList(result, pageNum, pageSize);
   }
@@ -230,7 +230,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
-      result.add(userDAO.findOne("profile.alias", uc.getToUser()));
+      result.add(uc.getToUser());
     }
     return SocialUtils.sliceList(result, pageNum, pageSize);
   }
@@ -241,7 +241,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
-      result.add(userDAO.findOne("profile.alias", uc.getToUser()));
+      result.add(uc.getToUser());
     }
     return result;
   }
@@ -321,9 +321,19 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     Map<User, Integer> userTagSeq =
         SocialUtils.toSeqMap(SocialUtils.sortMapByValue(userTagNumMap, false));
 
-    List<User> allResult = SocialUtils.toSeqList(SocialUtils.sortMapByValue(userTagSeq, false));
+    List<User> sortedUsers = SocialUtils.toSeqList(SocialUtils.sortMapByValue(userTagSeq, false));
+    List<User> results = new ArrayList<User>();
 
-    return allResult;
+    for(User user: sortedUsers)
+    {
+      UserConnect uc = userConnectDAO.findOne("toUser", user);
+
+      if (uc == null)
+      {
+        results.add(user);
+      }
+    }
+    return results;
   }
 
   @Override
@@ -340,7 +350,19 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     List<User> candidates = combineSocialAndTagsRecommandation(bySocial, byTags);
 
-    List<User> toReturn = SocialUtils.sliceList(candidates, pageNum, pageSize);
+    List<User> results = new ArrayList<User>();
+
+    for(User oneUser: candidates)
+    {
+      UserConnect uc = userConnectDAO.findOne("toUser", oneUser);
+
+      if (uc == null)
+      {
+        results.add(user);
+      }
+    }
+    
+    List<User> toReturn = SocialUtils.sliceList(results, pageNum, pageSize);
 
     if (toReturn.size() < pageNum) {
       toReturn.addAll(recommandRandomUsers(pageNum - toReturn.size()));
@@ -350,7 +372,21 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   private List<User> recommandRandomUsers(int number) {
-    return userDAO.findTopOnes(number, "userSocial.followed");
+    List<User> topUsers = userDAO.findTopOnes(number, "userSocial.followed");
+    
+    List<User> results = new ArrayList<User>();
+
+    for(User user: topUsers)
+    {
+      UserConnect uc = userConnectDAO.findOne("toUser", user);
+
+      if (uc == null)
+      {
+        results.add(user);
+      }
+    }
+    
+    return results;
   }
 
   private List<User> combineSocialAndTagsRecommandation(List<User> bySocial, List<User> byTags) {

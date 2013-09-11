@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -126,20 +125,23 @@ public class GuestServiceEndpoint {
 
   @PUT
   @Path("/create")
-  public Response create(@NotNull @FormParam("userAlias") String userAlias,
-      @NotNull @FormParam("emailAddress") String emailAddress,
-      @NotNull @FormParam("password") String password) {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response create(@NotNull JSONObject inputJsonObj) {
+    User user = null;
     try {
-      userService.createUser(userAlias, emailAddress, password);
+      String userAlias = inputJsonObj.getString("userAlias");
+      String emailAddress = inputJsonObj.getString("emailAddress");
+      String password = inputJsonObj.getString("password");
+      user = userService.createUser(userAlias, emailAddress, password);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (Exception e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to create user " + userAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user "))
+          .build();
     }
 
-    return Response.status(Status.OK).entity("true").build();
+    return Response.status(Status.OK).entity(user).build();
   }
 
 
