@@ -84,6 +84,8 @@ public class Tag extends BaseModel {
 
     private String name;
 
+    private boolean curated;
+
     private Date createdTime;
 
     public String getName() {
@@ -109,6 +111,14 @@ public class Tag extends BaseModel {
 
     public void setId(ObjectId id) {
       this.id = id;
+    }
+
+    public boolean isCurated() {
+      return curated;
+    }
+
+    public void setCurated(boolean curated) {
+      this.curated = curated;
     }
 
   }

@@ -217,7 +217,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
-      result.add(userDAO.findOne("profile.alias", uc.getFromUser()));
+      result.add(uc.getFromUser());
     }
     return SocialUtils.sliceList(result, pageNum, pageSize);
   }
@@ -230,7 +230,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
-      result.add(userDAO.findOne("profile.alias", uc.getToUser()));
+      result.add(uc.getToUser());
     }
     return SocialUtils.sliceList(result, pageNum, pageSize);
   }
@@ -241,7 +241,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<UserConnect> list = userConnectDAO.find(cratiaries);
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
-      result.add(userDAO.findOne("profile.alias", uc.getToUser()));
+      result.add(uc.getToUser());
     }
     return result;
   }
@@ -320,10 +320,9 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     Map<User, Integer> userTagSeq =
         SocialUtils.toSeqMap(SocialUtils.sortMapByValue(userTagNumMap, false));
-
-    List<User> allResult = SocialUtils.toSeqList(SocialUtils.sortMapByValue(userTagSeq, false));
-
-    return allResult;
+    List<User> sortedUsers = SocialUtils.toSeqList(SocialUtils.sortMapByValue(userTagSeq, false));
+  
+    return sortedUsers;
   }
 
   @Override
@@ -340,17 +339,53 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     List<User> candidates = combineSocialAndTagsRecommandation(bySocial, byTags);
 
-    List<User> toReturn = SocialUtils.sliceList(candidates, pageNum, pageSize);
+    List<User> results = new ArrayList<User>();
+
+    for(User oneUser: candidates)
+    {
+      Map<String, Object> cretiaria = new HashMap<String, Object>();
+      cretiaria.put("fromUser", user);
+      cretiaria.put("toUser", oneUser);
+      UserConnect uc = userConnectDAO.findOne(cretiaria);
+
+      if (uc == null)
+      {
+        results.add(user);
+      }
+    }
+    
+    List<User> toReturn = SocialUtils.sliceList(results, pageNum, pageSize);
 
     if (toReturn.size() < pageNum) {
-      toReturn.addAll(recommandRandomUsers(pageNum - toReturn.size()));
+      toReturn.addAll(recommandRandomUsers(user, pageSize - toReturn.size()));
     }
 
     return toReturn;
   }
 
-  private List<User> recommandRandomUsers(int number) {
-    return userDAO.findTopOnes(number, "userSocial.followed");
+  private List<User> recommandRandomUsers(User currentUser, int number) {
+    Map<String, List<Object>> exclude = new HashMap<String, List<Object>>();
+    List<Object> alias = new ArrayList<Object>();
+    alias.add(currentUser.getProfile().getAlias());
+    exclude.put("profile.alias", alias);
+    List<User> topUsers = userDAO.findTopOnes(number, "userSocial.followed", exclude);
+    
+    List<User> results = new ArrayList<User>();
+
+    for(User user: topUsers)
+    {
+      Map<String, Object> cretiaria = new HashMap<String, Object>();
+      cretiaria.put("fromUser", currentUser);
+      cretiaria.put("toUser", user);
+      UserConnect uc = userConnectDAO.findOne(cretiaria);
+
+      if (uc == null)
+      {
+        results.add(user);
+      }
+    }
+    
+    return results;
   }
 
   private List<User> combineSocialAndTagsRecommandation(List<User> bySocial, List<User> byTags) {
@@ -379,7 +414,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   @Override
-  public List<User> recommandUsersByTags(List<String> tagLabels, Integer pageNum, Integer pageSize)
+  public List<User> recommandUsersByTags(User currentUser, List<String> tagLabels, Integer pageNum, Integer pageSize)
       throws UserException, SoundException {
     Set<Tag> tags = new HashSet<Tag>();
 
@@ -392,7 +427,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<User> toReturn = SocialUtils.sliceList(byTags, pageNum, pageSize);
 
     if (toReturn.size() < pageNum) {
-      toReturn.addAll(recommandRandomUsers(pageNum - toReturn.size()));
+      toReturn.addAll(recommandRandomUsers(currentUser, pageSize - toReturn.size()));
     }
 
     return toReturn;

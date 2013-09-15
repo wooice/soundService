@@ -28,13 +28,14 @@ import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Tag;
+import com.sound.model.Tag.TagCategory;
 import com.sound.model.User;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.util.JsonHandler;
 
 @Component
 @Path("/tag")
-@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
 public class TagServiceEndpoint {
 
   Logger logger = Logger.getLogger(TagServiceEndpoint.class);
@@ -113,7 +114,7 @@ public class TagServiceEndpoint {
   }
 
   @GET
-  @Path("/tags")
+  @Path("/list")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getTagsContains(@NotNull @QueryParam("term") String term) {
     List<Tag> tags = null;
@@ -144,4 +145,35 @@ public class TagServiceEndpoint {
     return Response.status(Response.Status.OK).entity(sounds.toString()).build();
   }
 
+  @GET
+  @Path("/list/curated")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getCuratedTags() {
+    List<Tag> tags = null;
+    try {
+      tags = tagService.findCurated();
+    } catch (SoundException e) {
+      logger.error(e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Cannot detach Tag because internal server error").build();
+    }
+
+    return Response.status(Response.Status.OK).entity(JsonHandler.toJson(tags)).build();
+  }
+
+  @GET
+  @Path("/list/categories")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getCategories() {
+    List<TagCategory> categories = null;
+    try {
+      categories = tagService.listCategories();
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Cannot detach Tag because internal server error").build();
+    }
+
+    return Response.status(Response.Status.OK).entity(JsonHandler.toJson(categories)).build();
+  }
 }
