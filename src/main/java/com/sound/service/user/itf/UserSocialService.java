@@ -32,6 +32,6 @@ public interface UserSocialService {
   public List<User> recommandUsersForUser(User user, Integer pageNum, Integer pageSize)
       throws UserException, SoundException;
 
-  public List<User> recommandUsersByTags(List<String> tagLabels, Integer pageNum, Integer pageSize)
+  public List<User> recommandUsersByTags(User currentUser, List<String> tagLabels, Integer pageNum, Integer pageSize)
       throws UserException, SoundException;
 }

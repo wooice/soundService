@@ -1,7 +1,9 @@
 package com.sound.service.endpoint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -103,9 +104,10 @@ public class GuestServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to get user by alias " + userAlias)).build();
     }
-    String result = (null == user) ? "true" : "false";
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("unique", (null == user) ? "true" : "false");
 
-    return Response.status(Status.OK).entity(result).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @GET
@@ -119,27 +121,31 @@ public class GuestServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to check emailaddress " + emailAddress)).build();
     }
-    String result = (null == user) ? "true" : "false";
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("unique", (null == user) ? "true" : "false");
 
-    return Response.status(Status.OK).entity(result).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @PUT
   @Path("/create")
-  public Response create(@NotNull @FormParam("userAlias") String userAlias,
-      @NotNull @FormParam("emailAddress") String emailAddress,
-      @NotNull @FormParam("password") String password) {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response create(@NotNull JSONObject inputJsonObj) {
+    User user = null;
     try {
-      userService.createUser(userAlias, emailAddress, password);
+      String userAlias = inputJsonObj.getString("userAlias");
+      String emailAddress = inputJsonObj.getString("emailAddress");
+      String password = inputJsonObj.getString("password");
+      user = userService.createUser(userAlias, emailAddress, password);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     } catch (Exception e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to create user " + userAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user "))
+          .build();
     }
 
-    return Response.status(Status.OK).entity("true").build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
   }
 
 
