@@ -16,8 +16,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.sound.dao.QueueNodeDAO;
+import com.sound.dao.SoundCommentDAO;
 import com.sound.dao.SoundDAO;
 import com.sound.dao.SoundLikeDAO;
+import com.sound.dao.SoundPlayDAO;
 import com.sound.dao.SoundRecordDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
@@ -66,6 +68,12 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   SoundLikeDAO soundLikeDAO;
 
   @Autowired
+  SoundPlayDAO soundPlayDAO;
+
+  @Autowired
+  SoundCommentDAO soundCommentDAO;
+
+  @Autowired
   QueueNodeDAO queueNodeDAO;
 
   @Autowired
@@ -85,13 +93,20 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       // Delete create sound activity.
       soundRecordDAO.deleteByProperty("sound", sound);
       soundLikeDAO.deleteByProperty("sound", sound);
+      soundPlayDAO.deleteByProperty("sound", sound);
+      soundCommentDAO.deleteByProperty("sound", sound);
+
+      userDAO.decrease("profile.alias", sound.getProfile().getOwner().getProfile().getAlias(),
+          "userSocial.sounds");
+      userDAO.updateProperty("profile.alias",
+          sound.getProfile().getOwner().getProfile().getAlias(), "userSocial.soundDuration", (sound
+              .getProfile().getOwner().getUserSocial().getSoundDuration() + sound.getSoundData()
+              .getDuration()));
 
       if (null != sound.getSoundData() && null != sound.getSoundData().getObjectId()) {
         soundDataService.delete(sound.getSoundData().getObjectId());
       }
       soundDAO.delete(sound);
-
-      // TODO: decrease user's sound count and total sound time.
     }
   }
 
@@ -186,13 +201,13 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       userDAO.increase("profile.alias", owner.getProfile().getAlias(), "userSocial.sounds");
     }
 
-    userDAO.updateProperty("profile.alias", owner.getProfile().getAlias(), "userSocial.soundDuration", (owner
-        .getUserSocial().getSoundDuration() + soundLocal.getDuration()));
+    userDAO.updateProperty("profile.alias", owner.getProfile().getAlias(),
+        "userSocial.soundDuration",
+        (owner.getUserSocial().getSoundDuration() + soundLocal.getDuration()));
   }
 
   @Override
-  public SoundProfile saveProfile(SoundProfile soundProfile, User owner)
-      throws SoundException {
+  public SoundProfile saveProfile(SoundProfile soundProfile, User owner) throws SoundException {
     if (null == soundProfile.getName()) {
       throw new SoundException("Sound name can't be null.");
     }
@@ -554,7 +569,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   @Override
   public boolean isOwner(User user, String soundAlias) {
     Sound sound = soundDAO.findOne("profile.alias", soundAlias);
-    
+
     return sound.getProfile().getOwner().equals(user);
   }
 

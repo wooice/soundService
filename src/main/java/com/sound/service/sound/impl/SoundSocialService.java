@@ -1,6 +1,7 @@
 package com.sound.service.sound.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -340,7 +341,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   private List<Sound> recommandRandomSounds(int number) {
-    return soundDAO.findTopOnes(number, "soundSocial.likesCount");
+    return soundDAO.findTopOnes(number, "soundSocial.likesCount", Collections.<String, List<Object>>emptyMap());
   }
 
 }

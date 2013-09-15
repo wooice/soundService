@@ -59,8 +59,12 @@ public class UserSocialServiceEndpoint {
     User toUser = null;
     try {
       fromUser = userService.getCurrentUser(req);
-      toUser = userService.getUserByAlias(toUserAlias);
-      followed = userSocialService.follow(fromUser, toUser);
+      
+      if (!fromUser.getProfile().getAlias().equals(toUserAlias))
+      {
+        toUser = userService.getUserByAlias(toUserAlias);
+        followed = userSocialService.follow(fromUser, toUser);
+      }
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -219,6 +223,7 @@ public class UserSocialServiceEndpoint {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response getRecommandedUsersByTags(@NotNull JSONObject inputJsonObj) {
     List<User> users = new ArrayList<User>();
+    User currentUser = userService.getCurrentUser(req);
     try {
       Integer pageNum = inputJsonObj.getInt("pageNum");
       Integer pageSize = inputJsonObj.getInt("pageSize");
@@ -228,7 +233,7 @@ public class UserSocialServiceEndpoint {
       for (int i = 0; i < len; i++) {
         tagList.add(inputJsonObj.getJSONArray("tags").get(i).toString());
       }
-      users.addAll(userSocialService.recommandUsersByTags(tagList, pageNum, pageSize));
+      users.addAll(userSocialService.recommandUsersByTags(currentUser, tagList, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

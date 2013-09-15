@@ -1,7 +1,9 @@
 package com.sound.service.endpoint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -102,9 +104,10 @@ public class GuestServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to get user by alias " + userAlias)).build();
     }
-    String result = (null == user) ? "true" : "false";
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("unique", (null == user) ? "true" : "false");
 
-    return Response.status(Status.OK).entity(result).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @GET
@@ -118,9 +121,10 @@ public class GuestServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(("Failed to check emailaddress " + emailAddress)).build();
     }
-    String result = (null == user) ? "true" : "false";
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("unique", (null == user) ? "true" : "false");
 
-    return Response.status(Status.OK).entity(result).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
 
   @PUT
@@ -141,7 +145,7 @@ public class GuestServiceEndpoint {
           .build();
     }
 
-    return Response.status(Status.OK).entity(user).build();
+    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
   }
 
 
