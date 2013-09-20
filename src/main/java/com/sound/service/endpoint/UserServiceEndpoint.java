@@ -1,17 +1,18 @@
 package com.sound.service.endpoint;
 
+import java.util.List;
+
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,6 +29,7 @@ import com.sound.model.User;
 import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
 import com.sound.model.User.UserProfile;
+import com.sound.model.UserMessage;
 import com.sound.util.JsonHandler;
 
 @Component
@@ -106,55 +108,6 @@ public class UserServiceEndpoint {
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
   }
 
-  @POST
-  @Path("/updatePassword")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUserPassword(@NotNull JSONObject inputJsonObj) {
-    User user = null;
-
-    try {
-      user = userService.getCurrentUser(req);
-
-      if (null == user) {
-        return Response.status(Status.FORBIDDEN).entity(JsonHandler.toJson("falied")).build();
-      }
-
-      String oldPassword = inputJsonObj.getString("oldPassword");
-
-      if (!user.getAuth().getPassword().equals(oldPassword)) {
-        throw new UserException("Old password not match!");
-      }
-
-      String newPassword = inputJsonObj.getString("newPassword");
-
-      if (oldPassword.equals(newPassword))
-      {
-        throw new UserException("Password not changed!");
-      }
-      
-      user = userService.updatePassword(user, newPassword, null);
-    } catch (Exception e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot update password for " + user.getProfile().getAlias())).build();
-    }
-
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
-  }
-
-  @GET
-  @Path("/confirmEmail/{confirmCode}")
-  public Response confirmEmailAddress(@NotNull @PathParam("confirmCode") String confirmCode) {
-    try {
-      userService.confirmEmailAddress(confirmCode);
-    } catch (Exception e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Cannot confirm email")).build();
-    }
-
-    return Response.status(Status.OK).entity("Confirm Successfully").build();
-  }
-
   @PUT
   @Path("/addEmail/{userAlias}/{emailAddress}")
   public Response addEmailAddress(@NotNull @PathParam("userAlias") String userAlias,
@@ -221,38 +174,61 @@ public class UserServiceEndpoint {
   }
 
   @PUT
-  @Path("/sendMessage")
-  public Response sendUserMessage(@NotNull @FormParam("from") String fromUser,
-      @NotNull @FormParam("to") String toUser, @NotNull @FormParam("topic") String topic,
-      @NotNull @FormParam("content") String content) {
+  @Path("/messages/send")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response sendUserMessage(@NotNull JSONObject inputJsonObj) {
+    User curUser = null;
     try {
-      userService.sendUserMessage(fromUser, toUser, topic, content);
+      String toUser = inputJsonObj.getString("toUser");
+      String topic = inputJsonObj.getString("topic");
+      String content = inputJsonObj.getString("content");
+      curUser = userService.getCurrentUser(req);
+      User to = userService.getUserByAlias(toUser);
+      userService.sendUserMessage(curUser, to, topic, content);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot send user message from " + fromUser + " to " + toUser)).build();
+          .entity(("Cannot send user message from ")).build();
     }
 
     return Response.status(Status.OK).entity("send sucessfully").build();
-
   }
 
-  @DELETE
-  @Path("/removeMessage")
-  public Response removeUserMessage(@NotNull @FormParam("from") String fromUser,
-      @NotNull @FormParam("to") String toUser, @NotNull @FormParam("messageId") String messageId) {
+  @POST
+  @Path("/messages/mark")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response markUserMessage(@NotNull JSONObject inputJsonObj) {
     try {
-      userService.removeUserMessage(fromUser, toUser, messageId);
+      String messageId = inputJsonObj.getString("id");
+      String status = inputJsonObj.getString("status");
+      userService.markUserMessage(messageId, status);
     } catch (Exception e) {
       logger.error(e);
       return Response
           .status(Status.INTERNAL_SERVER_ERROR)
           .entity(
-              ("Cannot remove user message " + messageId + " from " + fromUser + " to " + toUser))
+              ("Cannot mark user message "))
           .build();
     }
 
     return Response.status(Status.OK).entity("remove sucessfully").build();
+  }
+
+  @GET
+  @Path("/messages")
+  public Response getMessages(@QueryParam("pageNum") Integer pageNum,
+      @QueryParam("perPage") Integer perPage, @QueryParam("status") String status) {
+    User curUser = null;
+    List<UserMessage> messages = null;
+    try {
+      curUser = userService.getCurrentUser(req);
+      messages = userService.getUserMessages(curUser, status, pageNum, perPage);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity((e.getMessage())).build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson(messages)).build();
   }
 
   @GET
@@ -291,6 +267,27 @@ public class UserServiceEndpoint {
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+    }
+
+    return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();
+  }
+
+  @POST
+  @Path("/submitPassChange")
+  public Response forgetPass() {
+    User user = null;
+    try {
+      user = userService.getCurrentUser(req);
+      if (user == null) {
+        return Response.status(Status.FORBIDDEN).entity("User not logged in.").build();
+      }
+      userService.sendChangePassLink(user.getProfile().getAlias());
+    } catch (UserException e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    } catch (Exception e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user "))
+          .build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();

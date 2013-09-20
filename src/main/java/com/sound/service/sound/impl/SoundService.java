@@ -277,20 +277,23 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     for (SoundRecord oneSound : records) {
       if (!results.contains(oneSound)) {
-        if (null != oneSound.getSound().getProfile().getPoster()
-            && null != oneSound.getSound().getProfile().getPoster().getPosterId()) {
-          oneSound
-              .getSound()
-              .getProfile()
-              .getPoster()
-              .setUrl(
-                  remoteStorageService.generateDownloadUrl(
-                      oneSound.getSound().getProfile().getPoster().getPosterId() + "."
-                          + oneSound.getSound().getProfile().getPoster().getExtension(),
-                      FileType.getFileType("image")).toString());
+        if (oneSound.getActions() != null && oneSound.getActions().size() > 0)
+        {
+          if (null != oneSound.getSound().getProfile().getPoster()
+              && null != oneSound.getSound().getProfile().getPoster().getPosterId()) {
+            oneSound
+                .getSound()
+                .getProfile()
+                .getPoster()
+                .setUrl(
+                    remoteStorageService.generateDownloadUrl(
+                        oneSound.getSound().getProfile().getPoster().getPosterId() + "."
+                            + oneSound.getSound().getProfile().getPoster().getExtension(),
+                        FileType.getFileType("image")).toString());
+          }
+          oneSound.getSound().setUserPrefer(getUserPreferOfSound(oneSound.getSound(), owner));
+          results.add(oneSound);
         }
-        oneSound.getSound().setUserPrefer(getUserPreferOfSound(oneSound.getSound(), owner));
-        results.add(oneSound);
       }
     }
     records.clear();
@@ -496,7 +499,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       }
     }
 
-    List<QueueNode> nodes = queueNodeDAO.find("ownerAlias", user.getProfile().getAlias());
+    List<QueueNode> nodes = queueNodeDAO.find("owner", user);
     for (QueueNode node : nodes) {
       Sound sound = soundDAO.findOne("profile.remoteId", node.getFileName().split("\\.")[0]);
       if (null == sound) {

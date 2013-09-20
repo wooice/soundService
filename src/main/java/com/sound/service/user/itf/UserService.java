@@ -1,9 +1,12 @@
 package com.sound.service.user.itf;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.sound.exception.UserException;
 import com.sound.model.User;
+import com.sound.model.UserMessage;
 import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
 import com.sound.model.User.UserProfile;
@@ -14,7 +17,7 @@ public interface UserService {
 
 	public User createUser(String userAlias, String emailAddress, String password) throws UserException;
 	
-	public User updatePassword(User user, String password, String ip) throws UserException;
+	public User updatePassword(String code, String oldPassword, String password, String ip) throws UserException;
 
 	public User getUserByAlias(String userAlias);
 	
@@ -34,11 +37,17 @@ public interface UserService {
 	
 	public User updateEmailSetting(String emailAddress, EmailSetting emailSetting) throws UserException;
 	
-	public void sendUserMessage(String fromUser, String toUser, String topic, String content) throws UserException;
+	public void sendUserMessage(User fromUser, User toUser, String topic, String content) throws UserException;
 
-	public void removeUserMessage(String fromUser, String toUser, String messageId) throws UserException;
+	public void markUserMessage(String messageId, String status) throws UserException;
 	
 	public User getCurrentUser(HttpServletRequest req);
 	
 	public User grantRole(User user, String role);
+	
+	public void sendChangePassLink(String emailAddress) throws UserException;
+	
+	public boolean verifyResetRequest(String action, String code) throws UserException;
+
+	public List<UserMessage> getUserMessages(User toUser, String status, Integer pageNum, Integer perPage);
 }

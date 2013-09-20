@@ -4,10 +4,12 @@ import java.util.Date;
 
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
+import com.sound.jackson.extension.IdSerializer;
 
 @Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,11 +23,14 @@ public class UserMessage extends BaseModel {
   @Reference
   private User to;
 
+  private String status;
+  
   private String topic;
   private String content;
   private String summary;
   private Date date;
 
+  @JsonSerialize(using = IdSerializer.class)
   public ObjectId getId() {
     return id;
   }
@@ -80,6 +85,14 @@ public class UserMessage extends BaseModel {
 
   public void setDate(Date date) {
     this.date = date;
+  }
+  
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 
   @Override

@@ -63,7 +63,7 @@ public class SoundActivity {
   public static class SoundComment extends SoundActivity {
     private String comment;
 
-    private float pointAt;
+    private Float pointAt;
 
     @Embedded
     private List<SoundCommentReply> replies;
@@ -76,11 +76,11 @@ public class SoundActivity {
       this.comment = comment;
     }
 
-    public float getPointAt() {
+    public Float getPointAt() {
       return pointAt;
     }
 
-    public void setPointAt(float pointAt) {
+    public void setPointAt(Float pointAt) {
       this.pointAt = pointAt;
     }
 
