@@ -58,7 +58,39 @@ public class UserAuth extends BaseModel {
     this.histories.add(history);
   }
 
+  public static class PasswordResetRequest{
+    @Id
+    private ObjectId id;
+    private User user;
+    private String resetCode;
+    private String cancelCode;
 
+    public ObjectId getId() {
+      return id;
+    }
+    public void setId(ObjectId id) {
+      this.id = id;
+    }
+    public User getUser() {
+      return user;
+    }
+    public void setUser(User user) {
+      this.user = user;
+    }
+    public String getResetCode() {
+      return resetCode;
+    }
+    public void setResetCode(String resetCode) {
+      this.resetCode = resetCode;
+    }
+    public String getCancelCode() {
+      return cancelCode;
+    }
+    public void setCancelCode(String cancelCode) {
+      this.cancelCode = cancelCode;
+    }
+  }
+  
   public static class ChangeHistory {
     private String ip;
     private String password;

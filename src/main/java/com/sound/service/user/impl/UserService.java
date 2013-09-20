@@ -8,18 +8,24 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.log4j.Logger;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.sound.constant.Constant;
+import com.sound.dao.PasswordResetRequestDAO;
 import com.sound.dao.UserAuthDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
@@ -37,6 +43,7 @@ import com.sound.model.User.UserSocial;
 import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
+import com.sound.model.UserAuth.PasswordResetRequest;
 import com.sound.model.UserMessage;
 import com.sound.model.enums.FileType;
 import com.sound.service.storage.itf.RemoteStorageService;
@@ -46,6 +53,8 @@ import com.sound.service.storage.itf.RemoteStorageService;
 public class UserService implements com.sound.service.user.itf.UserService {
 
   Logger logger = Logger.getLogger(UserService.class);
+
+  private static final String CONFIG_FILE = "config.properties";
 
   @Autowired
   UserDAO userDAO;
@@ -61,6 +70,20 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Autowired
   UserMessageDAO userMessageDAO;
+
+  @Autowired
+  PasswordResetRequestDAO passwordResetRequestDAO;
+
+  private PropertiesConfiguration config;
+
+  public UserService() {
+    try {
+      config = new PropertiesConfiguration(CONFIG_FILE);
+    } catch (ConfigurationException e) {
+      e.printStackTrace();
+    }
+  }
+
 
   @Override
   public User getUserByAlias(String userAlias) {
@@ -129,7 +152,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     UserEmail email = new UserEmail();
     email.setEmailAddress(emailAddress);
-    email.setConfirmCode(generateConfirmationCode());
+    email.setConfirmCode(generateRandomCode());
     email.setConfirmed(false);
     email.setContact(true);
     email.setSetting(new EmailSetting());
@@ -141,7 +164,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     social.setSoundDuration(0L);
     social.setReposts(0L);
     user.setUserSocial(social);
-    
+
     UserExternal userExternal = new UserExternal();
     userExternal.addSite(new Site("site", "个人网站", ""));
     userExternal.addSite(new Site("sina", "新浪微博", ""));
@@ -157,7 +180,23 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public User updatePassword(User user, String password, String ip) throws UserException {
+  public User updatePassword(String code, String oldPassword, String password, String ip)
+      throws UserException {
+    PasswordResetRequest request = passwordResetRequestDAO.findOne("resetCode", code);
+    if (null == request) {
+      throw new UserException("You can't update password.");
+    }
+
+    User user = request.getUser();
+
+    if (!user.getAuth().getPassword().equals(oldPassword)) {
+      throw new UserException("Old password not match!");
+    }
+
+    if (oldPassword.equals(password)) {
+      throw new UserException("Password not changed!");
+    }
+
     UserAuth auth = user.getAuth();
     if (auth == null) {
       auth = new UserAuth();
@@ -172,6 +211,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
     auth.addHistory(history);
 
     userAuthDAO.save(auth);
+
+    passwordResetRequestDAO.delete(request);
 
     return user;
   }
@@ -267,7 +308,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     email.setContact(false);
     email.setConfirmed(false);
     email.setEmailAddress(emailAddress);
-    email.setConfirmCode(generateConfirmationCode());
+    email.setConfirmCode(generateRandomCode());
     email.setSetting(new EmailSetting());
     emails.add(email);
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
@@ -285,7 +326,37 @@ public class UserService implements com.sound.service.user.itf.UserService {
     List<UserEmail> emails = user.getEmails();
     for (UserEmail email : emails) {
       if (email.getEmailAddress().equals(emailAddress)) {
-        doSendEmail(emailAddress, userAlias, email.getConfirmCode());
+        doSendEmail("[Wooice]注册确认", emailAddress, userAlias,
+            generateConformEmailBody(email.getConfirmCode(), userAlias));
+      }
+    }
+  }
+
+  @Override
+  public void sendChangePassLink(String emailAddress) throws UserException {
+    User user = this.getUserByEmail(emailAddress);
+    if (user == null) {
+      throw new UserException("Cannot find user by email " + emailAddress);
+    }
+    List<UserEmail> emails = user.getEmails();
+    for (UserEmail email : emails) {
+      if (email.getEmailAddress().equals(emailAddress)) {
+        passwordResetRequestDAO.deleteByProperty("user", user);
+
+        PasswordResetRequest passwordResetRequest = new PasswordResetRequest();
+        passwordResetRequest.setUser(user);
+        passwordResetRequest.setResetCode(this.generateRandomCode());
+        passwordResetRequest.setCancelCode(this.generateRandomCode());
+
+        doSendEmail(
+            "[Wooice]重置密码",
+            emailAddress,
+            user.getProfile().getAlias(),
+            generateChangePassBody(passwordResetRequest.getResetCode(),
+                passwordResetRequest.getCancelCode(), user.getProfile().getAlias()));
+
+        passwordResetRequestDAO.save(passwordResetRequest);
+        return;
       }
     }
   }
@@ -295,7 +366,6 @@ public class UserService implements com.sound.service.user.itf.UserService {
     User user = userDAO.findOne("emails.confirmCode", confirmCode);
     if (user == null) {
       throw new UserException("Cannot find user by email confirm code: " + confirmCode);
-
     }
     List<UserEmail> emails = user.getEmails();
     for (UserEmail email : emails) {
@@ -307,37 +377,49 @@ public class UserService implements com.sound.service.user.itf.UserService {
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
   }
 
-  private String generateConfirmationCode() {
+  @Override
+  public boolean verifyResetRequest(String action, String code) throws UserException {
+    PasswordResetRequest request = null;
+    if (action.equals("confirm")) {
+      request = passwordResetRequestDAO.findOne("resetCode", code);
+      if (request == null) {
+        return false;
+      }
+      return true;
+    } else {
+      if (action.equals("cancel")) {
+        request = passwordResetRequestDAO.findOne("cancelCode", code);
+        if (request == null) {
+          return false;
+        }
+        passwordResetRequestDAO.delete(request);
+        return true;
+      } else {
+        throw new UserException("Action " + action + " not supported.");
+      }
+    }
+  }
+
+  private String generateRandomCode() {
     return RandomStringUtils.random(32, true, true);
   }
 
-  private void doSendEmail(String emailAddress, String userAlias, String confirmCode)
+  private void doSendEmail(String title, String emailAddress, String userAlias, String body)
       throws UserException {
     try {
       HtmlEmail email = new HtmlEmail();
       email.setAuthentication("wooice", "dxd123456");
       email.setCharset("utf-8");
-      email.setSubject("Wooice Email Address Confirmation");
+      email.setSubject(title);
       email.setHostName("smtp.126.com");
       email.setFrom("wooice@126.com", "Wooice");
       email.addTo(emailAddress, userAlias);
-      email.setContent(generateHtmlEmailBody(confirmCode, userAlias), "text/html; charset=UTF-8");
+      email.setContent(body, "text/html; charset=UTF-8");
       email.send();
     } catch (EmailException e) {
       logger.error(e);
       throw new UserException("Cannot send email confirmation for email " + emailAddress);
     }
-  }
-
-  private String generateHtmlEmailBody(String code, String userAlias) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("<h2>Welcome to Wooice Family</h2>");
-    sb.append("Hi " + userAlias + ",<br/><br/>");
-    sb.append("We've received a request to add this email address to a Wooice account. Please click ");
-    sb.append("<a href=\"http://localhost:8080/commonService/confirmEmail/" + code
-        + "\">this link to confirm that it's OK.</a> <br/><br/>");
-    sb.append("<h4>The WOOICE Team<h4/>");
-    return sb.toString();
   }
 
   @Override
@@ -378,57 +460,58 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public void sendUserMessage(String fromUser, String toUser, String topic, String content)
+  public void sendUserMessage(User fromUser, User toUser, String topic, String content)
       throws UserException {
-    User from = this.getUserByAlias(fromUser);
-    User to = this.getUserByAlias(toUser);
-    if (from == null) {
-      throw new UserException("Cannot find user : " + fromUser);
-    }
-    if (to == null) {
-      throw new UserException("Cannot find user : " + toUser);
-    }
-
     String summary = content.length() <= 50 ? content : content.substring(0, 49) + "...";
 
     UserMessage message = new UserMessage();
-    message.setFrom(from);
-    message.setTo(to);
+    message.setFrom(fromUser);
+    message.setTo(toUser);
     message.setTopic(topic);
     message.setContent(content);
     message.setSummary(summary);
     message.setDate(new Date());
+    message.setStatus("unread");
     userMessageDAO.save(message);
 
-    from.addOutputMessage(message);
-    to.addInputMessage(message);
-
-    userDAO.updateProperty("_id", from.getId(), "outputMessages", from.getOutputMessages());
-    userDAO.updateProperty("_id", to.getId(), "inputMessages", to.getInputMessages());
-
+    if (null != fromUser)
+    {
+      userDAO.increase("profile.alias", fromUser.getProfile().getAlias(), "userSocial.outputMessages");
+    }
+    userDAO.increase("profile.alias", toUser.getProfile().getAlias(), "userSocial.inputMessages");
   }
 
   @Override
-  public void removeUserMessage(String fromUser, String toUser, String messageId)
+  public List<UserMessage> getUserMessages(User toUser, String status, Integer pageNum,
+      Integer perPage) {
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("to", toUser);
+
+    if (null != status) {
+      cratiaries.put("status", status);
+    }
+
+    return userMessageDAO.findWithRange(cratiaries, (pageNum - 1) * perPage, perPage, "-date");
+  }
+
+  @Override
+  public void markUserMessage(String messageId, String status)
       throws UserException {
-    User from = this.getUserByAlias(fromUser);
-    User to = this.getUserByAlias(toUser);
-    if (from == null) {
-      throw new UserException("Cannot find user : " + fromUser);
+    UserMessage userMessage = userMessageDAO.findOne("_id", new ObjectId(messageId));
+    if (status.equals("delete"))
+    {
+      if (null != userMessage.getFrom())
+      {
+        userDAO.decrease("profile.alias", userMessage.getFrom().getProfile().getAlias(), "userSocial.outputMessages");
+      }
+      userDAO.decrease("profile.alias", userMessage.getTo().getProfile().getAlias(), "userSocial.inputMessages");
     }
-    if (to == null) {
-      throw new UserException("Cannot find user : " + toUser);
+    
+    if (!status.equals("trash")) {
+      userMessageDAO.updateProperty("_id", userMessage.getId(), "status", status);
+    } else {
+      userMessageDAO.deleteByProperty("_id", userMessage.getId());
     }
-
-    UserMessage message = userMessageDAO.findOne("_id", messageId);
-    userMessageDAO.delete(message);
-
-    from.removeOutputMessage(message);
-    to.removeInputMessage(message);
-
-    userDAO.updateProperty("_id", from.getId(), "outputMessages", from.getOutputMessages());
-    userDAO.updateProperty("_id", to.getId(), "inputMessages", to.getInputMessages());
-
   }
 
   @Override
@@ -452,4 +535,28 @@ public class UserService implements com.sound.service.user.itf.UserService {
     return user;
   }
 
+  private String generateConformEmailBody(String code, String userAlias) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<h2>感谢您注册Wooice!</h2>");
+    sb.append("Hi " + userAlias + ",<br/><br/>");
+    sb.append("感谢您注册Wooice，请点击以下面链接 ");
+    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?confirmCode=" + code
+        + "\">激活您的账号.</a> <br/><br/>");
+    sb.append("<h4>WOOICE团队<h4/>");
+    return sb.toString();
+  }
+
+  private String generateChangePassBody(String changeCode, String cancelCode, String userAlias) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<h3>请修改您的密码</h3>");
+    sb.append("Hi " + userAlias + ",<br/><br/>");
+    sb.append("我们收到您修改密码的请求，请访问以下链接 ");
+    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?resetCode=" + changeCode
+        + "\">修改密码</a> <br/><br/>");
+    sb.append("如果您没有发出修改密码请求，请访问以下连续取消修改 ");
+    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?cancelCode=" + cancelCode
+        + "\">取消修改</a> <br/><br/>");
+    sb.append("<h4>WOOICE团队<h4/>");
+    return sb.toString();
+  }
 }

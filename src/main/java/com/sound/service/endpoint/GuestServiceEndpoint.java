@@ -148,5 +148,21 @@ public class GuestServiceEndpoint {
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
   }
 
+  @PUT
+  @Path("/reportForget")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response forgetPass(@NotNull JSONObject inputJsonObj) {
+    try {
+      String emailAddress = inputJsonObj.getString("emailAddress");
+      userService.sendChangePassLink(emailAddress);
+    } catch (UserException e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    } catch (Exception e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user "))
+          .build();
+    }
 
+    return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();
+  }
 }

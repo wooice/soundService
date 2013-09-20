@@ -26,7 +26,7 @@ import com.sound.model.file.SoundLocal;
 public class RemoteStorageService implements com.sound.service.storage.itf.RemoteStorageService {
 
   private static final String OSS_CONFIG_FILE = "ossConfig.properties";
-
+  
   private static final int DEFAULT_CONEECTIONTIMEOUT = 10000;
 
   private static final int DEFAULT_MAXCONNECTION = 1000;
