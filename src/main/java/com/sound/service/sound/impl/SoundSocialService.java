@@ -203,6 +203,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     if (null == sound) {
       throw new SoundException("Sound " + soundAlias + " not found.");
     }
+    
+    if (pointAt < 0)
+    {
+      pointAt = null;
+    }
+    
     soundComment.setSound(sound);
     soundComment.setCreatedTime(new Date());
     soundComment.setComment(comment);

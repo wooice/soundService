@@ -479,6 +479,7 @@ public class Sound extends BaseModel {
 
     private String fileName;
 
+    @Reference
     private User owner;
     
     private Date createdDate;

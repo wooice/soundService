@@ -261,10 +261,11 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
       List<User> firstClass = this.getAllFollowingUsers(oneUser);
       firstClass.removeAll(followingUsers);
       for (User firstUser : firstClass) {
-        if (potentialFollowing.containsKey(firstUser)) {
-          potentialFollowing.put(firstUser, 1l);
-        } else {
+        if (potentialFollowing.containsKey(firstUser)) 
+        {
           potentialFollowing.put(firstUser, potentialFollowing.get(firstUser) + 1);
+        } else {
+          potentialFollowing.put(firstUser, 1l);
         }
       }
     }
@@ -426,7 +427,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     List<User> toReturn = SocialUtils.sliceList(byTags, pageNum, pageSize);
 
-    if (toReturn.size() < pageNum) {
+    if (toReturn.size() < pageSize) {
       toReturn.addAll(recommandRandomUsers(currentUser, pageSize - toReturn.size()));
     }
 
