@@ -190,7 +190,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   @Override
-  public Integer comment(String soundAlias, User user, String comment, Float pointAt)
+  public Integer comment(String soundAlias, User user, User toUser, String comment, Float pointAt)
       throws SoundException, UserException {
     SoundComment soundComment = new SoundComment();
 
@@ -204,12 +204,13 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
       throw new SoundException("Sound " + soundAlias + " not found.");
     }
     
-    if (pointAt < 0)
+    if (null == pointAt || pointAt < 0)
     {
       pointAt = null;
     }
     
     soundComment.setSound(sound);
+    soundComment.setTo(toUser);
     soundComment.setCreatedTime(new Date());
     soundComment.setComment(comment);
     soundComment.setPointAt(pointAt);
