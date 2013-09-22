@@ -7,11 +7,11 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.sound.jackson.extension.DateSerializer;
+import com.sound.jackson.extension.IdSerializer;
 
 public class SoundActivity {
 
@@ -26,6 +26,7 @@ public class SoundActivity {
 
   protected Date createdTime;
 
+  @JsonSerialize(using = IdSerializer.class)
   public ObjectId getId() {
     return id;
   }
@@ -65,9 +66,9 @@ public class SoundActivity {
 
     private Float pointAt;
 
-    @Embedded
-    private List<SoundCommentReply> replies;
-
+    @Reference
+    private User to;
+    
     public String getComment() {
       return comment;
     }
@@ -84,26 +85,14 @@ public class SoundActivity {
       this.pointAt = pointAt;
     }
 
-    public List<SoundCommentReply> getReplies() {
-      return replies;
+    public User getTo() {
+      return to;
     }
 
-
-    public void setReplies(List<SoundCommentReply> replies) {
-      this.replies = replies;
+    public void setTo(User to) {
+      this.to = to;
     }
 
-    public class SoundCommentReply extends SoundActivity {
-      private String reply;
-
-      public String getReply() {
-        return reply;
-      }
-
-      public void setReply(String reply) {
-        this.reply = reply;
-      }
-    }
   }
 
   @Entity
