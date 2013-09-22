@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -17,10 +18,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,14 +39,14 @@ import com.sound.util.JsonHandler;
 
 @Component
 @Path("/soundActivity")
-@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
 public class SoundSocialServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundSocialServiceEndpoint.class);
 
   @Autowired
   SoundSocialService soundSocialService;
- 
+
   @Autowired
   com.sound.service.user.itf.UserService userService;
 
@@ -51,9 +55,7 @@ public class SoundSocialServiceEndpoint {
 
   @PUT
   @Path("/play/{soundAlias}")
-  public Response play(
-      @NotNull @PathParam("soundAlias") String soundAlias
-      ) {
+  public Response play(@NotNull @PathParam("soundAlias") String soundAlias) {
     Map<String, String> result = null;
     User currentUser = null;
     try {
@@ -156,13 +158,32 @@ public class SoundSocialServiceEndpoint {
 
   @PUT
   @Path("/comment/{soundAlias}")
+  @Consumes(MediaType.APPLICATION_JSON)
   public Response comment(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull @QueryParam("comment") String comment, @QueryParam("pointAt") Float pointAt) {
+                          @NotNull JSONObject inputJsonObj) {
     Integer commentsCount = 0;
     User currentUser = null;
     try {
+      String comment = inputJsonObj.getString("comment");
+      Float pointAt = null;
+
+      if (null != inputJsonObj.get("pointAt"))
+      {
+        try
+        {
+          pointAt = (float) inputJsonObj.getDouble("pointAt");
+        }
+        catch(JSONException e)
+        {
+        }
+      }
+      String toUserAlias = inputJsonObj.getString("toUserAlias");
       currentUser = userService.getCurrentUser(req);
-      commentsCount = soundSocialService.comment(soundAlias, currentUser, comment, pointAt);
+      User toUser = null;
+      if (null != toUserAlias) {
+        toUser = userService.getUserByAlias(toUserAlias);
+      }
+      commentsCount = soundSocialService.comment(soundAlias, currentUser, toUser, comment, pointAt);
     } catch (UserException e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

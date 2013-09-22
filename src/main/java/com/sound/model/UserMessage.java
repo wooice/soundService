@@ -24,7 +24,6 @@ public class UserMessage extends BaseModel {
   private User to;
 
   private String status;
-  
   private String topic;
   private String content;
   private String summary;

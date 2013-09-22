@@ -21,7 +21,7 @@ public interface SoundSocialService {
 	
 	public Integer unrepost(String soundAlias, User user)  throws SoundException;
 	
-	public Integer comment(String soundAlias, User user, String comment, Float pointAt) throws SoundException, UserException;
+	public Integer comment(String soundAlias, User user, User toUser, String comment, Float pointAt) throws SoundException, UserException;
 	
 	public Integer uncomment(String commentId) throws SoundException;
 
