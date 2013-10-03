@@ -29,8 +29,7 @@ import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.Tag;
 import com.sound.model.User;
-import com.sound.model.enums.FileType;
-import com.sound.service.storage.itf.RemoteStorageService;
+import com.sound.service.storage.itf.RemoteStorageServiceV2;
 import com.sound.util.SocialUtils;
 
 @Service
@@ -59,14 +58,14 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   TagService tagService;
 
   @Autowired
-  RemoteStorageService remoteStorageService;
+  RemoteStorageServiceV2 remoteStorageService;
 
   @Override
-  public Map<String, String> play(String soundAlias, User user) throws SoundException {
-    Sound sound = soundDAO.findOne("profile.alias", soundAlias);
+  public Map<String, String> play(String id, User user) throws SoundException {
+    Sound sound = soundDAO.findOne("_id", new ObjectId(id));
 
     if (null == sound) {
-      throw new SoundException("Sound with name " + soundAlias + " not found");
+      throw new SoundException("Sound with id " + id + " not found");
     }
 
     SoundPlay play = new SoundPlay();
@@ -74,25 +73,22 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     play.setOwner(user);
     play.setCreatedTime(new Date());
     soundPlayDAO.save(play);
-    soundDAO.increase("profile.alias", soundAlias, "soundSocial.playedCount");
+    soundDAO.increase("_id", new ObjectId(id), "soundSocial.playedCount");
 
     Map<String, String> playResult = new HashMap<String, String>();
     playResult.put("played", String.valueOf(sound.getSoundSocial().getPlayedCount() + 1));
-    playResult.put(
-        "url",
-        remoteStorageService.generateDownloadUrl(
-            sound.getSoundData().getObjectId() + "." + sound.getSoundData().getExtension(),
-            FileType.getFileType("sound")).toString());
+    playResult.put("url", remoteStorageService.getDownloadURL(sound.getSoundData().getObjectId(),
+        "sound", "avthumb/mp3"));
 
     return playResult;
   }
 
   @Override
-  public Integer like(String soundAlias, User user) throws SoundException {
-    Sound sound = soundDAO.findOne("profile.alias", soundAlias);
+  public Integer like(String id, User user) throws SoundException {
+    Sound sound = soundDAO.findOne("_id", new ObjectId(id));
 
     if (null == sound) {
-      throw new SoundException("Sound with name " + soundAlias + " not found");
+      throw new SoundException("Sound with name " + id + " not found");
     }
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -109,17 +105,17 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     like.setOwner(user);
     like.setCreatedTime(new Date());
     soundLikeDAO.save(like);
-    soundDAO.increase("profile.alias", soundAlias, "soundSocial.likesCount");
+    soundDAO.increase("_id", sound.getId(), "soundSocial.likesCount");
 
     return sound.getSoundSocial().getLikesCount() + 1;
   }
 
   @Override
-  public Integer dislike(String soundAlias, User user) throws SoundException {
-    Sound sound = soundDAO.findOne("profile.alias", soundAlias);
+  public Integer dislike(String id, User user) throws SoundException {
+    Sound sound = soundDAO.findOne("_id", new ObjectId(id));
 
     if (null == sound) {
-      throw new SoundException("Sound with name " + soundAlias + " not found");
+      throw new SoundException("Sound with name " + id + " not found");
     }
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -128,21 +124,22 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     SoundLike liked = soundLikeDAO.findOne(cratiaries);
 
     if (null == liked) {
-      throw new SoundException("The user " + user.getProfile().getAlias() + " hasn't liked sound " + soundAlias);
+      throw new SoundException("The user " + user.getProfile().getAlias() + " hasn't liked sound "
+          + id);
     }
 
     soundLikeDAO.delete(liked);
-    soundDAO.decrease("profile.alias", soundAlias, "soundSocial.likesCount");
+    soundDAO.decrease("_id", sound.getId(), "soundSocial.likesCount");
 
     return sound.getSoundSocial().getLikesCount() - 1;
   }
 
   @Override
-  public Integer repost(String soundAlias, User user) throws SoundException {
-    Sound sound = soundDAO.findOne("profile.alias", soundAlias);
+  public Integer repost(String id, User user) throws SoundException {
+    Sound sound = soundDAO.findOne("_id", new ObjectId(id));
 
     if (null == sound) {
-      throw new SoundException("Sound with name " + soundAlias + " not found");
+      throw new SoundException("Sound with name " + id + " not found");
     }
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -159,18 +156,18 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     activityRecord.setCreatedTime(new Date());
     soundRecordDAO.save(activityRecord);
 
-    soundDAO.increase("profile.alias", soundAlias, "soundSocial.reportsCount");
-    userDAO.increase("profile.alias", user.getProfile().getAlias(), "userSocial.reposts");
+    soundDAO.increase("_id", sound.getId(), "soundSocial.reportsCount");
+    userDAO.increase("_id", user.getId(), "userSocial.reposts");
 
     return sound.getSoundSocial().getReportsCount() + 1;
   }
 
   @Override
-  public Integer unrepost(String soundAlias, User user) throws SoundException {
-    Sound sound = soundDAO.findOne("profile.alias", soundAlias);
+  public Integer unrepost(String id, User user) throws SoundException {
+    Sound sound = soundDAO.findOne("_id", new ObjectId(id));
 
     if (null == sound) {
-      throw new SoundException("Sound with name " + soundAlias + " not found");
+      throw new SoundException("Sound with id " + id + " not found");
     }
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -179,18 +176,19 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     SoundRecord reposted = soundRecordDAO.findOne(cratiaries);
 
     if (null == reposted) {
-      throw new SoundException("The user " + user.getProfile().getAlias() + " hasn't reposted sound " + soundAlias);
+      throw new SoundException("The user " + user.getProfile().getAlias()
+          + " hasn't reposted sound");
     }
     reposted.removeAction(SoundRecord.REPOST);
     soundRecordDAO.save(reposted);
-    soundDAO.decrease("profile.alias", soundAlias, "soundSocial.reportsCount");
-    userDAO.decrease("profile.alias", user.getProfile().getAlias(), "userSocial.reposts");
+    soundDAO.decrease("_id", sound.getId(), "soundSocial.reportsCount");
+    userDAO.decrease("_id", user.getId(), "userSocial.reposts");
 
     return sound.getSoundSocial().getReportsCount() - 1;
   }
 
   @Override
-  public Integer comment(String soundAlias, User user, User toUser, String comment, Float pointAt)
+  public Integer comment(String id, User user, User toUser, String comment, Float pointAt)
       throws SoundException, UserException {
     SoundComment soundComment = new SoundComment();
 
@@ -199,16 +197,15 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     }
     soundComment.setOwner(user);
 
-    Sound sound = soundDAO.findOne("profile.alias", soundAlias);
+    Sound sound = soundDAO.findOne("_id", new ObjectId(id));
     if (null == sound) {
-      throw new SoundException("Sound " + soundAlias + " not found.");
+      throw new SoundException("Sound " + id + " not found.");
     }
-    
-    if (null == pointAt || pointAt < 0)
-    {
+
+    if (null == pointAt || pointAt < 0) {
       pointAt = null;
     }
-    
+
     soundComment.setSound(sound);
     soundComment.setTo(toUser);
     soundComment.setCreatedTime(new Date());
@@ -216,7 +213,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     soundComment.setPointAt(pointAt);
 
     soundCommentDAO.save(soundComment);
-    soundDAO.increase("profile.alias", soundAlias, "soundSocial.commentsCount");
+    soundDAO.increase("_id", sound.getId(), "soundSocial.commentsCount");
 
     return sound.getSoundSocial().getCommentsCount() + 1;
   }
@@ -231,17 +228,16 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
     int commentsCount = soundComment.getSound().getSoundSocial().getCommentsCount() - 1;
 
-    String soundAlias = soundComment.getSound().getProfile().getName();
     soundCommentDAO.delete(soundComment);
-    soundDAO.decrease("profile.alias", soundAlias, "soundSocial.commentsCount");
+    soundDAO.decrease("_id", soundComment.getSound().getId(), "soundSocial.commentsCount");
 
     return commentsCount;
   }
 
   @Override
-  public List<SoundComment> getComments(String soundAlias, Integer pageNum, Integer commentsPerPage)
+  public List<SoundComment> getComments(String id, Integer pageNum, Integer commentsPerPage)
       throws SoundException {
-    Sound sound = soundDAO.findOne("profile.alias", soundAlias);
+    Sound sound = soundDAO.findOne("_id", new ObjectId(id));
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
     cratiaries.put("sound", sound);
@@ -259,9 +255,8 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
             .getOwner()
             .getProfile()
             .setAvatorUrl(
-                remoteStorageService.generateDownloadUrl(
-                    comment.getOwner().getProfile().getAlias(), FileType.getFileType("image"))
-                    .toString());
+                remoteStorageService.getDownloadURL(comment.getOwner().getId().toString(), "image",
+                    "format/png"));
       } else {
         comment.getOwner().getProfile().setAvatorUrl(null);
       }
@@ -348,7 +343,8 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   private List<Sound> recommandRandomSounds(int number) {
-    return soundDAO.findTopOnes(number, "soundSocial.likesCount", Collections.<String, List<Object>>emptyMap());
+    return soundDAO.findTopOnes(number, "soundSocial.likesCount",
+        Collections.<String, List<Object>>emptyMap());
   }
 
 }

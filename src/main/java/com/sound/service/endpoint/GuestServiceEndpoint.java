@@ -72,7 +72,7 @@ public class GuestServiceEndpoint {
         throw new RuntimeException("The user " + userId + " does not exist.");
       }
 
-      if (!user.getAuth().getPassword().equals(password)) {
+      if (!userService.authVerify(user, password)) {
         throw new RuntimeException("Password is not correct.");
       }
 
@@ -86,7 +86,7 @@ public class GuestServiceEndpoint {
       session.setAttribute("userRoles", roles);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -101,8 +101,7 @@ public class GuestServiceEndpoint {
       user = userService.getUserByAlias(userAlias);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to get user by alias " + userAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, String> result = new HashMap<String, String>();
     result.put("unique", (null == user) ? "true" : "false");
@@ -118,8 +117,7 @@ public class GuestServiceEndpoint {
       user = userService.getUserByEmail(emailAddress);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to check emailaddress " + emailAddress)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, String> result = new HashMap<String, String>();
     result.put("unique", (null == user) ? "true" : "false");
@@ -139,10 +137,9 @@ public class GuestServiceEndpoint {
       user = userService.createUser(userAlias, emailAddress, password);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user "))
-          .build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -157,10 +154,9 @@ public class GuestServiceEndpoint {
       userService.sendChangePassLink(emailAddress);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user "))
-          .build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();

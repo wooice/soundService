@@ -49,12 +49,18 @@ public class UserServiceEndpoint {
   @Path("/{userAlias}")
   public Response load(@NotNull @PathParam("userAlias") String userAlias) {
     User user = null;
+    User curUser = null;
     try {
       user = userService.getUserByAlias(userAlias);
+
+      if (null == user) {
+        return Response.status(Status.NOT_FOUND).build();
+      }
+      curUser = userService.getCurrentUser(req);
+      user.setUserPrefer(userService.getUserPrefer(curUser, user));
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to load user " + userAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -63,29 +69,15 @@ public class UserServiceEndpoint {
   @POST
   @Path("/updateBasic")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUserBasicProfile(@NotNull JSONObject inputJsonObj) {
+  public Response updateUserBasicProfile(@NotNull UserProfile userProfile) {
     User user = null;
-    UserProfile profile = new UserProfile();
     try {
       user = userService.getCurrentUser(req);
 
-      // profile.setAlias(inputJsonObj.getString("alias"));
-      profile.setFirstName(inputJsonObj.getString("firstName"));
-      profile.setLastName(inputJsonObj.getString("lastName"));
-      profile.setCity(inputJsonObj.getString("city"));
-      profile.setCountry(inputJsonObj.getString("country"));
-      profile.setDescription(inputJsonObj.getString("description"));
-      // JSONArray occs = inputJsonObj.getJSONArray("occupations");
-      // List<Integer> occList = new ArrayList<Integer>();
-      // for (int i = 0; i < occs.length(); i++) {
-      // occList.add(occs.getInt(i));
-      // }
-      // profile.setOccupations(occList);
-      user = userService.updateUserBasicProfile(user, profile);
+      user = userService.updateUserBasicProfile(user, userProfile);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot update user basic profile for " + user.getProfile().getAlias())).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -117,8 +109,7 @@ public class UserServiceEndpoint {
       user = userService.addEmailAddress(userAlias, emailAddress);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot add email " + emailAddress + " for user " + userAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -132,12 +123,10 @@ public class UserServiceEndpoint {
       userService.sendEmailAddressConfirmation(userAlias, emailAddress);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot send confirmation to email " + emailAddress + " for user " + userAlias))
-          .build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Status.OK).entity("send confirmation email successfully").build();
+    return Response.status(Status.OK).build();
   }
 
   @GET
@@ -148,12 +137,10 @@ public class UserServiceEndpoint {
       userService.changeContactEmailAddress(userAlias, emailAddress);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot change contact email " + emailAddress + " for user " + userAlias))
-          .build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Status.OK).entity("change contact email successfully").build();
+    return Response.status(Status.OK).build();
   }
 
   @PUT
@@ -166,8 +153,7 @@ public class UserServiceEndpoint {
       user = userService.updateEmailSetting(emailAddress, setting);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot update email setting of " + emailAddress)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
@@ -187,11 +173,10 @@ public class UserServiceEndpoint {
       userService.sendUserMessage(curUser, to, topic, content);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot send user message from ")).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Status.OK).entity("send sucessfully").build();
+    return Response.status(Status.OK).build();
   }
 
   @POST
@@ -204,14 +189,10 @@ public class UserServiceEndpoint {
       userService.markUserMessage(messageId, status);
     } catch (Exception e) {
       logger.error(e);
-      return Response
-          .status(Status.INTERNAL_SERVER_ERROR)
-          .entity(
-              ("Cannot mark user message "))
-          .build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Status.OK).entity("remove sucessfully").build();
+    return Response.status(Status.OK).build();
   }
 
   @GET
@@ -231,24 +212,6 @@ public class UserServiceEndpoint {
     return Response.status(Status.OK).entity(JsonHandler.toJson(messages)).build();
   }
 
-  @GET
-  @Path("/isAlive")
-  public Response isAlive() {
-    User user = null;
-    try {
-      user = userService.getCurrentUser(req);
-
-      if (null == user) {
-        throw new RuntimeException("You are not logged in.");
-      }
-    } catch (Exception e) {
-      logger.error(e);
-      return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-    }
-
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
-  }
-
   @POST
   @Path("/logout")
   public Response logout() {
@@ -266,10 +229,10 @@ public class UserServiceEndpoint {
       }
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+      return Response.status(Status.UNAUTHORIZED).build();
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();
+    return Response.status(Status.OK).build();
   }
 
   @POST
@@ -278,18 +241,18 @@ public class UserServiceEndpoint {
     User user = null;
     try {
       user = userService.getCurrentUser(req);
-      if (user == null) {
-        return Response.status(Status.FORBIDDEN).entity("User not logged in.").build();
+      if (user == null || (user.getEmails() == null || user.getEmails().size() == 0)) {
+        return Response.status(Status.FORBIDDEN).build();
       }
-      userService.sendChangePassLink(user.getProfile().getAlias());
+      userService.sendChangePassLink(user.getEmails().get(0).getEmailAddress());
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(("Failed to create user "))
-          .build();
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson("true")).build();
+    return Response.status(Status.OK).build();
   }
 }

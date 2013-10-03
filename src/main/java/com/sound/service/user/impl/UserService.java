@@ -1,5 +1,7 @@
 package com.sound.service.user.impl;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,8 +10,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.configuration.ConfigurationException;
@@ -30,6 +30,7 @@ import com.sound.dao.UserAuthDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
 import com.sound.dao.UserMessageDAO;
+import com.sound.exception.AuthException;
 import com.sound.exception.UserException;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail;
@@ -45,8 +46,7 @@ import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
 import com.sound.model.UserAuth.PasswordResetRequest;
 import com.sound.model.UserMessage;
-import com.sound.model.enums.FileType;
-import com.sound.service.storage.itf.RemoteStorageService;
+import com.sound.service.storage.itf.RemoteStorageServiceV2;
 
 @Service
 @Scope("singleton")
@@ -63,7 +63,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   UserConnectDAO userConnectDAO;
 
   @Autowired
-  RemoteStorageService remoteStorageService;
+  RemoteStorageServiceV2 remoteStorageService;
 
   @Autowired
   UserAuthDAO userAuthDAO;
@@ -93,11 +93,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
-          remoteStorageService.generateDownloadUrl(user.getProfile().getAvatorUrl(),
-              FileType.getFileType("image")).toString());
+          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "format/png"));
     }
-
-    user.setUserPrefer(getUserPreferOfSound(user, user));
 
     return user;
   }
@@ -110,11 +107,9 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
-          remoteStorageService.generateDownloadUrl(user.getProfile().getAlias(),
-              FileType.getFileType("image")).toString());
+          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "format/png"));
     }
 
-    user.setUserPrefer(getUserPreferOfSound(user, user));
     return user;
   }
 
@@ -138,7 +133,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     profile.setAlias(userAlias);
 
     UserAuth auth = new UserAuth();
-    auth.setPassword(password);
+    auth.setPassword(hashPassword(password));
     userAuthDAO.save(auth);
 
     user.setProfile(profile);
@@ -181,15 +176,15 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Override
   public User updatePassword(String code, String oldPassword, String password, String ip)
-      throws UserException {
+      throws UserException, AuthException {
     PasswordResetRequest request = passwordResetRequestDAO.findOne("resetCode", code);
     if (null == request) {
-      throw new UserException("You can't update password.");
+      throw new AuthException("You can't update password.");
     }
 
     User user = request.getUser();
 
-    if (!user.getAuth().getPassword().equals(oldPassword)) {
+    if (!user.getAuth().getPassword().equals(hashPassword(oldPassword))) {
       throw new UserException("Old password not match!");
     }
 
@@ -203,11 +198,11 @@ public class UserService implements com.sound.service.user.itf.UserService {
       user.setAuth(auth);
       auth.setHistories(new ArrayList<ChangeHistory>());
     }
-    auth.setPassword(password);
+    auth.setPassword(hashPassword(password));
     ChangeHistory history = new ChangeHistory();
     history.setIp(ip);
     history.setModifiedDate(new Date());
-    history.setPassword(password);
+    history.setPassword(hashPassword(password));
     auth.addHistory(history);
 
     userAuthDAO.save(auth);
@@ -221,7 +216,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
     userDAO.deleteByProperty("profile.alias", userAlias);
   }
 
-  private UserPrefer getUserPreferOfSound(User currentUser, User targetUser) {
+  @Override
+  public UserPrefer getUserPrefer(User currentUser, User targetUser) {
     UserPrefer userPrefer = new UserPrefer();
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -281,6 +277,10 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (CollectionUtils.isNotEmpty(newProfile.getOccupations())) {
       profile.setOccupations(newProfile.getOccupations());
+    }
+
+    if (null != newProfile.getColor()) {
+      profile.setColor(newProfile.getColor());
     }
 
     userDAO.updateProperty("_id", user.getId(), "profile", profile);
@@ -474,9 +474,9 @@ public class UserService implements com.sound.service.user.itf.UserService {
     message.setStatus("unread");
     userMessageDAO.save(message);
 
-    if (null != fromUser)
-    {
-      userDAO.increase("profile.alias", fromUser.getProfile().getAlias(), "userSocial.outputMessages");
+    if (null != fromUser) {
+      userDAO.increase("profile.alias", fromUser.getProfile().getAlias(),
+          "userSocial.outputMessages");
     }
     userDAO.increase("profile.alias", toUser.getProfile().getAlias(), "userSocial.inputMessages");
   }
@@ -495,18 +495,17 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public void markUserMessage(String messageId, String status)
-      throws UserException {
+  public void markUserMessage(String messageId, String status) throws UserException {
     UserMessage userMessage = userMessageDAO.findOne("_id", new ObjectId(messageId));
-    if (status.equals("delete"))
-    {
-      if (null != userMessage.getFrom())
-      {
-        userDAO.decrease("profile.alias", userMessage.getFrom().getProfile().getAlias(), "userSocial.outputMessages");
+    if (status.equals("delete")) {
+      if (null != userMessage.getFrom()) {
+        userDAO.decrease("profile.alias", userMessage.getFrom().getProfile().getAlias(),
+            "userSocial.outputMessages");
       }
-      userDAO.decrease("profile.alias", userMessage.getTo().getProfile().getAlias(), "userSocial.inputMessages");
+      userDAO.decrease("profile.alias", userMessage.getTo().getProfile().getAlias(),
+          "userSocial.inputMessages");
     }
-    
+
     if (!status.equals("trash")) {
       userMessageDAO.updateProperty("_id", userMessage.getId(), "status", status);
     } else {
@@ -535,6 +534,17 @@ public class UserService implements com.sound.service.user.itf.UserService {
     return user;
   }
 
+  private String hashPassword(String password) {
+    byte[] passHash = null;
+    try {
+      MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+      passHash = sha256.digest(password.getBytes());
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+    return new String(passHash);
+  }
+
   private String generateConformEmailBody(String code, String userAlias) {
     StringBuilder sb = new StringBuilder();
     sb.append("<h2>感谢您注册Wooice!</h2>");
@@ -558,5 +568,11 @@ public class UserService implements com.sound.service.user.itf.UserService {
         + "\">取消修改</a> <br/><br/>");
     sb.append("<h4>WOOICE团队<h4/>");
     return sb.toString();
+  }
+
+
+  @Override
+  public boolean authVerify(User user, String password) {
+    return user.getAuth().getPassword().equals(hashPassword(password));
   }
 }

@@ -68,7 +68,7 @@ public class SoundActivity {
 
     @Reference
     private User to;
-    
+
     public String getComment() {
       return comment;
     }
@@ -134,12 +134,12 @@ public class SoundActivity {
         actions.remove(action);
       }
     }
-    
+
     public boolean hasAction(String action) {
       if (null == actions) {
         actions = new ArrayList<String>();
       }
-      
+
       return actions.contains(action);
     }
 
@@ -162,7 +162,7 @@ public class SoundActivity {
       } else if (!sound.equals(other.sound)) return false;
       return true;
     }
- 
+
   }
 
   @Entity

@@ -7,12 +7,10 @@ import com.mongodb.Mongo;
 import com.sound.model.UserMessage;
 import com.sound.morphia.extension.BaseDAO;
 
-public class UserMessageDAO extends BaseDAO<UserMessage, ObjectId>{
+public class UserMessageDAO extends BaseDAO<UserMessage, ObjectId> {
 
-  public UserMessageDAO(Mongo mongo, Morphia morphia,
-          String dbName) 
-  {
-      super(mongo, morphia, dbName);
+  public UserMessageDAO(Mongo mongo, Morphia morphia, String dbName) {
+    super(mongo, morphia, dbName);
   }
 
 }

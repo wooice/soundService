@@ -5,18 +5,18 @@ import java.util.List;
 
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
-import com.sound.model.User;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.User;
 import com.sound.model.file.SoundLocal;
+import com.sound.processor.exception.AudioProcessException;
 
 public interface SoundService {
 
-  public SoundProfile updateProfile(SoundProfile soundProfile) throws SoundException;
+  public Sound updateProfile(String id, SoundProfile soundProfile) throws SoundException;
 
-  public SoundProfile saveProfile(SoundProfile soundProfile, User user)
-      throws SoundException;
+  public Sound saveProfile(SoundProfile soundProfile, User user) throws SoundException;
 
   public void addToSet(String soundId, String setId);
 
@@ -29,14 +29,17 @@ public interface SoundService {
   public List<Sound> loadByKeyWords(User user, String keyWords, Integer pageNum,
       Integer soundsPerPage);
 
-  public List<SoundRecord> getSoundsByUser(User user, Integer pageNum, Integer soundsPerPage)
-      throws SoundException;
-
-  public List<SoundRecord> getObservingSounds(User user, Integer pageNum,
+  public List<SoundRecord> getSoundsByUser(User user, User curUser, Integer pageNum,
       Integer soundsPerPage) throws SoundException;
+
+  public List<SoundRecord> getObservingSounds(User user, Integer pageNum, Integer soundsPerPage)
+      throws SoundException;
 
   public SoundLocal processSound(User currentUser, File originSoundFile, String fileName)
       throws SoundException;
+
+  public SoundLocal processSoundV2(User user, File soundFile, String fileName)
+      throws SoundException, AudioProcessException;
 
   public void saveData(SoundLocal soundFile, User owner);
 
@@ -49,6 +52,6 @@ public interface SoundService {
   public void dequeue(QueueNode node);
 
   public Sound getUnfinishedUpload(User user);
-  
+
   public boolean isOwner(User user, String soundAlias);
 }

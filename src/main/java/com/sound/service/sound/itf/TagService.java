@@ -9,20 +9,19 @@ import com.sound.model.Tag.TagCategory;
 import com.sound.model.User;
 
 public interface TagService {
-	
-	public Tag getOrCreate(String label, User owner, String tagCategory) throws SoundException;
 
-	public List<Tag> listTagsContains(String pattern) throws SoundException;
+  public Tag getOrCreate(String label, User owner, String tagCategory) throws SoundException;
 
-	public List<Tag> findCurated() throws SoundException;
-	
-	public List<TagCategory> listCategories();
+  public List<Tag> listTagsContains(String pattern) throws SoundException;
 
-	public void attachToSound(String soundAlias, List<String> tags, User owner)
-			throws SoundException;
+  public List<Tag> findCurated() throws SoundException;
 
-	public void detachFromSound(String soundAlias, List<String> tags, User owner)
-			throws SoundException;
+  public List<TagCategory> listCategories();
 
-	public List<Sound> getSoundsWithTag(String label) throws SoundException;
+  public void attachToSound(String soundAlias, List<String> tags, User owner) throws SoundException;
+
+  public void detachFromSound(String soundAlias, List<String> tags, User owner)
+      throws SoundException;
+
+  public List<Sound> getSoundsWithTag(String label) throws SoundException;
 }

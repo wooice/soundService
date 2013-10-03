@@ -6,12 +6,14 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
+import com.sound.jackson.extension.IdSerializer;
 import com.sound.model.enums.GenderEnum;
 import com.sound.model.enums.UserOccupationType;
 import com.sound.model.enums.UserRoleEnum;
@@ -50,7 +52,7 @@ public class User extends BaseModel {
   @Embedded
   private UserPrefer userPrefer;
 
-  @JsonIgnore
+  @JsonSerialize(using = IdSerializer.class)
   public ObjectId getId() {
     return id;
   }
@@ -158,6 +160,7 @@ public class User extends BaseModel {
     private int age;
     private boolean gender;
     private boolean hasAvatar = false;
+    private Color color;
     private List<Integer> occupations = new ArrayList<Integer>();
 
     public List<UserOccupationType> getOccupationTypes() {
@@ -224,6 +227,14 @@ public class User extends BaseModel {
       return age;
     }
 
+    public Color getColor() {
+      return color;
+    }
+
+    public void setColor(Color color) {
+      this.color = color;
+    }
+
     public String getDescription() {
       return description;
     }
@@ -272,6 +283,36 @@ public class User extends BaseModel {
       return true;
     }
 
+    public static class Color {
+      private String upper;
+      private String lower;
+      private String deeper;
+
+      public String getUpper() {
+        return upper;
+      }
+
+      public void setUpper(String upper) {
+        this.upper = upper;
+      }
+
+      public String getLower() {
+        return lower;
+      }
+
+      public void setLower(String lower) {
+        this.lower = lower;
+      }
+
+      public String getDeeper() {
+        return deeper;
+      }
+
+      public void setDeeper(String deeper) {
+        this.deeper = deeper;
+      }
+
+    }
   }
 
   @Entity
@@ -285,9 +326,9 @@ public class User extends BaseModel {
     private Long reposts;
 
     private Long soundDuration;
-  
+
     private Long inputMessages;
-    
+
     private Long outputMessages;
 
     public Long getFollowing() {
@@ -363,10 +404,9 @@ public class User extends BaseModel {
 
     public void addSite(Site site) {
       for (Site oneExternal : this.sites) {
-          if (oneExternal.equals(site))
-          {
-            return;
-          }
+        if (oneExternal.equals(site)) {
+          return;
+        }
       }
       sites.add(site);
     }
@@ -379,7 +419,7 @@ public class User extends BaseModel {
       String url;
 
       boolean userCreated = false;
-      
+
       public Site() {
         super();
       }
@@ -442,7 +482,7 @@ public class User extends BaseModel {
         } else if (!name.equals(other.name)) return false;
         return true;
       }
-      
+
     }
   }
 
@@ -649,11 +689,11 @@ public class User extends BaseModel {
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (!(obj instanceof User)) return false;
     User other = (User) obj;
     if (profile == null) {
       if (other.profile != null) return false;
-    } else if (!profile.equals(other.profile)) return false;
+    } else if (!profile.equals(other.getProfile())) return false;
     return true;
   }
 

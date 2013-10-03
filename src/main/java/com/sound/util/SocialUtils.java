@@ -69,9 +69,9 @@ public class SocialUtils {
     if (resultSize > offset) {
       int left = resultSize - offset;
       if (left > pageSize) {
-        return allResult.subList(offset, offset + pageNum - 1);
+        return allResult.subList(offset, offset + pageSize);
       } else {
-        return allResult.subList(offset, resultSize - 1);
+        return allResult.subList(offset, resultSize);
       }
     } else {
       return new ArrayList<T>();

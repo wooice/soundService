@@ -18,7 +18,7 @@ public class SoundDataService implements com.sound.service.sound.itf.SoundDataSe
 
   public SoundData save(SoundData soundData) {
     soundDataDAO.save(soundData);
-    
+
     return soundData;
   }
 
@@ -29,11 +29,12 @@ public class SoundDataService implements com.sound.service.sound.itf.SoundDataSe
   public void delete(String objectId) {
     soundDataDAO.deleteByProperty("objectId", objectId);
   }
-  
-  public SoundData update(SoundData soundData)
-  {
-    soundDataDAO.updateProperty("objectId", soundData.getObjectId(), "duration", soundData.getDuration());
-    soundDataDAO.updateProperty("objectId", soundData.getObjectId(), "originName", soundData.getOriginName());
+
+  public SoundData update(SoundData soundData) {
+    soundDataDAO.updateProperty("objectId", soundData.getObjectId(), "duration",
+        soundData.getDuration());
+    soundDataDAO.updateProperty("objectId", soundData.getObjectId(), "originName",
+        soundData.getOriginName());
     soundDataDAO.updateProperty("objectId", soundData.getObjectId(), "wave", soundData.getWave());
     return soundData;
   }

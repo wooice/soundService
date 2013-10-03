@@ -7,6 +7,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
@@ -14,6 +15,7 @@ import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
+import com.sound.jackson.extension.IdSerializer;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
 
@@ -46,7 +48,7 @@ public class Sound extends BaseModel {
   @Embedded
   private UserPrefer userPrefer;
 
-  @JsonIgnore
+  @JsonSerialize(using = IdSerializer.class)
   public ObjectId getId() {
     return id;
   }
@@ -136,7 +138,7 @@ public class Sound extends BaseModel {
     private String description;
 
     /**
-     * published, private, deleted
+     * published, private, deleted. refer to SoundState.
      */
     private int status;
 
@@ -194,7 +196,7 @@ public class Sound extends BaseModel {
     public void setRemoteId(String remoteId) {
       this.remoteId = remoteId;
     }
-    
+
     public String getExtension() {
       return extension;
     }
@@ -318,9 +320,9 @@ public class Sound extends BaseModel {
 
     private String originName;
 
-    // meide route in resource server.
+    // route id in resource server.
     private String objectId;
-    
+
     private String extension;
 
     private Long duration;
@@ -481,7 +483,7 @@ public class Sound extends BaseModel {
 
     @Reference
     private User owner;
-    
+
     private Date createdDate;
 
     @JsonIgnore
@@ -539,11 +541,11 @@ public class Sound extends BaseModel {
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (!(obj instanceof Sound)) return false;
     Sound other = (Sound) obj;
     if (profile.getAlias() == null) {
       if (other.profile.getAlias() != null) return false;
-    } else if (!profile.getAlias().equals(other.profile.getAlias())) return false;
+    } else if (!profile.getAlias().equals(other.getProfile().getAlias())) return false;
     return true;
   }
 

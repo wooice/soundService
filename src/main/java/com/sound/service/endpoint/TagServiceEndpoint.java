@@ -62,10 +62,9 @@ public class TagServiceEndpoint {
       tagService.getOrCreate(label, curUser, categoryName);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to create tag " + label)).build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Response.Status.CREATED).entity("true").build();
@@ -88,8 +87,7 @@ public class TagServiceEndpoint {
       tagService.attachToSound(soundAlias, tagList, curUser);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot attach Tag because internal server error").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Response.Status.OK).entity("true").build();
@@ -106,11 +104,10 @@ public class TagServiceEndpoint {
       tagService.detachFromSound(soundAlias, tagLabels, curUser);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot detach Tag because internal server error").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Response.Status.OK).entity("true").build();
+    return Response.status(Response.Status.OK).build();
   }
 
   @GET
@@ -122,8 +119,7 @@ public class TagServiceEndpoint {
       tags = tagService.listTagsContains(term);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot detach Tag because internal server error").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Response.Status.OK).entity(JsonHandler.toJson(tags)).build();
@@ -138,8 +134,7 @@ public class TagServiceEndpoint {
       sounds = tagService.getSoundsWithTag(tagLabel);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot get sounds by tag because internal server error").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Response.Status.OK).entity(sounds.toString()).build();

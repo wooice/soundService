@@ -7,15 +7,15 @@ import com.sound.processor.model.Wave;
 public class SoundLocal {
 
   private String originName;
-  
+
   private String fileName;
 
   private Wave wave;
 
   private InputStream soundStream;
-  
+
   private Long length;
-  
+
   private Long duration;
 
   public String getOriginName() {

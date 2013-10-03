@@ -59,19 +59,17 @@ public class UserSocialServiceEndpoint {
     User toUser = null;
     try {
       fromUser = userService.getCurrentUser(req);
-      
-      if (!fromUser.getProfile().getAlias().equals(toUserAlias))
-      {
+
+      if (!fromUser.getProfile().getAlias().equals(toUserAlias)) {
         toUser = userService.getUserByAlias(toUserAlias);
         followed = userSocialService.follow(fromUser, toUser);
       }
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to follow user " + toUserAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     Map<String, Long> result = new HashMap<String, Long>();
@@ -91,11 +89,10 @@ public class UserSocialServiceEndpoint {
       followed = userSocialService.unfollow(fromUser, toUser);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to follow user " + toUserAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, Long> result = new HashMap<String, Long>();
     result.put("followed", followed);
@@ -112,11 +109,10 @@ public class UserSocialServiceEndpoint {
       userSocialService.createGroup(currentUser, groupName, description);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to create group " + groupName)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity("true").build();
   }
@@ -130,11 +126,10 @@ public class UserSocialServiceEndpoint {
       userSocialService.dismissGroup(currentUser, groupName);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to delete group " + groupName)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity("true").build();
   }
@@ -148,11 +143,10 @@ public class UserSocialServiceEndpoint {
       userSocialService.joinGroup(currentUser, groupName);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to join group " + groupName)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity("true").build();
   }
@@ -167,11 +161,10 @@ public class UserSocialServiceEndpoint {
       userSocialService.leaveGroup(currentUser, groupName);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to leave group " + groupName)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity("true").build();
   }
@@ -188,11 +181,10 @@ public class UserSocialServiceEndpoint {
       userSocialService.promoteGroupAdmin(currentUser, adminUser, groupName);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to promote group admin" + groupName)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity("true").build();
   }
@@ -209,11 +201,10 @@ public class UserSocialServiceEndpoint {
       userSocialService.promoteGroupAdmin(currentUser, adminUser, groupName);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to demote group admin" + groupName)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity("true").build();
   }
@@ -236,10 +227,10 @@ public class UserSocialServiceEndpoint {
       users.addAll(userSocialService.recommandUsersByTags(currentUser, tagList, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (JSONException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -261,10 +252,10 @@ public class UserSocialServiceEndpoint {
       users.addAll(userSocialService.recommandUsersForUser(currentUser, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (JSONException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -273,33 +264,35 @@ public class UserSocialServiceEndpoint {
   }
 
   @GET
-  @Path("/followed")
-  public Response getFollowedUsers(@NotNull @QueryParam("pageNum") Integer pageNum,
+  @Path("/{userAlias}/followed")
+  public Response getFollowedUsers(@NotNull @PathParam("userAlias") String userAlias,
+      @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<User> users = new ArrayList<User>();
-    User currentUser = null;
+    User user = null;
     try {
-      currentUser = userService.getCurrentUser(req);
-      users.addAll(userSocialService.getFollowedUsers(currentUser, pageNum, pageSize));
+      user = userService.getUserByAlias(userAlias);
+      users.addAll(userSocialService.getFollowedUsers(user, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity(users).build();
   }
 
   @GET
-  @Path("/following")
-  public Response getFollowingUsers(@NotNull @QueryParam("pageNum") Integer pageNum,
+  @Path("/{userAlias}/following")
+  public Response getFollowingUsers(@NotNull @PathParam("userAlias") String userAlias,
+      @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<User> users = new ArrayList<User>();
-    User currentUser = null;
+    User user = null;
     try {
-      currentUser = userService.getCurrentUser(req);
-      users.addAll(userSocialService.getFollowingUsers(currentUser, pageNum, pageSize));
+      user = userService.getUserByAlias(userAlias);
+      users.addAll(userSocialService.getFollowingUsers(user, pageNum, pageSize));
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity(users).build();
   }

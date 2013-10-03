@@ -9,8 +9,8 @@ import com.sound.morphia.extension.BaseDAO;
 
 public class TagDAO extends BaseDAO<Tag, ObjectId> {
 
-	public TagDAO(Mongo mongo, Morphia morphia, String dbName) {
-		super(mongo, morphia, dbName);
-	}
+  public TagDAO(Mongo mongo, Morphia morphia, String dbName) {
+    super(mongo, morphia, dbName);
+  }
 
 }

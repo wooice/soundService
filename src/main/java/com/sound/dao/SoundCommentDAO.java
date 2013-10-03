@@ -7,12 +7,10 @@ import com.mongodb.Mongo;
 import com.sound.model.SoundActivity.SoundComment;
 import com.sound.morphia.extension.BaseDAO;
 
-public class SoundCommentDAO extends BaseDAO<SoundComment, ObjectId>{
+public class SoundCommentDAO extends BaseDAO<SoundComment, ObjectId> {
 
-	public SoundCommentDAO(Mongo mongo, Morphia morphia,
-			String dbName) 
-	{
-		super(mongo, morphia, dbName);
-	}
+  public SoundCommentDAO(Mongo mongo, Morphia morphia, String dbName) {
+    super(mongo, morphia, dbName);
+  }
 
 }

@@ -63,11 +63,10 @@ public class SoundSocialServiceEndpoint {
       result = soundSocialService.play(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to record play sound " + soundAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
   }
@@ -82,11 +81,10 @@ public class SoundSocialServiceEndpoint {
       liked = soundSocialService.like(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to like sound " + soundAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("liked", liked);
@@ -103,11 +101,10 @@ public class SoundSocialServiceEndpoint {
       liked = soundSocialService.dislike(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to unlike sound " + soundAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("liked", liked);
@@ -124,11 +121,10 @@ public class SoundSocialServiceEndpoint {
       reposted = soundSocialService.repost(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to repost sound " + soundAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("reposted", reposted);
@@ -145,11 +141,10 @@ public class SoundSocialServiceEndpoint {
       reposted = soundSocialService.unrepost(soundAlias, currentUser);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to unlike sound " + soundAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("reposted", reposted);
@@ -160,22 +155,17 @@ public class SoundSocialServiceEndpoint {
   @Path("/comment/{soundAlias}")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response comment(@NotNull @PathParam("soundAlias") String soundAlias,
-                          @NotNull JSONObject inputJsonObj) {
+      @NotNull JSONObject inputJsonObj) {
     Integer commentsCount = 0;
     User currentUser = null;
     try {
       String comment = inputJsonObj.getString("comment");
       Float pointAt = null;
 
-      if (null != inputJsonObj.get("pointAt"))
-      {
-        try
-        {
+      if (null != inputJsonObj.get("pointAt")) {
+        try {
           pointAt = (float) inputJsonObj.getDouble("pointAt");
-        }
-        catch(JSONException e)
-        {
-        }
+        } catch (JSONException e) {}
       }
       String toUserAlias = inputJsonObj.getString("toUserAlias");
       currentUser = userService.getCurrentUser(req);
@@ -186,14 +176,13 @@ public class SoundSocialServiceEndpoint {
       commentsCount = soundSocialService.comment(soundAlias, currentUser, toUser, comment, pointAt);
     } catch (UserException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to comment on sound " + soundAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
@@ -208,11 +197,10 @@ public class SoundSocialServiceEndpoint {
       commentsCount = soundSocialService.uncomment(commentId);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to comment with id " + commentId)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
@@ -229,11 +217,10 @@ public class SoundSocialServiceEndpoint {
       comments = soundSocialService.getComments(soundAlias, pageNum, commentsPerPage);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to load comments of sound " + soundAlias)).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Status.OK).entity(JsonHandler.toJson(comments)).build();
@@ -249,7 +236,7 @@ public class SoundSocialServiceEndpoint {
       sounds.addAll(soundSocialService.recommandSoundsByTags(tags, pageNum, pageSize));
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
   }

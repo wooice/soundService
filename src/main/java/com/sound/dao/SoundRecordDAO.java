@@ -12,26 +12,23 @@ import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.User;
 import com.sound.morphia.extension.BaseDAO;
 
-public class SoundRecordDAO extends BaseDAO<SoundRecord, ObjectId>{
+public class SoundRecordDAO extends BaseDAO<SoundRecord, ObjectId> {
 
-	public SoundRecordDAO(Mongo mongo, Morphia morphia,
-			String dbName) 
-	{
-		super(mongo, morphia, dbName);
-	}
-	
-	public List<SoundRecord> findByOwners(Map<String, Object> cratiaries, List<User> users, Integer start, Integer range)
-	{
-		Query<SoundRecord> query = createQuery();
-		
-		for(String key: cratiaries.keySet())
-		{
-			query.field(key).equal(cratiaries.get(key));
-		}
-		
-		query.field("owner").in(users);
-		query.offset(start).limit(range).order("-createdTime");
-		
-		return this.find(query).asList();
-	}
+  public SoundRecordDAO(Mongo mongo, Morphia morphia, String dbName) {
+    super(mongo, morphia, dbName);
+  }
+
+  public List<SoundRecord> findByOwners(Map<String, Object> cratiaries, List<User> users,
+      Integer start, Integer range) {
+    Query<SoundRecord> query = createQuery();
+
+    for (String key : cratiaries.keySet()) {
+      query.field(key).equal(cratiaries.get(key));
+    }
+
+    query.field("owner").in(users);
+    query.offset(start).limit(range).order("-createdTime");
+
+    return this.find(query).asList();
+  }
 }
