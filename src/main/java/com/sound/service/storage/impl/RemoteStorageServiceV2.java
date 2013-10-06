@@ -143,12 +143,9 @@ public class RemoteStorageServiceV2 implements com.sound.service.storage.itf.Rem
 
   public void deleteFile(String type, String fileKey) {
     RSClient client = new RSClient(mac);
-    if (type.equals("sound"))
-    {
+    if (type.equals("sound")) {
       client.delete(config.getString("SOUND_BUCKET"), fileKey);
-    }
-    else
-    {
+    } else {
       client.delete(config.getString("IMAGE_BUCKET"), fileKey);
     }
   }

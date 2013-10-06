@@ -11,8 +11,8 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
-import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
+import com.github.jmkgreen.morphia.annotations.Transient;
 import com.sound.jackson.extension.IdSerializer;
 import com.sound.model.enums.GenderEnum;
 import com.sound.model.enums.UserOccupationType;
@@ -47,9 +47,11 @@ public class User extends BaseModel {
   // One user one role. List for future extension.
   @Embedded
   private List<UserRole> userRoles = new ArrayList<UserRole>();
+  
+  @Reference(lazy = true)
+  private List<Tag> tags = new ArrayList<Tag>();
 
-  @NotSaved
-  @Embedded
+  @Transient
   private UserPrefer userPrefer;
 
   @JsonSerialize(using = IdSerializer.class)
@@ -69,6 +71,22 @@ public class User extends BaseModel {
     this.profile = profile;
   }
 
+  public List<Tag> getTags() {
+    return tags;
+  }
+
+  public void setTags(List<Tag> tags) {
+    this.tags = tags;
+  }
+
+  public void addTags(List<Tag> tags) {
+    for (Tag newTag : tags) {
+      if (!this.tags.contains(newTag)) {
+        this.tags.addAll(tags);
+      }
+    }
+  }
+  
   public List<Group> getGroups() {
     return groups;
   }

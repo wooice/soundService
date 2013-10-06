@@ -35,6 +35,6 @@ public class MockServiceEndpoint {
     } catch (Exception e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     }
-    return Response.status(Status.OK).entity("true").build();
+    return Response.status(Status.OK).build();
   }
 }

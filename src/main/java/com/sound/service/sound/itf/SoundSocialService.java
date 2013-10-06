@@ -4,37 +4,29 @@ import java.util.List;
 import java.util.Map;
 
 import com.sound.exception.SoundException;
-import com.sound.exception.UserException;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.User;
 
 public interface SoundSocialService {
 
-  public Map<String, String> play(String soundAlias, User user) throws SoundException;
+  public Map<String, String> play(User user, Sound sound) throws SoundException;
 
-  public Integer like(String soundAlias, User user) throws SoundException;
+  public Integer like(User user, Sound sound) throws SoundException;
 
-  public Integer dislike(String soundAlias, User user) throws SoundException;
+  public Integer dislike(User user, Sound sound) throws SoundException;
 
-  public Integer repost(String soundAlias, User user) throws SoundException;
+  public Integer repost(User user, Sound sound) throws SoundException;
 
-  public Integer unrepost(String soundAlias, User user) throws SoundException;
+  public Integer unrepost(User user, Sound sound) throws SoundException;
 
-  public Integer comment(String soundAlias, User user, User toUser, String comment, Float pointAt)
-      throws SoundException, UserException;
+  public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt);
 
-  public Integer uncomment(String commentId) throws SoundException;
+  public Integer uncomment(Sound sound, String commentId) throws SoundException;
 
-  public List<Sound> recommandSoundsByTags(List<String> tagLabels, Integer pageNum, Integer pageSize)
+  public List<SoundComment> getComments(Sound sound, Integer pageNum, Integer soundsPerPage)
       throws SoundException;
 
-  public List<Sound> getLikedSoundsByUser(User user) throws SoundException;
-
-  public List<Sound> recommandSoundsForUser(User user, Integer pageNum, Integer pageSize)
-      throws SoundException, UserException;
-
-  public List<SoundComment> getComments(String soundAlias, Integer pageNum, Integer soundsPerPage)
-      throws SoundException;
+  public List<Sound> recommandSoundsForUser(User recommendTo, Integer pageNum, Integer pageSize);
 
 }

@@ -3,6 +3,7 @@ package com.sound.service.endpoint;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
@@ -12,14 +13,15 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +32,6 @@ import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
 import com.sound.model.User.UserProfile;
 import com.sound.model.UserMessage;
-import com.sound.util.JsonHandler;
 
 @Component
 @Path("/user")
@@ -47,29 +48,33 @@ public class UserServiceEndpoint {
 
   @GET
   @Path("/{userAlias}")
-  public Response load(@NotNull @PathParam("userAlias") String userAlias) {
+  @Produces(MediaType.APPLICATION_JSON)
+  public User load(@NotNull @PathParam("userAlias") String userAlias) {
     User user = null;
     User curUser = null;
     try {
       user = userService.getUserByAlias(userAlias);
 
       if (null == user) {
-        return Response.status(Status.NOT_FOUND).build();
+        throw new WebApplicationException(Status.NOT_FOUND);
       }
       curUser = userService.getCurrentUser(req);
       user.setUserPrefer(userService.getUserPrefer(curUser, user));
+    } catch (WebApplicationException e) {
+      throw e;
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return user;
   }
 
   @POST
   @Path("/updateBasic")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUserBasicProfile(@NotNull UserProfile userProfile) {
+  @Produces(MediaType.APPLICATION_JSON)
+  public User updateUserBasicProfile(@NotNull UserProfile userProfile) {
     User user = null;
     try {
       user = userService.getCurrentUser(req);
@@ -77,42 +82,43 @@ public class UserServiceEndpoint {
       user = userService.updateUserBasicProfile(user, userProfile);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return user;
   }
 
   @POST
   @Path("/updateSns")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUserSnsProfile(@NotNull UserExternal external) {
+  @Produces(MediaType.APPLICATION_JSON)
+  public User updateUserSnsProfile(@NotNull UserExternal external) {
     User user = null;
     try {
       user = userService.getCurrentUser(req);
       user = userService.updateUserSnsProfile(user, external);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Cannot update user sns profile for " + user.getProfile().getAlias())).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return user;
   }
 
   @PUT
   @Path("/addEmail/{userAlias}/{emailAddress}")
-  public Response addEmailAddress(@NotNull @PathParam("userAlias") String userAlias,
+  @Produces(MediaType.APPLICATION_JSON)
+  public User addEmailAddress(@NotNull @PathParam("userAlias") String userAlias,
       @NotNull @PathParam("emailAddress") String emailAddress) {
     User user = null;
     try {
       user = userService.addEmailAddress(userAlias, emailAddress);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return user;
   }
 
   @PUT
@@ -146,23 +152,24 @@ public class UserServiceEndpoint {
   @PUT
   @Path("/updateEmailSetting/{emailAddress}")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response saveProfile(@NotNull @PathParam("emailAddress") String emailAddress,
+  @Produces(MediaType.APPLICATION_JSON)
+  public User saveProfile(@NotNull @PathParam("emailAddress") String emailAddress,
       @NotNull EmailSetting setting) {
     User user = null;
     try {
       user = userService.updateEmailSetting(emailAddress, setting);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return user;
   }
 
   @PUT
   @Path("/messages/send")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response sendUserMessage(@NotNull JSONObject inputJsonObj) {
+  public Response sendUserMessage(@NotNull JsonObject inputJsonObj) {
     User curUser = null;
     try {
       String toUser = inputJsonObj.getString("toUser");
@@ -182,7 +189,7 @@ public class UserServiceEndpoint {
   @POST
   @Path("/messages/mark")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response markUserMessage(@NotNull JSONObject inputJsonObj) {
+  public Response markUserMessage(@NotNull JsonObject inputJsonObj) {
     try {
       String messageId = inputJsonObj.getString("id");
       String status = inputJsonObj.getString("status");
@@ -197,7 +204,8 @@ public class UserServiceEndpoint {
 
   @GET
   @Path("/messages")
-  public Response getMessages(@QueryParam("pageNum") Integer pageNum,
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<UserMessage> getMessages(@QueryParam("pageNum") Integer pageNum,
       @QueryParam("perPage") Integer perPage, @QueryParam("status") String status) {
     User curUser = null;
     List<UserMessage> messages = null;
@@ -206,10 +214,10 @@ public class UserServiceEndpoint {
       messages = userService.getUserMessages(curUser, status, pageNum, perPage);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity((e.getMessage())).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(messages)).build();
+    return messages;
   }
 
   @POST

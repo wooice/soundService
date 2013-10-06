@@ -12,10 +12,14 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
-import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
+import com.github.jmkgreen.morphia.annotations.Transient;
 import com.sound.jackson.extension.IdSerializer;
+import com.sound.model.SoundActivity.SoundComment;
+import com.sound.model.SoundActivity.SoundLike;
+import com.sound.model.SoundActivity.SoundPlay;
+import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
 
@@ -29,9 +33,6 @@ public class Sound extends BaseModel {
   @Embedded
   private SoundProfile profile;
 
-  @Embedded
-  private SoundSocial soundSocial;
-
   @Reference
   private SoundData soundData;
 
@@ -44,8 +45,22 @@ public class Sound extends BaseModel {
   @Reference(lazy = true)
   private List<Tag> tags;
 
-  @NotSaved
-  @Embedded
+  @Embedded(concreteClass = java.util.ArrayList.class)
+  private List<SoundComment> comments = new ArrayList<SoundComment>();
+  
+  @Embedded(concreteClass = java.util.ArrayList.class)
+  private List<SoundLike> likes = new ArrayList<SoundLike>();
+  
+  @Embedded(concreteClass = java.util.ArrayList.class)
+  private List<SoundPlay> plays = new ArrayList<SoundPlay>();
+  
+  @Embedded(concreteClass = java.util.ArrayList.class)
+  private List<SoundRecord> records = new ArrayList<SoundRecord>();
+  
+  @Transient
+  private SoundSocial soundSocial;
+
+  @Transient
   private UserPrefer userPrefer;
 
   @JsonSerialize(using = IdSerializer.class)
@@ -122,6 +137,77 @@ public class Sound extends BaseModel {
 
   public void setUserPrefer(UserPrefer userPrefer) {
     this.userPrefer = userPrefer;
+  }
+
+  @JsonIgnore
+  public List<SoundComment> getComments() {
+    return comments;
+  }
+
+  public void setComments(List<SoundComment> comments) {
+    this.comments = comments;
+  }
+  
+  public void addComment(SoundComment comment)
+  {
+    this.comments.add(comment);
+  }
+  
+  public void removeComment(SoundComment comment)
+  {
+    this.comments.remove(comment);
+  }
+
+  @JsonIgnore
+  public List<SoundLike> getLikes() {
+    return likes;
+  }
+
+  public void setLikes(List<SoundLike> likes) {
+    this.likes = likes;
+  }
+
+  public void addLike(SoundLike like)
+  {
+    this.likes.add(like);
+  }
+  
+  public void removeLike(SoundLike like)
+  {
+    this.likes.remove(like);
+  }
+  
+  @JsonIgnore
+  public List<SoundPlay> getPlays() {
+    return plays;
+  }
+
+  public void setPlays(List<SoundPlay> plays) {
+    this.plays = plays;
+  }
+
+  public void addPlay(SoundPlay play)
+  {
+    this.plays.add(play);
+  }
+  
+  @JsonIgnore
+  public List<SoundRecord> getRecords() {
+    return this.records;
+  }
+
+  public void setRecords(List<SoundRecord> records) {
+    this.records = records;
+  }
+  
+  public void addRecord(SoundRecord record)
+  {
+    this.records.add(record);
+  }
+  
+  public void removeRecord(SoundRecord record)
+  {
+    this.records.remove(record);
   }
 
   public static class SoundProfile {

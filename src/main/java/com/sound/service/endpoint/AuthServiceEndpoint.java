@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -11,13 +12,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +27,6 @@ import com.sound.constant.Constant;
 import com.sound.exception.AuthException;
 import com.sound.exception.UserException;
 import com.sound.model.User;
-import com.sound.util.JsonHandler;
 
 @Component
 @Path("/auth")
@@ -36,7 +37,7 @@ public class AuthServiceEndpoint {
 
   @Autowired
   com.sound.service.user.itf.UserService userService;
-  
+
   @Context
   HttpServletRequest req;
 
@@ -55,31 +56,33 @@ public class AuthServiceEndpoint {
 
   @GET
   @Path("/resetRequest/{action}/{code}")
-  public Response verifyResetRequest(@NotNull @PathParam("action") String action,
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Boolean> verifyResetRequest(@NotNull @PathParam("action") String action,
       @NotNull @PathParam("code") String code) {
     boolean result;
     try {
       if (userService.verifyResetRequest(action, code)) {
         result = true;
       } else {
-        return Response.status(Status.FORBIDDEN).build();
+        throw new WebApplicationException(Status.FORBIDDEN);
       }
+    } catch (WebApplicationException e) {
+      throw e;
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
     Map<String, Boolean> response = new HashMap<String, Boolean>();
     response.put("result", result);
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(response)).build();
+    return response;
   }
 
   @POST
   @Path("/updatePassword")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUserPassword(@NotNull JSONObject inputJsonObj) {
-    User user = null;
+  public Response updateUserPassword(@NotNull JsonObject inputJsonObj) {
 
     try {
       String code = inputJsonObj.getString("confirmCode");
@@ -92,7 +95,7 @@ public class AuthServiceEndpoint {
       String oldPassword = inputJsonObj.getString("oldPassword");
       String newPassword = inputJsonObj.getString("newPassword");
 
-      user = userService.updatePassword(code, oldPassword, newPassword, null);
+      userService.updatePassword(code, oldPassword, newPassword, null);
     } catch (AuthException e) {
       logger.error(e);
       return Response.status(Status.FORBIDDEN).build();
@@ -104,24 +107,25 @@ public class AuthServiceEndpoint {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return Response.status(Status.OK).build();
   }
- 
+
   @GET
   @Path("/isAlive")
-  public Response isAlive() {
+  @Produces(MediaType.APPLICATION_JSON)
+  public User isAlive() {
     User user = null;
     try {
       user = userService.getCurrentUser(req);
 
       if (null == user) {
-        return Response.status(Status.UNAUTHORIZED).build();
+        throw new WebApplicationException(Status.UNAUTHORIZED);
       }
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.UNAUTHORIZED).build();
+      throw new WebApplicationException(Status.UNAUTHORIZED);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return user;
   }
 }

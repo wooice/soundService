@@ -17,4 +17,8 @@ public class Constant {
   public static final String USER_ROLE = "user";
 
   public static final String ADMIN_ROLE = "admin";
+
+  public static final String SOUND_RECORD_CREATE = "create";
+
+  public static final String SOUND_RECORD_REPOST = "repost";
 }

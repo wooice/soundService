@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.sound.dao.GroupDAO;
+import com.sound.dao.SoundDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
@@ -35,6 +36,9 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
   @Autowired
   UserConnectDAO userConnectDAO;
+
+  @Autowired
+  SoundDAO soundDAO;
 
   @Autowired
   GroupDAO groupDAO;
@@ -331,15 +335,13 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
       throws UserException, SoundException {
     List<User> bySocial = recommandUsersBySocial(user);
 
-    List<Sound> liked = soundSocialService.getLikedSoundsByUser(user);
+    List<Sound> liked = soundDAO.getRecommendSoundsByUser(user, 0, 50);
     Set<Tag> tags = new HashSet<Tag>();
     for (Sound sound : liked) {
       tags.addAll(sound.getTags());
     }
     List<User> byTags = recommandUsersByTags(tags);
-
     List<User> candidates = combineSocialAndTagsRecommandation(bySocial, byTags);
-
     List<User> results = new ArrayList<User>();
 
     for (User oneUser : candidates) {
@@ -367,7 +369,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<Object> alias = new ArrayList<Object>();
     alias.add(currentUser.getProfile().getAlias());
     exclude.put("profile.alias", alias);
-    List<User> topUsers = userDAO.findTopOnes(number, "userSocial.followed", exclude);
+    List<User> topUsers = userDAO.findTopOnes(number,  exclude);
 
     List<User> results = new ArrayList<User>();
 
