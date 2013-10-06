@@ -168,6 +168,35 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   @Override
+  public List<SoundComment> getCommentsInsound(Sound sound)
+      throws SoundException {
+    List<SoundComment> comments = new ArrayList<SoundComment>();
+    
+    for(SoundComment comment: sound.getComments())
+    {
+      if (comment.getPointAt() != null && comment.getPointAt() > 0 && null == comment.getTo())
+      {
+        comments.add(comment);
+      }
+    }
+
+    for (SoundComment comment : comments) {
+      if (comment.getOwner().getProfile().hasAvatar()) {
+        comment
+            .getOwner()
+            .getProfile()
+            .setAvatorUrl(
+                remoteStorageService.getDownloadURL(comment.getOwner().getId().toString(), "image",
+                    "format/png"));
+      } else {
+        comment.getOwner().getProfile().setAvatorUrl(null);
+      }
+    }
+
+    return comments;
+  }
+  
+  @Override
   public List<SoundComment> getComments(Sound sound, Integer pageNum, Integer commentsPerPage)
       throws SoundException {
     List<SoundComment> comments = sound.getComments();

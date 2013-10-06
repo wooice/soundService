@@ -242,16 +242,25 @@ public class SoundSocialServiceEndpoint {
   @Path("/{soundId}/comments")
   @Produces(MediaType.APPLICATION_JSON)
   public List<SoundComment> comment(@NotNull @PathParam("soundId") String soundId,
-      @NotNull @QueryParam("pageNum") Integer pageNum,
-      @QueryParam("commentsPerPage") Integer commentsPerPage) {
+      @QueryParam("pageNum") Integer pageNum,
+      @QueryParam("commentsPerPage") Integer commentsPerPage,
+      @QueryParam("justInSound") String justInSound) {
     List<SoundComment> comments = null;
     try {
       Sound sound = soundService.loadById(soundId);
       if (null == sound) {
         throw new WebApplicationException(Status.NOT_FOUND);
       }
-
-      comments = soundSocialService.getComments(sound, pageNum, commentsPerPage);
+      
+      boolean commentsInSound = (null == justInSound)? false: Boolean.parseBoolean(justInSound);
+      if (commentsInSound)
+      {
+        comments = soundSocialService.getCommentsInsound(sound);
+      }
+      else
+      {
+        comments = soundSocialService.getComments(sound, pageNum, commentsPerPage);
+      }
     } catch (SoundException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

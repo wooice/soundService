@@ -29,4 +29,6 @@ public interface SoundSocialService {
 
   public List<Sound> recommandSoundsForUser(User recommendTo, Integer pageNum, Integer pageSize);
 
+  List<SoundComment> getCommentsInsound(Sound sound) throws SoundException;
+
 }
