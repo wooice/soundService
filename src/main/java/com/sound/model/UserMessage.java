@@ -85,7 +85,7 @@ public class UserMessage extends BaseModel {
   public void setDate(Date date) {
     this.date = date;
   }
-  
+
   public String getStatus() {
     return status;
   }

@@ -10,32 +10,29 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
-import com.sound.exception.UserException;
+import com.sound.model.RequestModel.commentRequest;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.User;
+import com.sound.service.sound.itf.SoundService;
 import com.sound.service.sound.itf.SoundSocialService;
-import com.sound.util.JsonHandler;
 
 @Component
 @Path("/soundActivity")
@@ -48,209 +45,248 @@ public class SoundSocialServiceEndpoint {
   SoundSocialService soundSocialService;
 
   @Autowired
+  SoundService soundService;
+
+  @Autowired
   com.sound.service.user.itf.UserService userService;
 
   @Context
   HttpServletRequest req;
 
   @PUT
-  @Path("/play/{soundAlias}")
-  public Response play(@NotNull @PathParam("soundAlias") String soundAlias) {
+  @Path("/play/{soundId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, String> play(@NotNull @PathParam("soundId") String soundId) {
     Map<String, String> result = null;
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
-      result = soundSocialService.play(soundAlias, currentUser);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      result = soundSocialService.play(currentUser, sound);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to record play sound " + soundAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
-    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
+    return result;
   }
 
   @PUT
-  @Path("/like/{soundAlias}")
-  public Response like(@NotNull @PathParam("soundAlias") String soundAlias) {
+  @Path("/like/{soundId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Integer> like(@NotNull @PathParam("soundId") String soundId) {
     Integer liked = 0;
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
-      liked = soundSocialService.like(soundAlias, currentUser);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      liked = soundSocialService.like(currentUser, sound);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to like sound " + soundAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("liked", liked);
-    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
+    return result;
   }
 
   @DELETE
-  @Path("/like/{soundAlias}")
-  public Response unlike(@NotNull @PathParam("soundAlias") String soundAlias) {
+  @Path("/like/{soundId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Integer> unlike(@NotNull @PathParam("soundId") String soundId) {
     Integer liked = 0;
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
-      liked = soundSocialService.dislike(soundAlias, currentUser);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      liked = soundSocialService.dislike(currentUser, sound);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to unlike sound " + soundAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("liked", liked);
-    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
+    return result;
   }
 
   @PUT
-  @Path("/repost/{soundAlias}")
-  public Response repost(@NotNull @PathParam("soundAlias") String soundAlias) {
+  @Path("/repost/{soundId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Integer> repost(@NotNull @PathParam("soundId") String soundId) {
     Integer reposted = 0;
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
-      reposted = soundSocialService.repost(soundAlias, currentUser);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      reposted = soundSocialService.repost(currentUser, sound);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to repost sound " + soundAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("reposted", reposted);
-    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
+    return result;
   }
 
   @DELETE
-  @Path("/repost/{soundAlias}")
-  public Response unrepost(@NotNull @PathParam("soundAlias") String soundAlias) {
+  @Path("/repost/{soundId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Integer> unrepost(@NotNull @PathParam("soundId") String soundId) {
     Integer reposted = 0;
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
-      reposted = soundSocialService.unrepost(soundAlias, currentUser);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      reposted = soundSocialService.unrepost(currentUser, sound);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to unlike sound " + soundAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("reposted", reposted);
-    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
+    return result;
   }
 
   @PUT
-  @Path("/comment/{soundAlias}")
+  @Path("/comment/{soundId}")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response comment(@NotNull @PathParam("soundAlias") String soundAlias,
-                          @NotNull JSONObject inputJsonObj) {
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Integer> comment(@NotNull @PathParam("soundId") String soundId,
+      @NotNull commentRequest request) {
     Integer commentsCount = 0;
     User currentUser = null;
     try {
-      String comment = inputJsonObj.getString("comment");
-      Float pointAt = null;
-
-      if (null != inputJsonObj.get("pointAt"))
-      {
-        try
-        {
-          pointAt = (float) inputJsonObj.getDouble("pointAt");
-        }
-        catch(JSONException e)
-        {
-        }
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
       }
-      String toUserAlias = inputJsonObj.getString("toUserAlias");
+
       currentUser = userService.getCurrentUser(req);
       User toUser = null;
-      if (null != toUserAlias) {
-        toUser = userService.getUserByAlias(toUserAlias);
+      if (null != request.getToUserAlias()) {
+        toUser = userService.getUserByAlias(request.getToUserAlias());
       }
-      commentsCount = soundSocialService.comment(soundAlias, currentUser, toUser, comment, pointAt);
-    } catch (UserException e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-    } catch (SoundException e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+
+      commentsCount =
+          soundSocialService.comment(sound, currentUser, toUser, request.getComment(),
+              request.getPointAt());
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to comment on sound " + soundAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
-    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
+    return result;
   }
 
   @DELETE
-  @Path("/comment/{commentId}")
-  public Response comment(@NotNull @PathParam("commentId") String commentId) {
+  @Path("/comment/{soundId}/{commentId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Integer> comment(@NotNull @PathParam("soundId") String soundId,
+      @NotNull @PathParam("commentId") String commentId) {
     Integer commentsCount = 0;
     try {
-      commentsCount = soundSocialService.uncomment(commentId);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      commentsCount = soundSocialService.uncomment(sound, commentId);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to comment with id " + commentId)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
     Map<String, Integer> result = new HashMap<String, Integer>();
     result.put("commentsCount", commentsCount);
-    return Response.status(Status.OK).entity(JsonHandler.toJson(result)).build();
+    return result;
   }
 
   @GET
-  @Path("/{soundAlias}/comments")
-  public Response comment(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull @QueryParam("pageNum") Integer pageNum,
-      @QueryParam("commentsPerPage") Integer commentsPerPage) {
+  @Path("/{soundId}/comments")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<SoundComment> comment(@NotNull @PathParam("soundId") String soundId,
+      @QueryParam("pageNum") Integer pageNum,
+      @QueryParam("commentsPerPage") Integer commentsPerPage,
+      @QueryParam("justInSound") String justInSound) {
     List<SoundComment> comments = null;
     try {
-      comments = soundSocialService.getComments(soundAlias, pageNum, commentsPerPage);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+      
+      boolean commentsInSound = (null == justInSound)? false: Boolean.parseBoolean(justInSound);
+      if (commentsInSound)
+      {
+        comments = soundSocialService.getCommentsInsound(sound);
+      }
+      else
+      {
+        comments = soundSocialService.getComments(sound, pageNum, commentsPerPage);
+      }
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to load comments of sound " + soundAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(comments)).build();
+    return comments;
   }
 
-  @POST
+  @GET
   @Path("/recommand/sounds")
-  public Response getRecommandedGroupsByTags(@NotNull @FormParam("tags") List<String> tags,
-      @NotNull @FormParam("pageNum") Integer pageNum,
-      @NotNull @FormParam("pageSize") Integer pageSize) {
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<Sound> getRecommandedSounds(
+      @NotNull @QueryParam("pageNum") Integer pageNum,
+      @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<Sound> sounds = new ArrayList<Sound>();
+    User currentUser = null;
     try {
-      sounds.addAll(soundSocialService.recommandSoundsByTags(tags, pageNum, pageSize));
-    } catch (SoundException e) {
+      currentUser = userService.getCurrentUser(req);
+      sounds.addAll(soundSocialService.recommandSoundsForUser(currentUser, pageNum, pageSize));
+    } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
-    return Response.status(Status.OK).entity(JsonHandler.toJson(sounds)).build();
+    return sounds;
   }
 }

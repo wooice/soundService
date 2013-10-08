@@ -23,15 +23,14 @@ public class UserRoleFilter implements Filter {
   com.sound.service.user.itf.UserService userService;
 
   @Override
-  public void init(FilterConfig arg0) throws ServletException {
-  }
+  public void init(FilterConfig arg0) throws ServletException {}
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain next)
       throws IOException, ServletException {
     HttpServletRequest request = (HttpServletRequest) req;
     HttpSession session = request.getSession(false);
- 
+
     String userAlias = (null == session) ? null : (String) session.getAttribute("userAlias");
     @SuppressWarnings("unchecked")
     List<String> userRoles =

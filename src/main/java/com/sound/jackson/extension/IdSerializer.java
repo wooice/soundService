@@ -11,10 +11,9 @@ import org.codehaus.jackson.map.SerializerProvider;
 public class IdSerializer extends JsonSerializer<ObjectId> {
 
   @Override
-  public void serialize(ObjectId value, JsonGenerator jgen,
-          SerializerProvider provider) throws IOException,
-          JsonProcessingException {
-      jgen.writeString(value.toString()); 
+  public void serialize(ObjectId value, JsonGenerator jgen, SerializerProvider provider)
+      throws IOException, JsonProcessingException {
+    jgen.writeString(value.toString());
   }
 
 }
