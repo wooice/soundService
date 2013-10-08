@@ -1,4 +1,4 @@
-package com.sound.model.file;
+package com.sound.model;
 
 import java.io.InputStream;
 

@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
+import com.sound.model.SoundLocal;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.User;
-import com.sound.model.file.SoundLocal;
 import com.sound.processor.exception.AudioProcessException;
 
 public interface SoundService {
