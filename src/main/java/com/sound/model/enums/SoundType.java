@@ -2,57 +2,50 @@ package com.sound.model.enums;
 
 public enum SoundType {
 
-	SOUND(1, "sound"),
-	SET(2, "set");
-	
-	private int typeId;
-	private String typeName;
+  SOUND(1, "sound"), SET(2, "set");
 
-	private SoundType(int typeId, String typeName) {
-		this.typeId = typeId;
-		this.typeName = typeName;
-	}
+  private int typeId;
+  private String typeName;
 
-	public static Integer getTypeId(String typeName)
-	{
-		for (SoundType type: SoundType.values())
-		{
-			if (type.getTypeName().equalsIgnoreCase(typeName))
-			{
-				return type.getTypeId();
-			}
-		}
+  private SoundType(int typeId, String typeName) {
+    this.typeId = typeId;
+    this.typeName = typeName;
+  }
 
-		return null;
-	}
+  public static Integer getTypeId(String typeName) {
+    for (SoundType type : SoundType.values()) {
+      if (type.getTypeName().equalsIgnoreCase(typeName)) {
+        return type.getTypeId();
+      }
+    }
 
-	public static String getTypeName(Integer typeId)
-	{
-		for (SoundType type: SoundType.values())
-		{
-			if (type.getTypeId() == typeId)
-			{
-				return type.getTypeName();
-			}
-		}
+    return null;
+  }
 
-		return null;
-	}
-	
-	public int getTypeId() {
-		return typeId;
-	}
+  public static String getTypeName(Integer typeId) {
+    for (SoundType type : SoundType.values()) {
+      if (type.getTypeId() == typeId) {
+        return type.getTypeName();
+      }
+    }
 
-	public void setTypeId(int typeId) {
-		this.typeId = typeId;
-	}
+    return null;
+  }
 
-	public String getTypeName() {
-		return typeName;
-	}
+  public int getTypeId() {
+    return typeId;
+  }
 
-	public void setTypeName(String typeName) {
-		this.typeName = typeName;
-	}
+  public void setTypeId(int typeId) {
+    this.typeId = typeId;
+  }
+
+  public String getTypeName() {
+    return typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
 
 }

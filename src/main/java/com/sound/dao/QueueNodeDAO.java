@@ -7,11 +7,9 @@ import com.mongodb.Mongo;
 import com.sound.model.Sound.QueueNode;
 import com.sound.morphia.extension.BaseDAO;
 
-public class QueueNodeDAO extends BaseDAO<QueueNode, ObjectId>{
+public class QueueNodeDAO extends BaseDAO<QueueNode, ObjectId> {
 
-  public QueueNodeDAO(Mongo mongo, Morphia morphia,
-          String dbName) 
-  {
-      super(mongo, morphia, dbName);
+  public QueueNodeDAO(Mongo mongo, Morphia morphia, String dbName) {
+    super(mongo, morphia, dbName);
   }
 }

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.sound.dao.GroupDAO;
+import com.sound.dao.SoundDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
@@ -35,6 +36,9 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
   @Autowired
   UserConnectDAO userConnectDAO;
+
+  @Autowired
+  SoundDAO soundDAO;
 
   @Autowired
   GroupDAO groupDAO;
@@ -105,8 +109,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   @Override
-  public void createGroup(User user, String groupName, String description)
-      throws UserException {
+  public void createGroup(User user, String groupName, String description) throws UserException {
 
     if (null == user) {
       throw new UserException("User not found.");
@@ -118,7 +121,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     groupDAO.save(group);
 
     user.addGroup(group);
-    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups", user.getGroups());
+    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups",
+        user.getGroups());
   }
 
   @Override
@@ -139,8 +143,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
       groupDAO.delete(group);
     } else {
-      throw new UserException("User " + user.getProfile().getAlias() + " don't have rights to delete the group "
-          + groupName);
+      throw new UserException("User " + user.getProfile().getAlias()
+          + " don't have rights to delete the group " + groupName);
     }
   }
 
@@ -153,7 +157,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     Group group = groupDAO.findOne("name", groupName);
     user.addGroup(group);
-    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups", user.getGroups());
+    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups",
+        user.getGroups());
   }
 
   @Override
@@ -164,12 +169,12 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     Group group = groupDAO.findOne("name", groupName);
     user.removeGroup(group);
-    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups", user.getGroups());
+    userDAO.updateProperty("profile.alias", user.getProfile().getAlias(), "groups",
+        user.getGroups());
   }
 
   @Override
-  public void promoteGroupAdmin(User owner, User admin, String groupName)
-      throws UserException {
+  public void promoteGroupAdmin(User owner, User admin, String groupName) throws UserException {
     if (null == owner) {
       throw new UserException("Owner not found.");
     }
@@ -189,8 +194,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   @Override
-  public void demoteGroupAdmin(User owner, User admin, String groupName)
-      throws UserException {
+  public void demoteGroupAdmin(User owner, User admin, String groupName) throws UserException {
     if (null == owner) {
       throw new UserException("Owner not found.");
     }
@@ -261,8 +265,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
       List<User> firstClass = this.getAllFollowingUsers(oneUser);
       firstClass.removeAll(followingUsers);
       for (User firstUser : firstClass) {
-        if (potentialFollowing.containsKey(firstUser)) 
-        {
+        if (potentialFollowing.containsKey(firstUser)) {
           potentialFollowing.put(firstUser, potentialFollowing.get(firstUser) + 1);
         } else {
           potentialFollowing.put(firstUser, 1l);
@@ -272,7 +275,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     // add weight to impress 1-class
     for (User oneUser : potentialFollowing.keySet()) {
-      potentialFollowing.put(oneUser, potentialFollowing.get(oneUser) + SocialUtils.FIRST_CLASS_WEIGHT);
+      potentialFollowing.put(oneUser, potentialFollowing.get(oneUser)
+          + SocialUtils.FIRST_CLASS_WEIGHT);
     }
 
     // find 2-class potential follow targets
@@ -322,7 +326,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     Map<User, Integer> userTagSeq =
         SocialUtils.toSeqMap(SocialUtils.sortMapByValue(userTagNumMap, false));
     List<User> sortedUsers = SocialUtils.toSeqList(SocialUtils.sortMapByValue(userTagSeq, false));
-  
+
     return sortedUsers;
   }
 
@@ -331,30 +335,26 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
       throws UserException, SoundException {
     List<User> bySocial = recommandUsersBySocial(user);
 
-    List<Sound> liked = soundSocialService.getLikedSoundsByUser(user);
+    List<Sound> liked = soundDAO.getRecommendSoundsByUser(user, 0, 50);
     Set<Tag> tags = new HashSet<Tag>();
     for (Sound sound : liked) {
       tags.addAll(sound.getTags());
     }
     List<User> byTags = recommandUsersByTags(tags);
-
     List<User> candidates = combineSocialAndTagsRecommandation(bySocial, byTags);
-
     List<User> results = new ArrayList<User>();
 
-    for(User oneUser: candidates)
-    {
+    for (User oneUser : candidates) {
       Map<String, Object> cretiaria = new HashMap<String, Object>();
       cretiaria.put("fromUser", user);
       cretiaria.put("toUser", oneUser);
       UserConnect uc = userConnectDAO.findOne(cretiaria);
 
-      if (uc == null)
-      {
+      if (uc == null) {
         results.add(user);
       }
     }
-    
+
     List<User> toReturn = SocialUtils.sliceList(results, pageNum, pageSize);
 
     if (toReturn.size() < pageNum) {
@@ -369,23 +369,21 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     List<Object> alias = new ArrayList<Object>();
     alias.add(currentUser.getProfile().getAlias());
     exclude.put("profile.alias", alias);
-    List<User> topUsers = userDAO.findTopOnes(number, "userSocial.followed", exclude);
-    
+    List<User> topUsers = userDAO.findTopOnes(number,  exclude);
+
     List<User> results = new ArrayList<User>();
 
-    for(User user: topUsers)
-    {
+    for (User user : topUsers) {
       Map<String, Object> cretiaria = new HashMap<String, Object>();
       cretiaria.put("fromUser", currentUser);
       cretiaria.put("toUser", user);
       UserConnect uc = userConnectDAO.findOne(cretiaria);
 
-      if (uc == null)
-      {
+      if (uc == null) {
         results.add(user);
       }
     }
-    
+
     return results;
   }
 
@@ -415,8 +413,8 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   @Override
-  public List<User> recommandUsersByTags(User currentUser, List<String> tagLabels, Integer pageNum, Integer pageSize)
-      throws UserException, SoundException {
+  public List<User> recommandUsersByTags(User currentUser, List<String> tagLabels, Integer pageNum,
+      Integer pageSize) throws UserException, SoundException {
     Set<Tag> tags = new HashSet<Tag>();
 
     for (String label : tagLabels) {

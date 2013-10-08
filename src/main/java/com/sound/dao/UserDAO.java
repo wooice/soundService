@@ -7,11 +7,10 @@ import com.mongodb.Mongo;
 import com.sound.model.User;
 import com.sound.morphia.extension.BaseDAO;
 
-public class UserDAO extends BaseDAO<User, ObjectId>{
+public class UserDAO extends BaseDAO<User, ObjectId> {
 
-	protected UserDAO(Mongo mongo, Morphia morphia, String dbName) 
-	{
-		super(mongo, morphia, dbName);
-	}
+  protected UserDAO(Mongo mongo, Morphia morphia, String dbName) {
+    super(mongo, morphia, dbName);
+  }
 
 }

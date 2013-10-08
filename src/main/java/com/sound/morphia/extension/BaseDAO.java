@@ -67,13 +67,13 @@ public class BaseDAO<T, PK> extends BasicDAO<T, PK> {
     return this.find(query).asList();
   }
 
-  public void increase(String key, String value, String property) {
+  public void increase(String key, Object value, String property) {
     Query<T> updateQuery = ds.createQuery(this.clazz).field(key).equal(value);
     UpdateOperations<T> ops = ds.createUpdateOperations(this.clazz).inc(property);
     this.update(updateQuery, ops);
   }
 
-  public void decrease(String key, String value, String property) {
+  public void decrease(String key, Object value, String property) {
     Query<T> updateQuery = ds.createQuery(this.clazz).field(key).equal(value);
     UpdateOperations<T> ops = ds.createUpdateOperations(this.clazz).dec(property);
     this.update(updateQuery, ops);
@@ -99,21 +99,24 @@ public class BaseDAO<T, PK> extends BasicDAO<T, PK> {
     Query<T> query = ds.createQuery(clazz);
 
     for (String key : cratiaries.keySet()) {
-      query.field(key).equal(cratiaries.get(key));
+      if (cratiaries.get(key) instanceof Iterable) {
+        query.field(key).hasAnyOf((Iterable<?>) cratiaries.get(key));
+      } else {
+        query.field(key).equal(cratiaries.get(key));
+      }
     }
     query.order(order).offset(start).limit(range);
 
     return this.find(query).asList();
   }
 
-  public List<T> findTopOnes(Integer number, String property, Map<String, List<Object>> exclude) {
+  public List<T> findTopOnes(Integer number, Map<String, List<Object>> exclude) {
     Query<T> query = ds.createQuery(clazz);
-    
-    for(String key: exclude.keySet())
-    {
+
+    for (String key : exclude.keySet()) {
       query.field(key).hasNoneOf(exclude.get(key));
     }
-    
+
     query.offset(0).limit(number);
 
     return this.find(query).asList();

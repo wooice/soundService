@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -14,13 +16,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +33,6 @@ import com.sound.model.Tag;
 import com.sound.model.Tag.TagCategory;
 import com.sound.model.User;
 import com.sound.service.sound.itf.SoundService;
-import com.sound.util.JsonHandler;
 
 @Component
 @Path("/tag")
@@ -62,37 +63,35 @@ public class TagServiceEndpoint {
       tagService.getOrCreate(label, curUser, categoryName);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to create tag " + label)).build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Response.Status.CREATED).entity("true").build();
+    return Response.status(Response.Status.CREATED).build();
   }
 
   @PUT
   @Path("/attach/{soundAlias}")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response attachTagsToSound(@NotNull @PathParam("soundAlias") String soundAlias,
-      @NotNull JSONObject inputJsonObj) {
+      @NotNull JsonObject inputJsonObj) {
 
     User curUser = null;
     try {
       curUser = userService.getCurrentUser(req);
-      JSONArray tags = inputJsonObj.getJSONArray("tags");
+      JsonArray tags = inputJsonObj.getJsonArray("tags");
       List<String> tagList = new ArrayList<String>();
-      for (int i = 0; i < tags.length(); ++i) {
+      for (int i = 0; i < tags.size(); ++i) {
         tagList.add(tags.getString(i));
       }
       tagService.attachToSound(soundAlias, tagList, curUser);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot attach Tag because internal server error").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Response.Status.OK).entity("true").build();
+    return Response.status(Response.Status.OK).build();
   }
 
   @PUT
@@ -106,27 +105,25 @@ public class TagServiceEndpoint {
       tagService.detachFromSound(soundAlias, tagLabels, curUser);
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot detach Tag because internal server error").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Response.Status.OK).entity("true").build();
+    return Response.status(Response.Status.OK).build();
   }
 
   @GET
   @Path("/list")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getTagsContains(@NotNull @QueryParam("term") String term) {
+  public List<Tag> getTagsContains(@NotNull @QueryParam("term") String term) {
     List<Tag> tags = null;
     try {
       tags = tagService.listTagsContains(term);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot detach Tag because internal server error").build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Response.Status.OK).entity(JsonHandler.toJson(tags)).build();
+    return tags;
   }
 
   @GET
@@ -138,8 +135,7 @@ public class TagServiceEndpoint {
       sounds = tagService.getSoundsWithTag(tagLabel);
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot get sounds by tag because internal server error").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
     return Response.status(Response.Status.OK).entity(sounds.toString()).build();
@@ -148,32 +144,30 @@ public class TagServiceEndpoint {
   @GET
   @Path("/list/curated")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getCuratedTags() {
+  public List<Tag> getCuratedTags() {
     List<Tag> tags = null;
     try {
       tags = tagService.findCurated();
     } catch (SoundException e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot detach Tag because internal server error").build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Response.Status.OK).entity(JsonHandler.toJson(tags)).build();
+    return tags;
   }
 
   @GET
   @Path("/list/categories")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getCategories() {
+  public List<TagCategory> getCategories() {
     List<TagCategory> categories = null;
     try {
       categories = tagService.listCategories();
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-          .entity("Cannot detach Tag because internal server error").build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Response.Status.OK).entity(JsonHandler.toJson(categories)).build();
+    return categories;
   }
 }

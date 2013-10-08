@@ -52,24 +52,6 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
-	<bean id="soundLikeDAO" class="com.sound.dao.SoundLikeDAO">
-		<constructor-arg ref="mongo"></constructor-arg>  
-        <constructor-arg ref="morphia"></constructor-arg>  
-        <constructor-arg value="dev"></constructor-arg> 
-	</bean>
-	
-	<bean id="soundRecordDAO" class="com.sound.dao.SoundRecordDAO">
-		<constructor-arg ref="mongo"></constructor-arg>  
-        <constructor-arg ref="morphia"></constructor-arg>  
-        <constructor-arg value="dev"></constructor-arg> 
-	</bean>
-	
-	<bean id="soundCommentDAO" class="com.sound.dao.SoundCommentDAO">
-		<constructor-arg ref="mongo"></constructor-arg>  
-        <constructor-arg ref="morphia"></constructor-arg>  
-        <constructor-arg value="dev"></constructor-arg> 
-	</bean>
-	
 	<bean id="tagDAO" class="com.sound.dao.TagDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  
@@ -82,12 +64,6 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
-	<bean id="soundPlayDAO" class="com.sound.dao.SoundPlayDAO">
-		<constructor-arg ref="mongo"></constructor-arg>  
-        <constructor-arg ref="morphia"></constructor-arg>  
-        <constructor-arg value="dev"></constructor-arg> 
-	</bean>
-		
 	<bean id="tagCategoryDAO" class="com.sound.dao.TagCategoryDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  

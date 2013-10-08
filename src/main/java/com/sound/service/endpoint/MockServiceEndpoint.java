@@ -16,29 +16,25 @@ import com.sound.service.sound.itf.SoundService;
 @Path("/mock")
 public class MockServiceEndpoint {
 
-	@Autowired
-	com.sound.service.user.itf.UserService userService;
+  @Autowired
+  com.sound.service.user.itf.UserService userService;
 
-	@Autowired
-	SoundService soundService;
-	
-	@Autowired
-	SoundDataService soundDataService;
+  @Autowired
+  SoundService soundService;
 
-	@GET
-	@Path("/create")
-	public Response mock()
-	{
-		try
-		{
-			userService.deleteByAlias("robot");
-			User user = userService.createUser("robot", "robot@wooice.com", "robot123");
-			userService.grantRole(user, "admin");
-		}
-		catch(Exception e)
-		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-		}
-		return Response.status(Status.OK).entity("true").build();
-	}
+  @Autowired
+  SoundDataService soundDataService;
+
+  @GET
+  @Path("/create")
+  public Response mock() {
+    try {
+      userService.deleteByAlias("robot");
+      User user = userService.createUser("robot", "robot@wooice.com", "robot123");
+      userService.grantRole(user, "admin");
+    } catch (Exception e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    }
+    return Response.status(Status.OK).build();
+  }
 }

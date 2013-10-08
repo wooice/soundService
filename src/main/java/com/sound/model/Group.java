@@ -10,104 +10,96 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 
-@Entity(noClassnameStored= true)
+@Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Group extends BaseModel{
+public class Group extends BaseModel {
 
-	@Id private ObjectId id;
+  @Id
+  private ObjectId id;
 
-	private String name;
-	
-	private String description;
-	
-	private User owner;
-	
-	private List<User> admins;
+  private String name;
 
-	@JsonIgnore
-	public ObjectId getId() {
-		return id;
-	}
+  private String description;
 
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
+  private User owner;
 
-	public String getName() {
-		return name;
-	}
+  private List<User> admins;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  @JsonIgnore
+  public ObjectId getId() {
+    return id;
+  }
 
-	public String getDescription() {
-		return description;
-	}
+  public void setId(ObjectId id) {
+    this.id = id;
+  }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public User getOwner() {
-		return owner;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public void setOwner(User owner) {
-		this.owner = owner;
-	}
+  public String getDescription() {
+    return description;
+  }
 
-	public List<User> getAdmins() {
-		return admins;
-	}
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-	public void setAdmins(List<User> admins) {
-		this.admins = admins;
-	}
-	
-	public void addAdmin(User user)
-	{
-		this.admins = (null == this.admins)? new ArrayList<User>() : this.admins;
-		
-		for(User oneUser: this.admins)
-		{
-			if (oneUser == user)
-			{
-				return;
-			}
-		}
-		this.admins.add(user);
-	}
-	
-	public void removeAdmin(User user)
-	{
-		this.admins = (null == this.admins)? new ArrayList<User>() : this.admins;
-		this.admins.remove(user);
-	}
+  public User getOwner() {
+    return owner;
+  }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+  public void setOwner(User owner) {
+    this.owner = owner;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Group other = (Group) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
-	}
-	
+  public List<User> getAdmins() {
+    return admins;
+  }
+
+  public void setAdmins(List<User> admins) {
+    this.admins = admins;
+  }
+
+  public void addAdmin(User user) {
+    this.admins = (null == this.admins) ? new ArrayList<User>() : this.admins;
+
+    for (User oneUser : this.admins) {
+      if (oneUser == user) {
+        return;
+      }
+    }
+    this.admins.add(user);
+  }
+
+  public void removeAdmin(User user) {
+    this.admins = (null == this.admins) ? new ArrayList<User>() : this.admins;
+    this.admins.remove(user);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    Group other = (Group) obj;
+    if (name == null) {
+      if (other.name != null) return false;
+    } else if (!name.equals(other.name)) return false;
+    return true;
+  }
+
 }

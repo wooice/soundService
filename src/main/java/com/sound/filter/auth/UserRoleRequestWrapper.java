@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 @Resource
 public class UserRoleRequestWrapper extends HttpServletRequestWrapper {
 
-  String user ;
+  String user;
   List<String> roles = null;
   HttpServletRequest request;
 
@@ -26,8 +26,7 @@ public class UserRoleRequestWrapper extends HttpServletRequestWrapper {
   public boolean isUserInRole(String role) {
     if (roles == null) {
       // If no role on current user, treat him as a guest.
-      if ("guest".equals(role))
-      {
+      if ("guest".equals(role)) {
         return true;
       }
       return this.request.isUserInRole(role);

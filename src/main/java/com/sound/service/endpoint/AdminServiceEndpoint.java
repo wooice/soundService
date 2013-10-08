@@ -10,8 +10,10 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
@@ -19,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sound.constant.Constant;
 import com.sound.model.User;
-import com.sound.util.JsonHandler;
 
 @Path("/admin")
 @RolesAllowed(Constant.ADMIN_ROLE)
@@ -35,7 +36,8 @@ public class AdminServiceEndpoint {
 
   @POST
   @Path("/grantRole")
-  public Response grantRole(@NotNull @FormParam("userAlias") String userAlias,
+  @Produces(MediaType.APPLICATION_JSON)
+  public User grantRole(@NotNull @FormParam("userAlias") String userAlias,
       @NotNull @FormParam("role") String role) {
     User user = null;
     try {
@@ -51,10 +53,9 @@ public class AdminServiceEndpoint {
       }
     } catch (Exception e) {
       logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(("Failed to grant role to user " + userAlias)).build();
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
-    return Response.status(Status.OK).entity(JsonHandler.toJson(user)).build();
+    return user;
   }
 }

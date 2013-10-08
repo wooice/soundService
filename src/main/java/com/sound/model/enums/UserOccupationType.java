@@ -4,70 +4,60 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum UserOccupationType {
-	MUSICIAN(1, "Musician/Artist/Producer/Band"),
-	BOOKER(2, "Booker/Promoter/Venue"),
-	LISTENER(3, "Fan/Listener"),
-	STUDIO(4,"Studio/Mastering/Agency"),
-	PRESS(5,"Press/Blogger/Podcaster/Media"),
-	LABEL(6,"Label/Publisher"),
-	DJ(7, "DJ/Radio Host"),
-	OTHER(8, "Other");
-	
-	private int typeId;
-	private String typeName;
+  MUSICIAN(1, "Musician/Artist/Producer/Band"), BOOKER(2, "Booker/Promoter/Venue"), LISTENER(3,
+      "Fan/Listener"), STUDIO(4, "Studio/Mastering/Agency"), PRESS(5,
+      "Press/Blogger/Podcaster/Media"), LABEL(6, "Label/Publisher"), DJ(7, "DJ/Radio Host"), OTHER(
+      8, "Other");
 
-	private UserOccupationType(int typeId, String typeName) {
-		this.typeId = typeId;
-		this.typeName = typeName;
-	}
-	
-	public static List<Integer> getTypeIdsByTypes(List<UserOccupationType> types)
-	{
-		List<Integer> typeIds = new ArrayList<Integer>();
-		for (UserOccupationType type: types)
-		{
-			typeIds.add(type.getTypeId());
-		}
+  private int typeId;
+  private String typeName;
 
-		return typeIds;
-	}
+  private UserOccupationType(int typeId, String typeName) {
+    this.typeId = typeId;
+    this.typeName = typeName;
+  }
 
-	public static List<UserOccupationType> getTypesByIds(List<Integer> typeIds)
-	{
-		List<UserOccupationType> types = new ArrayList<UserOccupationType>();
-		for (Integer typeId : typeIds)
-		{
-			UserOccupationType.getTypeById(typeId);
-		}
+  public static List<Integer> getTypeIdsByTypes(List<UserOccupationType> types) {
+    List<Integer> typeIds = new ArrayList<Integer>();
+    for (UserOccupationType type : types) {
+      typeIds.add(type.getTypeId());
+    }
 
-		return types;
-	}
-	
-	public static UserOccupationType getTypeById(Integer typeId) {
-		for (UserOccupationType type : UserOccupationType.values()) 
-		{
-			if (type.getTypeId() == typeId)
-			{
-				return type;
-			}
-				
-		}
-		return null;
-	}
+    return typeIds;
+  }
 
-	public int getTypeId() {
-		return typeId;
-	}
+  public static List<UserOccupationType> getTypesByIds(List<Integer> typeIds) {
+    List<UserOccupationType> types = new ArrayList<UserOccupationType>();
+    for (Integer typeId : typeIds) {
+      UserOccupationType.getTypeById(typeId);
+    }
 
-	public void setTypeId(int typeId) {
-		this.typeId = typeId;
-	}
+    return types;
+  }
 
-	public String getTypeName() {
-		return typeName;
-	}
+  public static UserOccupationType getTypeById(Integer typeId) {
+    for (UserOccupationType type : UserOccupationType.values()) {
+      if (type.getTypeId() == typeId) {
+        return type;
+      }
 
-	public void setTypeName(String typeName) {
-		this.typeName = typeName;
-	}
+    }
+    return null;
+  }
+
+  public int getTypeId() {
+    return typeId;
+  }
+
+  public void setTypeId(int typeId) {
+    this.typeId = typeId;
+  }
+
+  public String getTypeName() {
+    return typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
 }
