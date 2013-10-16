@@ -13,6 +13,7 @@ import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Transient;
+import com.sound.constant.Constant;
 import com.sound.jackson.extension.IdSerializer;
 import com.sound.model.enums.GenderEnum;
 import com.sound.model.enums.UserOccupationType;
@@ -71,6 +72,7 @@ public class User extends BaseModel {
     this.profile = profile;
   }
 
+  @JsonIgnore
   public List<Tag> getTags() {
     return tags;
   }
@@ -87,6 +89,7 @@ public class User extends BaseModel {
     }
   }
   
+  @JsonIgnore
   public List<Group> getGroups() {
     return groups;
   }
@@ -95,6 +98,7 @@ public class User extends BaseModel {
     this.groups = groups;
   }
 
+  @JsonIgnore
   public UserExternal getExternal() {
     return external;
   }
@@ -119,6 +123,7 @@ public class User extends BaseModel {
     this.external = external;
   }
 
+  @JsonIgnore
   public List<UserEmail> getEmails() {
     return emails;
   }
@@ -176,7 +181,7 @@ public class User extends BaseModel {
     private String country;
     private String description;
     private int age;
-    private boolean gender;
+    private Boolean gender = null;
     private boolean hasAvatar = false;
     private Color color;
     private List<Integer> occupations = new ArrayList<Integer>();
@@ -684,13 +689,58 @@ public class User extends BaseModel {
 
   public static class UserRole {
     private Integer role;
+    private Integer allowedDuration;
 
+    public UserRole(){}
+    
+    public UserRole(String role)
+    {
+      this.role = UserRoleEnum.getTypeId(role);
+      
+      if (role.equals(Constant.USER_ROLE))
+      {
+        this.setAllowedDuration(Constant.USER_ALLOWED_DURATION);
+      }
+      if (role.equals(Constant.PRO_ROLE))
+      {
+        this.setAllowedDuration(Constant.PRO_ALLOWED_DURATION);
+      }
+    }
+    
     public String getRole() {
       return UserRoleEnum.getTypeName(this.role);
     }
 
     public void setRole(String role) {
       this.role = UserRoleEnum.getTypeId(role);
+    }
+    
+    public Integer getAllowedDuration() {
+      return allowedDuration;
+    }
+
+    public void setAllowedDuration(Integer allowedDuration) {
+      this.allowedDuration = allowedDuration;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((role == null) ? 0 : role.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
+      UserRole other = (UserRole) obj;
+      if (role == null) {
+        if (other.role != null) return false;
+      } else if (!role.equals(other.role)) return false;
+      return true;
     }
 
   }

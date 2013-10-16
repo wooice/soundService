@@ -32,7 +32,6 @@ public class SoundActivity {
   }
 
   public static class SoundComment extends SoundActivity {
-
     private String commentId;
 
     private String comment;
@@ -94,5 +93,6 @@ public class SoundActivity {
 
   public static class SoundShare extends SoundActivity {}
 
+  public static class SoundVisit extends SoundActivity {}
 
 }

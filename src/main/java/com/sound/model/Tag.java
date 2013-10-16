@@ -9,6 +9,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
+import com.github.jmkgreen.morphia.annotations.Transient;
 
 @Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,6 +28,9 @@ public class Tag extends BaseModel {
 
   @Reference(lazy = true)
   private TagCategory category;
+  
+  @Transient
+  private Boolean interested;
 
   @JsonIgnore
   public ObjectId getId() {
@@ -61,6 +65,7 @@ public class Tag extends BaseModel {
     this.createdDate = createdDate;
   }
 
+  @JsonIgnore
   public User getCreatedUser() {
     return createdUser;
   }
@@ -76,6 +81,16 @@ public class Tag extends BaseModel {
   public void setCategory(TagCategory category) {
     this.category = category;
   }
+  
+  public Boolean getInterested() {
+    return interested;
+  }
+
+  public void setInterested(Boolean interested) {
+    this.interested = interested;
+  }
+
+
 
   @Entity(noClassnameStored = true)
   public static class TagCategory {

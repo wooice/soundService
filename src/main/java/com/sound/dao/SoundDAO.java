@@ -3,6 +3,7 @@ package com.sound.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
@@ -35,11 +36,28 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("profile.status").hasNoneOf(status);
     query.criteria("soundData").exists();
 
-    query.offset(start).limit(range).order("-profile.createdTime");
+    query.offset(start).limit(range).order("-profile.priority, -profile.priorityUpdatedDate, -records.createdTime");
 
     return this.find(query).asList();
   }
 
+  public List<Sound> findByTag(User curUser, List<Tag> tags, Integer start, Integer range) {
+    Query<Sound> query = createQuery();
+
+    query.criteria("tags").hasAnyOf(tags);
+    
+    query.criteria("profile.owner").notEqual(curUser);
+    List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PRIVATE.getStatusId());
+    status.add(SoundState.DELETE.getStatusId());
+    query.criteria("profile.status").hasNoneOf(status);
+    query.criteria("soundData").exists();
+
+    query.offset(start).limit(range).order("-profile.priority, -profile.priorityUpdatedDate, -records.createdTime");
+
+    return this.find(query).asList();
+  }
+  
   public List<Sound> getUserSound(User user, User curUser, Integer start, Integer range) {
     Query<Sound> query = createQuery();
     query.criteria("records.owner").equal(user);
@@ -52,7 +70,14 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("profile.status").hasNoneOf(status);
     query.criteria("soundData").exists();
 
-    query.offset(start).limit(range).order("-records.createdTime");
+    if (curUser.getUserRoles().contains(Constant.USER_ROLE_OBJ))
+    {
+      query.offset(start).limit(range).order("-records.createdTime");
+    }
+    else
+    {
+      query.offset(start).limit(range).order("-profile.priority, -profile.priorityUpdatedDate, -records.createdTime");
+    }
 
     return this.find(query).asList();
   }
@@ -68,7 +93,7 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("profile.status").hasNoneOf(status);
     query.criteria("soundData").exists();
 
-    query.offset(start).limit(range).order("-records.createdTime");
+    query.offset(start).limit(range).order("-profile.priority, -profile.priorityUpdatedDate, -records.createdTime");
 
     return this.find(query).asList();
   }
@@ -131,5 +156,14 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
 
     return this.find(query).asList();
   }
- 
+  
+  public List<Sound> getSoundsByCreatedTime(Map<String, Object> cratiaries, Date startTime){
+    Query<Sound> query = createQuery();
+    for (String key : cratiaries.keySet()) {
+      query.field(key).equal(cratiaries.get(key));
+    }
+    
+    query.criteria("profile.createdTime").greaterThan(startTime);
+    return this.find(query).asList();
+  }
 }

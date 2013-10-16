@@ -29,7 +29,7 @@ import com.sound.service.sound.itf.SoundService;
 
 @Component
 @Path("/storageV2")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
 public class StorageServiceEndpointV2 {
 
   Logger logger = Logger.getLogger(StorageServiceEndpointV2.class);

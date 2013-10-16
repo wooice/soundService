@@ -22,6 +22,7 @@ import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.SoundActivity.SoundVisit;
 import com.sound.model.Tag;
 import com.sound.model.User;
 import com.sound.service.storage.itf.RemoteStorageServiceV2;
@@ -44,11 +45,14 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
   @Override
   public Map<String, String> play(User user, Sound sound) throws SoundException {
-    SoundPlay play = new SoundPlay();
-    play.setOwner(user);
-    play.setCreatedTime(new Date());
-    sound.addPlay(play);
-    soundDAO.save(sound);
+    if (!sound.getProfile().getOwner().equals(user))
+    {
+      SoundPlay play = new SoundPlay();
+      play.setOwner(user);
+      play.setCreatedTime(new Date());
+      sound.addPlay(play);
+      soundDAO.save(sound);
+    }
 
     Map<String, String> playResult = new HashMap<String, String>();
     playResult.put("played", String.valueOf(sound.getPlays().size()));
@@ -56,6 +60,34 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
         "sound", "avthumb/mp3"));
 
     return playResult;
+  }
+
+  @Override
+  public List<SoundPlay> getPlayed(Sound sound, Integer pageNum, Integer perPage)
+      throws SoundException {
+    List<SoundPlay> plays = sound.getPlays();
+
+    if ((pageNum - 1) * perPage >= plays.size()) {
+      plays.clear();
+    } else {
+      plays =
+          plays.subList((pageNum - 1) * perPage, pageNum * perPage > plays.size()
+              ? plays.size()
+              : pageNum * perPage);
+    }
+    for (SoundPlay play : plays) {
+      if (play.getOwner().getProfile().hasAvatar()) {
+        play.getOwner()
+            .getProfile()
+            .setAvatorUrl(
+                remoteStorageService.getDownloadURL(play.getOwner().getId().toString(), "image",
+                    "format/png"));
+      } else {
+        play.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+      }
+    }
+
+    return plays;
   }
 
   @Override
@@ -91,6 +123,34 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     }
 
     return sound.getLikes().size();
+  }
+
+  @Override
+  public List<SoundLike> getLiked(Sound sound, Integer pageNum, Integer perPage)
+      throws SoundException {
+    List<SoundLike> likes = sound.getLikes();
+
+    if ((pageNum - 1) * perPage >= likes.size()) {
+      likes.clear();
+    } else {
+      likes =
+          likes.subList((pageNum - 1) * perPage, pageNum * perPage > likes.size()
+              ? likes.size()
+              : pageNum * perPage);
+    }
+    for (SoundLike like : likes) {
+      if (like.getOwner().getProfile().hasAvatar()) {
+        like.getOwner()
+            .getProfile()
+            .setAvatorUrl(
+                remoteStorageService.getDownloadURL(like.getOwner().getId().toString(), "image",
+                    "format/png"));
+      } else {
+        like.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+      }
+    }
+
+    return likes;
   }
 
   @Override
@@ -134,6 +194,39 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   @Override
+  public List<SoundRecord> getReposts(Sound sound, Integer pageNum, Integer perPage)
+      throws SoundException {
+    List<SoundRecord> records = sound.getReposts();
+
+    if ((pageNum - 1) * perPage >= records.size()) {
+      records.clear();
+    } else {
+      records =
+          records.subList((pageNum - 1) * perPage,
+              pageNum * perPage > records.size() ? records.size() : pageNum * perPage);
+    }
+
+    List<SoundRecord> reposts = new ArrayList<SoundRecord>();
+
+    for (SoundRecord repost : records) {
+      if (repost.getOwner().getProfile().hasAvatar()) {
+        repost
+            .getOwner()
+            .getProfile()
+            .setAvatorUrl(
+                remoteStorageService.getDownloadURL(repost.getOwner().getId().toString(), "image",
+                    "format/png"));
+      } else {
+        repost.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+      }
+
+      reposts.add(repost);
+    }
+
+    return reposts;
+  }
+
+  @Override
   public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt) {
     SoundComment soundComment = new SoundComment();
     soundComment.setCommentId(String.valueOf(System.currentTimeMillis()));
@@ -168,14 +261,11 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   @Override
-  public List<SoundComment> getCommentsInsound(Sound sound)
-      throws SoundException {
+  public List<SoundComment> getCommentsInsound(Sound sound) throws SoundException {
     List<SoundComment> comments = new ArrayList<SoundComment>();
-    
-    for(SoundComment comment: sound.getComments())
-    {
-      if (comment.getPointAt() != null && comment.getPointAt() > 0 && null == comment.getTo())
-      {
+
+    for (SoundComment comment : sound.getComments()) {
+      if (comment.getPointAt() != null && comment.getPointAt() > 0 && null == comment.getTo()) {
         comments.add(comment);
       }
     }
@@ -195,19 +285,19 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
     return comments;
   }
-  
+
   @Override
   public List<SoundComment> getComments(Sound sound, Integer pageNum, Integer commentsPerPage)
       throws SoundException {
     List<SoundComment> comments = sound.getComments();
 
-    if ((pageNum-1) * commentsPerPage >=  comments.size())
-    {
+    if ((pageNum - 1) * commentsPerPage >= comments.size()) {
       comments.clear();
-    }
-    else
-    {
-      comments = comments.subList((pageNum-1) * commentsPerPage, pageNum * commentsPerPage > comments.size()? comments.size(): pageNum * commentsPerPage);
+    } else {
+      comments =
+          comments.subList((pageNum - 1) * commentsPerPage,
+              pageNum * commentsPerPage > comments.size() ? comments.size() : pageNum
+                  * commentsPerPage);
     }
     for (SoundComment comment : comments) {
       if (comment.getOwner().getProfile().hasAvatar()) {
@@ -218,7 +308,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
                 remoteStorageService.getDownloadURL(comment.getOwner().getId().toString(), "image",
                     "format/png"));
       } else {
-        comment.getOwner().getProfile().setAvatorUrl(null);
+        comment.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
       }
     }
 
@@ -272,6 +362,61 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     users.add(recommendTo);
     excludes.put("profile.owner", users);
     return soundDAO.findTopOnes(number, excludes);
+  }
+
+
+  @Override
+  public void addVisit(Sound sound, User user) {
+    if (sound.getProfile().getOwner().equals(user)) {
+      return;
+    }
+
+    List<SoundVisit> visits = sound.getVisits();
+    boolean found = false;
+    for (SoundVisit visit : visits) {
+      if (visit.getOwner().equals(user)) {
+        found = true;
+        visit.setCreatedTime(new Date());
+      }
+    }
+
+    if (!found) {
+      SoundVisit newVisit = new SoundVisit();
+      newVisit.setOwner(user);
+      newVisit.setCreatedTime(new Date());
+      visits.add(newVisit);
+    }
+
+    soundDAO.save(sound);
+  }
+
+  @Override
+  public List<SoundVisit> getVisits(Sound sound, Integer pageNum, Integer perPage)
+      throws SoundException {
+    List<SoundVisit> visits = sound.getVisits();
+
+    if ((pageNum - 1) * perPage >= visits.size()) {
+      visits.clear();
+    } else {
+      visits =
+          visits.subList((pageNum - 1) * perPage, pageNum * perPage > visits.size()
+              ? visits.size()
+              : pageNum * perPage);
+    }
+    for (SoundVisit visit : visits) {
+      if (visit.getOwner().getProfile().hasAvatar()) {
+        visit
+            .getOwner()
+            .getProfile()
+            .setAvatorUrl(
+                remoteStorageService.getDownloadURL(visit.getOwner().getId().toString(), "image",
+                    "format/png"));
+      } else {
+        visit.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+      }
+    }
+
+    return visits;
   }
 
 }

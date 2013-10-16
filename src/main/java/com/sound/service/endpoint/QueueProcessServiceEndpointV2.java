@@ -71,7 +71,7 @@ public class QueueProcessServiceEndpointV2 extends BaseEndpoint {
 
         File soundFile = new File(queueNodeFilePath);
         FileUtils.copyURLToFile(new URL(downURL), soundFile);
-        sound = soundService.processSoundV2(owner, soundFile, node.getFileName());
+        sound = soundService.processSound(owner, soundFile, node.getFileName());
         sound.setOriginName(node.getOriginFileName());
         soundService.saveData(sound, owner);
 

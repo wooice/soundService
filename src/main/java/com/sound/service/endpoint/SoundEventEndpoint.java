@@ -16,7 +16,7 @@ import org.glassfish.jersey.media.sse.SseFeature;
 import com.sound.constant.Constant;
 
 @Path("events")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE,Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
 public class SoundEventEndpoint {
 
   EventOutput eventOutput = null;

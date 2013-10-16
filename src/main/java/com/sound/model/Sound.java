@@ -15,11 +15,14 @@ import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
 import com.github.jmkgreen.morphia.annotations.Serialized;
 import com.github.jmkgreen.morphia.annotations.Transient;
+import com.sound.constant.Constant;
+import com.sound.jackson.extension.DateSerializer;
 import com.sound.jackson.extension.IdSerializer;
 import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.SoundActivity.SoundVisit;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
 
@@ -44,6 +47,9 @@ public class Sound extends BaseModel {
 
   @Reference(lazy = true)
   private List<Tag> tags;
+  
+  @Embedded(concreteClass = java.util.ArrayList.class)
+  private List<SoundVisit> visits = new ArrayList<SoundVisit>();
 
   @Embedded(concreteClass = java.util.ArrayList.class)
   private List<SoundComment> comments = new ArrayList<SoundComment>();
@@ -130,6 +136,14 @@ public class Sound extends BaseModel {
       }
     }
   }
+ 
+  public List<SoundVisit> getVisits() {
+    return visits;
+  }
+
+  public void setVisits(List<SoundVisit> visits) {
+    this.visits = visits;
+  }
 
   public UserPrefer getUserPrefer() {
     return userPrefer;
@@ -195,6 +209,19 @@ public class Sound extends BaseModel {
   public List<SoundRecord> getRecords() {
     return this.records;
   }
+  
+  public List<SoundRecord> getReposts() {
+    List<SoundRecord> reposts = new ArrayList<SoundRecord>();
+    
+    for (SoundRecord record: this.records)
+    {
+      if (record.getType().equals(Constant.SOUND_RECORD_REPOST))
+      {
+        reposts.add(record);
+      }
+    }
+    return reposts;
+  }
 
   public void setRecords(List<SoundRecord> records) {
     this.records = records;
@@ -210,6 +237,14 @@ public class Sound extends BaseModel {
     this.records.remove(record);
   }
 
+  /**
+   * @author xduo
+   *
+   */
+  /**
+   * @author xduo
+   *
+   */
   public static class SoundProfile {
     @Reference(lazy = true)
     private User owner;
@@ -240,7 +275,34 @@ public class Sound extends BaseModel {
 
     private Date modifiedTime;
 
+    /**
+     * private, public, closed 
+     */
+    private String commentMode;
+    
+    private int priority = 0;
+    
+    private Date priorityUpdatedDate;
+    
     private boolean downloadable;
+    
+    private Long duration;
+
+    public int getPriority() {
+      return priority;
+    }
+
+    public void setPriority(int priority) {
+      this.priority = priority;
+    }
+
+    public Date getPriorityUpdatedDate() {
+      return priorityUpdatedDate;
+    }
+
+    public void setPriorityUpdatedDate(Date priorityUpdatedDate) {
+      this.priorityUpdatedDate = priorityUpdatedDate;
+    }
 
     public User getOwner() {
       return owner;
@@ -283,6 +345,14 @@ public class Sound extends BaseModel {
       this.remoteId = remoteId;
     }
 
+    public String getCommentMode() {
+      return commentMode;
+    }
+
+    public void setCommentMode(String commentMode) {
+      this.commentMode = commentMode;
+    }
+
     public String getExtension() {
       return extension;
     }
@@ -307,6 +377,7 @@ public class Sound extends BaseModel {
       this.description = description;
     }
 
+    @JsonSerialize(using = DateSerializer.class)
     public Date getCreatedTime() {
       return createdTime;
     }
@@ -338,6 +409,15 @@ public class Sound extends BaseModel {
     public void setDownloadable(boolean downloadable) {
       this.downloadable = downloadable;
     }
+    
+    public Long getDuration() {
+      return duration;
+    }
+
+    public void setDuration(Long duration) {
+      this.duration = duration;
+    }
+
 
     public static class SoundPoster {
       // Id of stored poster
@@ -493,12 +573,15 @@ public class Sound extends BaseModel {
     private Integer reportsCount;
 
     private Integer commentsCount;
+    
+    private Integer visitsCount;
 
     public SoundSocial() {
       playedCount = 0;
       likesCount = 0;
       reportsCount = 0;
       commentsCount = 0;
+      visitsCount = 0;
     }
 
     public Integer getPlayedCount() {
@@ -531,6 +614,14 @@ public class Sound extends BaseModel {
 
     public void setCommentsCount(Integer commentsCount) {
       this.commentsCount = commentsCount;
+    }
+
+    public Integer getVisitsCount() {
+      return visitsCount;
+    }
+
+    public void setVisitsCount(Integer visitsCount) {
+      this.visitsCount = visitsCount;
     }
 
   }
