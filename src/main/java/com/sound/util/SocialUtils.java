@@ -14,18 +14,6 @@ public class SocialUtils {
   public static final long FIRST_CLASS_WEIGHT = 1000;
   public static final int FOLLOW_MIN_BORDER = 3;
 
-  public static <T> List<T> combineLogicAndSocial(Map<T, Integer> logicSeq,
-      Map<T, Integer> socialSeq, double socialPower) {
-
-    Map<T, Double> tmp = new HashMap<T, Double>();
-
-    for (T t : logicSeq.keySet()) {
-      tmp.put(t, logicSeq.get(t) * (1 - socialPower) + socialSeq.get(t) * socialPower);
-    }
-
-    return toSeqList(sortMapByValue(tmp, false));
-  }
-
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T, K extends Comparable> List<Entry<T, K>> sortMapByValue(Map<T, K> inputMap,
       final boolean asc) {

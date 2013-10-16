@@ -23,10 +23,13 @@ public interface SoundService {
   public void delete(String soundAlias);
 
   public Sound load(User user, String soundId);
-
+  
   public Sound loadByRemoteId(String remoteId);
 
   public List<Sound> loadByKeyWords(User user, String keyWords, Integer pageNum,
+      Integer soundsPerPage);
+  
+  public List<Sound> loadByTags(User user, List<String> tagLabels, Integer pageNum,
       Integer soundsPerPage);
 
   public List<Sound> getSoundsByUser(User user, User curUser, Integer pageNum, Integer soundsPerPage)
@@ -35,7 +38,7 @@ public interface SoundService {
   public List<Sound> getObservingSounds(User user, Integer pageNum, Integer soundsPerPage)
       throws SoundException;
 
-  public SoundLocal processSoundV2(User user, File soundFile, String fileName)
+  public SoundLocal processSound(User user, File soundFile, String fileName)
       throws SoundException, AudioProcessException;
 
   public void saveData(SoundLocal soundFile, User owner);
@@ -55,4 +58,8 @@ public interface SoundService {
   public long hasNewSounds(User currentUser, Date time);
   
   public long hasNewCreated(User user, Date time);
+  
+  public void promoteSound(Sound sound);
+  
+  public void demoteSound(Sound sound);
 }

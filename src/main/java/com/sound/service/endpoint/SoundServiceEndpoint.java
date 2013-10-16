@@ -1,6 +1,7 @@
 package com.sound.service.endpoint;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,16 +35,20 @@ import com.sound.model.Sound.SoundProfile;
 import com.sound.model.User;
 import com.sound.model.enums.SoundState;
 import com.sound.service.sound.itf.SoundService;
+import com.sound.service.sound.itf.SoundSocialService;
 
 @Component
 @Path("/sound")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
 public class SoundServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundServiceEndpoint.class);
 
   @Autowired
   SoundService soundService;
+  
+  @Autowired
+  SoundSocialService soundSocialService;
 
   @Autowired
   com.sound.service.user.itf.UserService userService;
@@ -70,6 +75,11 @@ public class SoundServiceEndpoint {
       if (!currentUser.equals(owner)
           && sound.getProfile().getStatus().equals(SoundState.PRIVATE.getStatusName())) {
         throw new WebApplicationException(Status.FORBIDDEN);
+      }
+      
+      if (!sound.getProfile().getOwner().equals(currentUser))
+      {
+        soundSocialService.addVisit(sound, currentUser);
       }
     } catch (WebApplicationException e) {
       throw e;
@@ -115,6 +125,12 @@ public class SoundServiceEndpoint {
       if (!soundService.isOwner(currentUser, soundId)) {
         throw new WebApplicationException(Status.FORBIDDEN);
       }
+      
+      if (currentUser.getUserRoles().contains(Constant.USER_ROLE_OBJ) && null != soundProfile.getCommentMode())
+      {
+        soundProfile.setCommentMode(Constant.COMMENT_PUBLIC);
+      }
+      
       sound = soundService.updateProfile(soundId, soundProfile);
     } catch (WebApplicationException e) {
       throw e;
@@ -155,10 +171,10 @@ public class SoundServiceEndpoint {
     return Response.status(Status.OK).build();
   }
 
-  @GET
-  @Path("/streams/search")
+  @POST
+  @Path("/streams/match/{q}")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<Sound> listSoundsByKeyword(@NotNull @QueryParam("q") String keyword,
+  public List<Sound> listSoundsByKeyword(@NotNull @PathParam("q") String keyword,
       @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
     soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
@@ -176,7 +192,51 @@ public class SoundServiceEndpoint {
     return sounds;
   }
 
-  @GET
+  @POST
+  @Path("/streams/tags/{tag}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<Sound> listSoundsByTag(@NotNull @PathParam("tag") String tag,
+      @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
+    pageNum = (null == pageNum) ? 0 : pageNum;
+    soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
+
+    List<Sound> sounds = null;
+    User currentUser = null;
+    try {
+      currentUser = userService.getCurrentUser(req);
+      List<String> tags = new ArrayList<String>();
+      tags.add(tag);
+      sounds = soundService.loadByTags(currentUser, tags, pageNum, soundsPerPage);
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return sounds;
+  }
+  
+  @POST
+  @Path("/streams/tags")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<Sound> listSoundsByTags(@NotNull final List<String> tags,
+      @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
+    pageNum = (null == pageNum) ? 0 : pageNum;
+    soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
+
+    List<Sound> sounds = null;
+    User currentUser = null;
+    try {
+      currentUser = userService.getCurrentUser(req);
+      sounds = soundService.loadByTags(currentUser, tags, pageNum, soundsPerPage);
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return sounds;
+  }
+  
+  @POST
   @Path("/streams/{userAlias}")
   @Produces(MediaType.APPLICATION_JSON)
   public List<Sound> listUsersSounds(@QueryParam("pageNum") Integer pageNum,
@@ -208,7 +268,7 @@ public class SoundServiceEndpoint {
     return sounds;
   }
 
-  @GET
+  @POST
   @Path("/streams")
   @Produces(MediaType.APPLICATION_JSON)
   public List<Sound> listObservingSounds(@QueryParam("pageNum") Integer pageNum,
