@@ -418,7 +418,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     Set<Tag> tags = new HashSet<Tag>();
 
     for (String label : tagLabels) {
-      tags.add(tagService.getOrCreate(label, null, null));
+      tags.add(tagService.getOrCreate(label, null, false, null));
     }
 
     List<User> byTags = recommandUsersByTags(tags);

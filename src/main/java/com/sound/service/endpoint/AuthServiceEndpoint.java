@@ -30,7 +30,7 @@ import com.sound.model.User;
 
 @Component
 @Path("/auth")
-@RolesAllowed({Constant.USER_ROLE, Constant.ADMIN_ROLE, Constant.GUEST_ROLE})
+@RolesAllowed({Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.ADMIN_ROLE, Constant.GUEST_ROLE})
 public class AuthServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserServiceEndpoint.class);

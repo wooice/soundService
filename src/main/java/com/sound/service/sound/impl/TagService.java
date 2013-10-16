@@ -37,7 +37,7 @@ public class TagService implements com.sound.service.sound.itf.TagService {
   UserService userService;
 
   @Override
-  public Tag getOrCreate(String label, User owner, String tagCategory) {
+  public Tag getOrCreate(String label, User owner, boolean curated, String tagCategory) {
     Tag tag = tagDAO.findOne("label", label);
 
     if (tag != null && tag.getId() != null) {
@@ -49,6 +49,7 @@ public class TagService implements com.sound.service.sound.itf.TagService {
     tag.setLabel(label);
     tag.setCreatedUser(owner);
     tag.setCategory(category);
+    tag.setCurated(curated);
     tag.setCreatedDate(new Date());
     tagDAO.save(tag);
 
@@ -69,23 +70,25 @@ public class TagService implements com.sound.service.sound.itf.TagService {
   }
 
   @Override
-  public void attachToSound(String id, List<String> tagLabels, User owner) {
+  public List<Tag> attachToSound(String id, List<String> tagLabels, User owner) {
     List<Tag> tags = new ArrayList<Tag>();
     for (String label : tagLabels) {
-      tags.add(this.getOrCreate(label, owner, null));
+      tags.add(this.getOrCreate(label, owner, false, null));
     }
 
     Sound sound = soundDAO.findOne("_id", new ObjectId(id));
     sound.addTags(tags);
 
     soundDAO.updateProperty("_id", new ObjectId(id), "tags", sound.getTags());
+ 
+    return tags;
   }
 
   @Override
   public void detachFromSound(String id, List<String> tagLabels, User owner) {
     List<Tag> tags = new ArrayList<Tag>();
     for (String label : tagLabels) {
-      tags.add(this.getOrCreate(label, owner, null));
+      tags.add(this.getOrCreate(label, owner, false, null));
     }
 
     Sound sound = soundDAO.findOne("_id", new ObjectId(id));

@@ -2,6 +2,7 @@ package com.sound.service.sound.impl;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,11 +16,11 @@ import org.springframework.stereotype.Service;
 import com.sound.constant.Constant;
 import com.sound.dao.QueueNodeDAO;
 import com.sound.dao.SoundDAO;
+import com.sound.dao.TagDAO;
 import com.sound.dao.UserConnectDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
-import com.sound.model.SoundLocal;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.Sound.SoundData;
 import com.sound.model.Sound.SoundProfile;
@@ -28,6 +29,8 @@ import com.sound.model.Sound.SoundSocial;
 import com.sound.model.Sound.UserPrefer;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.SoundLocal;
+import com.sound.model.Tag;
 import com.sound.model.User;
 import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.enums.SoundState;
@@ -49,6 +52,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
   @Autowired
   UserConnectDAO userConnectDAO;
+  
+  @Autowired
+  TagDAO tagDAO;
 
   @Autowired
   SoundDataService soundDataService;
@@ -116,6 +122,27 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     return sounds;
   }
+  
+  @Override
+  public List<Sound> loadByTags(User user, List<String> tagLabels, Integer pageNum, Integer soundsPerPage) {
+    List<Tag> tags = new ArrayList<Tag>();
+    
+    for (String tagLabel: tagLabels)
+    {
+      tags.add(tagDAO.findOne("label", tagLabel));
+    }
+    
+    List<Sound> sounds =
+        soundDAO.findByTag(user, tags, (pageNum - 1) * soundsPerPage, soundsPerPage);
+
+    for (Sound sound : sounds) {
+      buildSoundSocial(sound);
+      generateSoundPoster(sound);
+      sound.setUserPrefer(getUserPreferOfSound(sound, user));
+    }
+
+    return sounds;
+  }
 
   @Override
   public void saveData(SoundLocal soundLocal, User owner) {
@@ -139,6 +166,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     Sound sound = soundDAO.findOne("profile.remoteId", soundLocal.getFileName());
     if (null != sound) {
       sound.setSoundData(soundData);
+      sound.getProfile().setDuration(soundLocal.getDuration());
 
       SoundRecord soundCreate = new SoundRecord();
       soundCreate.setOwner(owner);
@@ -169,6 +197,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     soundProfile.setCreatedTime(new Date());
     soundProfile.setDownloadable(false);
     soundProfile.setModifiedTime(new Date());
+    soundProfile.setPriority(Constant.SOUND_NORMAL);
+    soundProfile.setPriorityUpdatedDate(soundProfile.getCreatedTime());
 
     String alias = calculateAlias(soundProfile.getName());
 
@@ -181,8 +211,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       SoundPoster soundPoster = new SoundPoster();
       soundProfile.setPoster(soundPoster);
     }
-
-    sound.setProfile(soundProfile);
 
     SoundSocial soundSocial = new SoundSocial();
     sound.setSoundSocial(soundSocial);
@@ -197,10 +225,14 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       soundCreate.setCreatedTime(new Date());
       soundCreate.setType(Constant.SOUND_RECORD_CREATE);
       sound.addRecord(soundCreate);
+      
+      soundProfile.setDuration(soundData.getDuration());
 
       // Add one sound count to user social
       userDAO.increase("_id", owner.getId(), "userSocial.sounds");
     }
+    
+    sound.setProfile(soundProfile);
     soundDAO.save(sound);
 
     return sound;
@@ -245,16 +277,37 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   }
 
   @Override
-  public SoundLocal processSoundV2(User user, File soundFile, String fileName)
+  public SoundLocal processSound(User user, File soundFile, String fileName)
       throws SoundException, AudioProcessException {
     Extractor extractor = processFactory.getExtractor("wav");
 
     try {
       AudioInfo soundInfo = extractor.extractInfo(soundFile);
 
-      if ((user.getUserSocial().getSoundDuration() + soundInfo.getDuration() / 1000) > 120 * 60) {
+      if (user.getUserRoles().contains(Constant.USER_ROLE) || user.getUserRoles().contains(Constant.PRO_ROLE_OBJ))
+      {
+        if ((user.getUserSocial().getSoundDuration() + soundInfo.getDuration() / 1000) > user.getUserRoles().get(0).getAllowedDuration() * 60) {
+          throw new SoundException("User " + user.getProfile().getAlias()
+              + " can't upload more sounds.");
+        }
+      }
+      
+      // User can't upload sounds more than Constant.WEEKLY_ALLOWED_DURATION limitaion in recent one week
+      Map<String, Object> cratiaries = new HashMap<String, Object>();
+      cratiaries.put("profile.owner", user);
+      Calendar c = Calendar.getInstance();  
+      c.add(Calendar.DATE, - 7);  
+      Date startDate = c.getTime();
+      List<Sound> sounds = soundDAO.getSoundsByCreatedTime(cratiaries, startDate);
+      long totalDuration = 0;
+      for(Sound sound: sounds)
+      {
+        totalDuration += sound.getProfile().getDuration();
+      }
+      if (totalDuration > Constant.WEEKLY_ALLOWED_DURATION)
+      {
         throw new SoundException("User " + user.getProfile().getAlias()
-            + " can't upload more sounds.");
+          + " can't upload more sounds due to weekly limitation.");
       }
 
       SoundLocal soundLocal = new SoundLocal();
@@ -296,6 +349,11 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     if (null != soundProfile.getPoster()) {
       soundDAO.updateProperty("_id", new ObjectId(id), "profile.poster", soundProfile.getPoster());
+    }
+    
+    if (null != soundProfile.getCommentMode())
+    {
+      soundDAO.updateProperty("_id", new ObjectId(id), "profile.commentMode", soundProfile.getCommentMode());
     }
 
     return soundDAO.findOne("_id", new ObjectId(id));
@@ -464,6 +522,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     soundSoical.setLikesCount(sound.getLikes().size());
     soundSoical.setPlayedCount(sound.getPlays().size());
     soundSoical.setReportsCount(sound.getRecords().size() - 1);
+    soundSoical.setVisitsCount(sound.getVisits().size());
     sound.setSoundSocial(soundSoical);
   }
 
@@ -483,4 +542,19 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       sound.getProfile().setPoster(poster);
     }
 }
+
+  @Override
+  public void promoteSound(Sound sound) {
+    sound.getProfile().setPriority(Constant.SOUND_HIGHLIGHT);
+    sound.getProfile().setPriorityUpdatedDate(new Date());
+    soundDAO.save(sound);
+  }
+
+  @Override
+  public void demoteSound(Sound sound) {
+    sound.getProfile().setPriority(Constant.SOUND_NORMAL);
+    sound.getProfile().setPriorityUpdatedDate(sound.getProfile().getCreatedTime());
+    soundDAO.save(sound);
+  }
+
 }

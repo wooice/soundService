@@ -30,13 +30,15 @@ import com.sound.exception.SoundException;
 import com.sound.model.RequestModel.commentRequest;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundComment;
+import com.sound.model.SoundActivity.SoundLike;
+import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.User;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.service.sound.itf.SoundSocialService;
 
 @Component
 @Path("/soundActivity")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
 public class SoundSocialServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundSocialServiceEndpoint.class);
@@ -129,6 +131,37 @@ public class SoundSocialServiceEndpoint {
     return result;
   }
 
+  @GET
+  @Path("/{soundId}/likes")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<SoundLike> likes(@NotNull @PathParam("soundId") String soundId,
+      @NotNull @QueryParam("pageNum") Integer pageNum,
+      @NotNull @QueryParam("perPage") Integer perPage) {
+    List<SoundLike> likes = null;
+    try {
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      likes = soundSocialService.getLiked(sound, pageNum, perPage);
+      
+      User curUser = userService.getCurrentUser(req);
+      for (SoundLike like : likes)
+      {
+        like.getOwner().setUserPrefer(userService.getUserPrefer(curUser, like.getOwner()));
+      }
+    } catch (SoundException e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return likes;
+  }
+  
   @PUT
   @Path("/repost/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
@@ -181,6 +214,37 @@ public class SoundSocialServiceEndpoint {
     return result;
   }
 
+  @GET
+  @Path("/{soundId}/reposts")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<SoundRecord> reports(@NotNull @PathParam("soundId") String soundId,
+      @NotNull @QueryParam("pageNum") Integer pageNum,
+      @NotNull @QueryParam("perPage") Integer perPage) {
+    List<SoundRecord> reports = null;
+    try {
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      reports = soundSocialService.getReposts(sound, pageNum, perPage);
+      
+      User curUser = userService.getCurrentUser(req);
+      for (SoundRecord report : reports)
+      {
+        report.getOwner().setUserPrefer(userService.getUserPrefer(curUser, report.getOwner()));
+      }
+    } catch (SoundException e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return reports;
+  }
+
   @PUT
   @Path("/comment/{soundId}")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -193,6 +257,11 @@ public class SoundSocialServiceEndpoint {
       Sound sound = soundService.loadById(soundId);
       if (null == sound) {
         throw new WebApplicationException(Status.NOT_FOUND);
+      }
+      
+      if (null != sound.getProfile().getCommentMode() && sound.getProfile().getCommentMode().equals(Constant.COMMENT_CLOSED))
+      {
+        throw new WebApplicationException(Status.FORBIDDEN);
       }
 
       currentUser = userService.getCurrentUser(req);

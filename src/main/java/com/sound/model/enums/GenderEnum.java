@@ -2,17 +2,17 @@ package com.sound.model.enums;
 
 public enum GenderEnum {
 
-  MALE(true, "man"), FAMELE(false, "woman");
+  MALE(true, "man"), FAMELE(false, "woman"), UNSET(null, "unset");
 
-  private boolean genderValue;
+  private Boolean genderValue;
   private String gender;
 
-  private GenderEnum(boolean genderValue, String gender) {
+  private GenderEnum(Boolean genderValue, String gender) {
     this.genderValue = genderValue;
     this.gender = gender;
   }
 
-  public static boolean getGenderValue(String genderName) {
+  public static Boolean getGenderValue(String genderName) {
     for (GenderEnum gender : GenderEnum.values()) {
       if (gender.getGender().equalsIgnoreCase(genderName)) {
         return gender.isGenderValue();
@@ -22,7 +22,7 @@ public enum GenderEnum {
     return true;
   }
 
-  public static String getGenderName(boolean genderValue) {
+  public static String getGenderName(Boolean genderValue) {
     for (GenderEnum gender : GenderEnum.values()) {
       if (gender.isGenderValue() == genderValue) {
         return gender.getGender();
@@ -32,11 +32,11 @@ public enum GenderEnum {
     return null;
   }
 
-  public boolean isGenderValue() {
+  public Boolean isGenderValue() {
     return genderValue;
   }
 
-  public void setGenderValue(boolean genderValue) {
+  public void setGenderValue(Boolean genderValue) {
     this.genderValue = genderValue;
   }
 

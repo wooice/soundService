@@ -131,6 +131,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     user = new User();
     UserProfile profile = new UserProfile();
     profile.setAlias(userAlias);
+    profile.setGender("unset");
 
     UserAuth auth = new UserAuth();
     auth.setPassword(hashPassword(password));
@@ -139,8 +140,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
     user.setProfile(profile);
     user.setAuth(auth);
 
-    UserRole role = new UserRole();
-    role.setRole(Constant.USER_ROLE);
+    UserRole role = new UserRole(Constant.USER_ROLE);
+    role.setAllowedDuration(Constant.USER_ALLOWED_DURATION);
     List<UserRole> roles = new ArrayList<UserRole>();
     roles.add(role);
     user.setUserRoles(roles);
@@ -523,8 +524,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Override
   public User grantRole(User user, String role) {
-    UserRole userRole = new UserRole();
-    userRole.setRole(role);
+    UserRole userRole = new UserRole(role);
+
     List<UserRole> newUserRole = new ArrayList<UserRole>();
     newUserRole.add(userRole);
     user.setUserRoles(newUserRole);

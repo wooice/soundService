@@ -35,7 +35,7 @@ import com.sound.model.UserMessage;
 
 @Component
 @Path("/user")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
 public class UserServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserServiceEndpoint.class);

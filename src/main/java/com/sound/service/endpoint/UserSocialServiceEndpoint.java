@@ -38,7 +38,7 @@ import com.sound.service.user.itf.UserSocialService;
 
 @Component
 @Path("/userActivity")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
 public class UserSocialServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserSocialServiceEndpoint.class);
