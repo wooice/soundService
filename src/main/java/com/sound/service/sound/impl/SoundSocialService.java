@@ -75,19 +75,27 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
               ? plays.size()
               : pageNum * perPage);
     }
+    
+    List<SoundPlay> playResults = new ArrayList<SoundPlay>();
+    
     for (SoundPlay play : plays) {
-      if (play.getOwner().getProfile().hasAvatar()) {
-        play.getOwner()
-            .getProfile()
-            .setAvatorUrl(
-                remoteStorageService.getDownloadURL(play.getOwner().getId().toString(), "image",
-                    "format/png"));
-      } else {
-        play.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+      if (null != play.getOwner())
+      {
+        if (play.getOwner().getProfile().hasAvatar()) {
+          play.getOwner()
+              .getProfile()
+              .setAvatorUrl(
+                  remoteStorageService.getDownloadURL(play.getOwner().getId().toString(), "image",
+                      "format/png"));
+        } else {
+          play.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+        }
+        playResults.add(play);
       }
+      
     }
 
-    return plays;
+    return playResults;
   }
 
   @Override
@@ -367,7 +375,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
   @Override
   public void addVisit(Sound sound, User user) {
-    if (sound.getProfile().getOwner().equals(user)) {
+    if (null == user || sound.getProfile().getOwner().equals(user)) {
       return;
     }
 
@@ -403,20 +411,27 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
               ? visits.size()
               : pageNum * perPage);
     }
+    
+    List<SoundVisit> visitsResult = new ArrayList<SoundVisit>();
     for (SoundVisit visit : visits) {
-      if (visit.getOwner().getProfile().hasAvatar()) {
-        visit
-            .getOwner()
-            .getProfile()
-            .setAvatorUrl(
-                remoteStorageService.getDownloadURL(visit.getOwner().getId().toString(), "image",
-                    "format/png"));
-      } else {
-        visit.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+      if (null != visit.getOwner())
+      {
+        if (visit.getOwner().getProfile().hasAvatar()) {
+          visit
+              .getOwner()
+              .getProfile()
+              .setAvatorUrl(
+                  remoteStorageService.getDownloadURL(visit.getOwner().getId().toString(), "image",
+                      "format/png"));
+        } else {
+          visit.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
+        }
+        
+        visitsResult.add(visit);
       }
     }
 
-    return visits;
+    return visitsResult;
   }
 
 }

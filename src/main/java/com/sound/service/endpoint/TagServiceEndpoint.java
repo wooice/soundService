@@ -1,6 +1,7 @@
 package com.sound.service.endpoint;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
@@ -60,7 +61,16 @@ public class TagServiceEndpoint {
     User curUser = null;
     try {
       curUser = userService.getCurrentUser(req);
-      tagService.getOrCreate(label, curUser, curated, categoryName);
+      Tag tag = new Tag();
+      tag.setLabel(label);
+      tag.setCurated(curated);
+      
+      TagCategory category = new TagCategory();
+      category.setName(categoryName);
+      tag.setCategory(category);
+      tag.setCreatedUser(curUser);
+      tag.setCreatedDate(new Date());
+      tagService.get(tag, true);
     } catch (SoundException e) {
       logger.error(e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -135,8 +145,15 @@ public class TagServiceEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   public List<Tag> getCuratedTags() {
     List<Tag> tags = null;
+    User curUser = null;
     try {
+      curUser = userService.getCurrentUser(req);
       tags = tagService.findCurated();
+      
+      for(Tag tag: tags)
+      {
+        tag.setInterested(curUser.containTag(tag));
+      }
     } catch (SoundException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

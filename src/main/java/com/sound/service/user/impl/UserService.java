@@ -571,9 +571,14 @@ public class UserService implements com.sound.service.user.itf.UserService {
     return sb.toString();
   }
 
-
   @Override
   public boolean authVerify(User user, String password) {
     return user.getAuth().getPassword().equals(hashPassword(password));
+  }
+
+  @Override
+  public User saveUser(User user) {
+    userDAO.save(user);
+    return user;
   }
 }

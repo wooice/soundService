@@ -63,4 +63,6 @@ public interface UserService {
   public boolean authVerify(User user, String password);
 
   public UserPrefer getUserPrefer(User currentUser, User targetUser);
+  
+  public User saveUser(User user);
 }

@@ -10,7 +10,7 @@ import com.sound.model.User;
 
 public interface TagService {
 
-  public Tag getOrCreate(String label, User owner, boolean curated, String tagCategory) throws SoundException;
+  public Tag get(Tag tag, Boolean createdOnNotFound) throws SoundException;
 
   public List<Tag> listTagsContains(String pattern) throws SoundException;
 

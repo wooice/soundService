@@ -70,6 +70,27 @@ public class UserServiceEndpoint {
     return user;
   }
 
+  @GET
+  @Path("/{userAlias}/external")
+  @Produces(MediaType.APPLICATION_JSON)
+  public UserExternal loadExternal(@NotNull @PathParam("userAlias") String userAlias) {
+    User user = null;
+    try {
+      user = userService.getUserByAlias(userAlias);
+
+      if (null == user) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+    } catch (WebApplicationException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return user.getExternal();
+  }
+
   @POST
   @Path("/updateBasic")
   @Consumes(MediaType.APPLICATION_JSON)

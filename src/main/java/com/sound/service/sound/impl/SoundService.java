@@ -124,13 +124,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   }
   
   @Override
-  public List<Sound> loadByTags(User user, List<String> tagLabels, Integer pageNum, Integer soundsPerPage) {
-    List<Tag> tags = new ArrayList<Tag>();
-    
-    for (String tagLabel: tagLabels)
-    {
-      tags.add(tagDAO.findOne("label", tagLabel));
-    }
+  public List<Sound> loadByTags(User user, List<Tag> tags, Integer pageNum, Integer soundsPerPage) {
     
     List<Sound> sounds =
         soundDAO.findByTag(user, tags, (pageNum - 1) * soundsPerPage, soundsPerPage);
@@ -527,7 +521,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   }
 
   private void generateSoundPoster(Sound sound) {
-    if (null != sound.getProfile().getPoster()) {
+    if (null != sound.getProfile().getPoster() && null != sound.getProfile().getPoster().getPosterId()) {
       sound
           .getProfile()
           .getPoster()
