@@ -46,7 +46,10 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
 
     query.criteria("tags").hasAnyOf(tags);
     
-    query.criteria("profile.owner").notEqual(curUser);
+    if (null != curUser)
+    {
+      query.criteria("profile.owner").notEqual(curUser);
+    }
     List<Integer> status = new ArrayList<Integer>();
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());

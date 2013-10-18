@@ -425,6 +425,7 @@ public class Sound extends BaseModel {
 
       private String extension;
 
+      @Transient
       private String url;
 
       public String getPosterId() {

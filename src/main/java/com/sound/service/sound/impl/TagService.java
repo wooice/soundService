@@ -1,7 +1,6 @@
 package com.sound.service.sound.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,23 +36,28 @@ public class TagService implements com.sound.service.sound.itf.TagService {
   UserService userService;
 
   @Override
-  public Tag getOrCreate(String label, User owner, boolean curated, String tagCategory) {
-    Tag tag = tagDAO.findOne("label", label);
+  public Tag get(Tag input, Boolean createdOnNotFound) {
+    Tag tag = tagDAO.findOne("label", input.getLabel());
 
     if (tag != null && tag.getId() != null) {
       return tag;
     }
+ 
+    if (!createdOnNotFound)
+    {
+      return null;
+    }
 
-    TagCategory category = tagCategoryDAO.findOne("name", tagCategory);
-    tag = new Tag();
-    tag.setLabel(label);
-    tag.setCreatedUser(owner);
-    tag.setCategory(category);
-    tag.setCurated(curated);
-    tag.setCreatedDate(new Date());
-    tagDAO.save(tag);
+    TagCategory category = null;
 
-    return tag;
+    if (null != input.getCategory() && null != input.getCategory().getName()) {
+      category = tagCategoryDAO.findOne("name", input.getCategory().getName());
+      input.setCategory(category);
+    }
+
+    tagDAO.save(input);
+
+    return input;
   }
 
   @Override
@@ -73,14 +77,18 @@ public class TagService implements com.sound.service.sound.itf.TagService {
   public List<Tag> attachToSound(String id, List<String> tagLabels, User owner) {
     List<Tag> tags = new ArrayList<Tag>();
     for (String label : tagLabels) {
-      tags.add(this.getOrCreate(label, owner, false, null));
+      Tag tag = new Tag();
+      tag.setLabel(label);
+      tag.setCurated(false);
+      tag.setCreatedUser(owner);
+      tags.add(this.get(tag, true));
     }
 
     Sound sound = soundDAO.findOne("_id", new ObjectId(id));
     sound.addTags(tags);
 
     soundDAO.updateProperty("_id", new ObjectId(id), "tags", sound.getTags());
- 
+
     return tags;
   }
 
@@ -88,7 +96,11 @@ public class TagService implements com.sound.service.sound.itf.TagService {
   public void detachFromSound(String id, List<String> tagLabels, User owner) {
     List<Tag> tags = new ArrayList<Tag>();
     for (String label : tagLabels) {
-      tags.add(this.getOrCreate(label, owner, false, null));
+      Tag tag = new Tag();
+      tag.setLabel(label);
+      tag.setCurated(false);
+      tag.setCreatedUser(owner);
+      tags.add(this.get(tag, true));
     }
 
     Sound sound = soundDAO.findOne("_id", new ObjectId(id));

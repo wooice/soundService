@@ -7,6 +7,7 @@ import java.util.List;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.SoundLocal;
+import com.sound.model.Tag;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.User;
@@ -29,7 +30,7 @@ public interface SoundService {
   public List<Sound> loadByKeyWords(User user, String keyWords, Integer pageNum,
       Integer soundsPerPage);
   
-  public List<Sound> loadByTags(User user, List<String> tagLabels, Integer pageNum,
+  public List<Sound> loadByTags(User user, List<Tag> tags, Integer pageNum,
       Integer soundsPerPage);
 
   public List<Sound> getSoundsByUser(User user, User curUser, Integer pageNum, Integer soundsPerPage)

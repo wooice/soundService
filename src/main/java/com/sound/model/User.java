@@ -80,6 +80,18 @@ public class User extends BaseModel {
   public void setTags(List<Tag> tags) {
     this.tags = tags;
   }
+  
+  public boolean containTag(Tag newTag) {
+    for (Tag tag: tags)
+    {
+      if (tag.equals(newTag))
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   public void addTags(List<Tag> tags) {
     for (Tag newTag : tags) {

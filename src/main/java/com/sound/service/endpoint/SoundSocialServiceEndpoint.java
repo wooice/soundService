@@ -38,7 +38,7 @@ import com.sound.service.sound.itf.SoundSocialService;
 
 @Component
 @Path("/soundActivity")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE, Constant.GUEST_ROLE})
 public class SoundSocialServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundSocialServiceEndpoint.class);
@@ -82,6 +82,7 @@ public class SoundSocialServiceEndpoint {
   @PUT
   @Path("/like/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Map<String, Integer> like(@NotNull @PathParam("soundId") String soundId) {
     Integer liked = 0;
     User currentUser = null;
@@ -108,6 +109,7 @@ public class SoundSocialServiceEndpoint {
   @DELETE
   @Path("/like/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Map<String, Integer> unlike(@NotNull @PathParam("soundId") String soundId) {
     Integer liked = 0;
     User currentUser = null;
@@ -134,6 +136,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/{soundId}/likes")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public List<SoundLike> likes(@NotNull @PathParam("soundId") String soundId,
       @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("perPage") Integer perPage) {
@@ -165,6 +168,7 @@ public class SoundSocialServiceEndpoint {
   @PUT
   @Path("/repost/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Map<String, Integer> repost(@NotNull @PathParam("soundId") String soundId) {
     Integer reposted = 0;
     User currentUser = null;
@@ -191,6 +195,7 @@ public class SoundSocialServiceEndpoint {
   @DELETE
   @Path("/repost/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Map<String, Integer> unrepost(@NotNull @PathParam("soundId") String soundId) {
     Integer reposted = 0;
     User currentUser = null;
@@ -217,6 +222,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/{soundId}/reposts")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public List<SoundRecord> reports(@NotNull @PathParam("soundId") String soundId,
       @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("perPage") Integer perPage) {
@@ -249,6 +255,7 @@ public class SoundSocialServiceEndpoint {
   @Path("/comment/{soundId}")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Map<String, Integer> comment(@NotNull @PathParam("soundId") String soundId,
       @NotNull commentRequest request) {
     Integer commentsCount = 0;
@@ -285,6 +292,7 @@ public class SoundSocialServiceEndpoint {
   @DELETE
   @Path("/comment/{soundId}/{commentId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Map<String, Integer> comment(@NotNull @PathParam("soundId") String soundId,
       @NotNull @PathParam("commentId") String commentId) {
     Integer commentsCount = 0;
@@ -310,6 +318,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/{soundId}/comments")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE, Constant.GUEST_ROLE})
   public List<SoundComment> comment(@NotNull @PathParam("soundId") String soundId,
       @QueryParam("pageNum") Integer pageNum,
       @QueryParam("commentsPerPage") Integer commentsPerPage,
@@ -344,6 +353,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/recommand/sounds")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public List<Sound> getRecommandedSounds(
       @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("pageSize") Integer pageSize) {

@@ -117,13 +117,9 @@ public class AuthServiceEndpoint {
     User user = null;
     try {
       user = userService.getCurrentUser(req);
-
-      if (null == user) {
-        throw new WebApplicationException(Status.UNAUTHORIZED);
-      }
     } catch (Exception e) {
       logger.error(e);
-      throw new WebApplicationException(Status.UNAUTHORIZED);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
     return user;
