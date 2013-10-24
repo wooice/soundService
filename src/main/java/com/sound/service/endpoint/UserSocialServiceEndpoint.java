@@ -226,7 +226,7 @@ public class UserSocialServiceEndpoint {
       List<String> tagList = new ArrayList<String>();
       int len = inputJsonObj.getJsonArray("tags").size();
       for (int i = 0; i < len; i++) {
-        tagList.add(inputJsonObj.getJsonArray("tags").get(i).toString());
+        tagList.add(inputJsonObj.getJsonArray("tags").getString(i));
       }
       users.addAll(userSocialService.recommandUsersByTags(currentUser, tagList, pageNum, pageSize));
     } catch (UserException e) {
@@ -236,7 +236,6 @@ public class UserSocialServiceEndpoint {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     } catch (JsonException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return users;

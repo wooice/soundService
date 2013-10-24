@@ -18,6 +18,7 @@ public class SoundService extends ResourceConfig {
   public SoundService() {
     packages("com.sound.service.endpoint");
 
+//    register(EntityFilteringFeature.class);
     register(SseFeature.class);
     register(GZIPWriterInterceptor.class);
     register(RolesAllowedDynamicFeature.class);

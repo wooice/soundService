@@ -17,6 +17,16 @@
 		</listener-class>
 	</listener>
  
+ 	 <filter>
+	   <filter-name>AuthenticateFilter</filter-name>
+	   <filter-class>com.sound.filter.auth.AuthenticateFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+	   <filter-name>AuthenticateFilter</filter-name>
+	   <url-pattern>/*</url-pattern>
+	</filter-mapping>
+ 
 	 <filter>
 	   <filter-name>userRoleFilter</filter-name>
 	   <filter-class>com.sound.filter.auth.UserRoleFilter</filter-class>
