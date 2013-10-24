@@ -299,7 +299,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     return allResult;
   }
 
-  private List<User> recommandUsersByTags(Set<Tag> tags) throws UserException, SoundException {
+  private List<User> recommandUsersByTags(User curUser, Set<Tag> tags) throws UserException, SoundException {
     Map<Tag, List<Sound>> tagSoundMap = new HashMap<Tag, List<Sound>>();
     Map<User, Long> userTagNumMap = new HashMap<User, Long>();
 
@@ -313,6 +313,11 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
       List<Sound> soundsOfTag = tagSoundMap.get(tag);
       for (Sound soundOfTag : soundsOfTag) {
         User user = soundOfTag.getProfile().getOwner();
+        
+        if (curUser.equals(user))
+        {
+          continue;
+        }
         if (userTagNumMap.containsKey(user)) {
           userTagNumMap.put(user, userTagNumMap.get(user) + 1);
         } else {
@@ -340,7 +345,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     for (Sound sound : liked) {
       tags.addAll(sound.getTags());
     }
-    List<User> byTags = recommandUsersByTags(tags);
+    List<User> byTags = recommandUsersByTags(user, tags);
     List<User> candidates = combineSocialAndTagsRecommandation(bySocial, byTags);
     List<User> results = new ArrayList<User>();
 
@@ -423,7 +428,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
       tags.add(tagService.get(tag, false));
     }
 
-    List<User> byTags = recommandUsersByTags(tags);
+    List<User> byTags = recommandUsersByTags(currentUser, tags);
 
     List<User> toReturn = SocialUtils.sliceList(byTags, pageNum, pageSize);
 

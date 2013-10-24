@@ -1,6 +1,7 @@
 package com.sound.service.sound.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,9 +121,13 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 
   @Override
   public List<Sound> getSoundsWithTag(String label) {
+    if (null == label)
+    {
+      return Collections.emptyList();
+    }
     Tag tag = tagDAO.findOne("label", label);
     if (tag == null) {
-      return new ArrayList<Sound>();
+      return Collections.emptyList();
     }
     return soundDAO.fetchEntitiesPropertyContains("tags", tag);
   }

@@ -47,7 +47,7 @@ public class Sound extends BaseModel {
 
   @Reference(lazy = true)
   private List<Tag> tags;
-  
+
   @Embedded(concreteClass = java.util.ArrayList.class)
   private List<SoundVisit> visits = new ArrayList<SoundVisit>();
 
@@ -77,7 +77,7 @@ public class Sound extends BaseModel {
   public void setId(ObjectId id) {
     this.id = id;
   }
-
+  
   public SoundProfile getProfile() {
     return profile;
   }
@@ -280,6 +280,14 @@ public class Sound extends BaseModel {
      */
     private String commentMode;
     
+    /**
+     * resing, original
+     */
+    private String recordType;
+    
+    @Embedded
+    private SoundRight soundRight;
+    
     private int priority = 0;
     
     private Date priorityUpdatedDate;
@@ -287,6 +295,23 @@ public class Sound extends BaseModel {
     private boolean downloadable;
     
     private Long duration;
+
+    @JsonIgnore
+    public String getRecordType() {
+      return recordType;
+    }
+
+    public void setRecordType(String recordType) {
+      this.recordType = recordType;
+    }
+
+    public SoundRight getSoundRight() {
+      return soundRight;
+    }
+
+    public void setSoundRight(SoundRight soundRight) {
+      this.soundRight = soundRight;
+    }
 
     public int getPriority() {
       return priority;
@@ -474,6 +499,28 @@ public class Sound extends BaseModel {
       return true;
     }
 
+  }
+  
+  public static class SoundRight {
+    private byte[] rightCopy;
+    
+    private String rightNumber;
+
+    public byte[] getRightCopy() {
+      return rightCopy;
+    }
+
+    public void setRightCopy(byte[] rightCopy) {
+      this.rightCopy = rightCopy;
+    }
+
+    public String getRightNumber() {
+      return rightNumber;
+    }
+
+    public void setRightNumber(String rightNumber) {
+      this.rightNumber = rightNumber;
+    }
   }
 
   @Entity(noClassnameStored = true)

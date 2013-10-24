@@ -32,6 +32,7 @@ public class UserRoleFilter implements Filter {
     HttpSession session = request.getSession(false);
 
     String userAlias = (null == session) ? null : (String) session.getAttribute("userAlias");
+    
     @SuppressWarnings("unchecked")
     List<String> userRoles =
         (null == session) ? null : (List<String>) session.getAttribute("userRoles");
