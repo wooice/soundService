@@ -372,7 +372,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     return soundDAO.findTopOnes(number, excludes);
   }
 
-
   @Override
   public void addVisit(Sound sound, User user) {
     if (null == user || sound.getProfile().getOwner().equals(user)) {
