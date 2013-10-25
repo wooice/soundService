@@ -551,4 +551,25 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     soundDAO.save(sound);
   }
 
+  @Override
+  public List<SoundData> loadData(User user, List<String> soundIds) {
+    List<ObjectId> soundIdObjects = new ArrayList<ObjectId>();
+    for (String soundId: soundIds)
+    {
+      soundIdObjects.add(new ObjectId(soundId));
+    }
+    List<Sound> sounds = soundDAO.getSoundsByIds(soundIdObjects);
+    List<SoundData> soundData = new ArrayList<SoundData>();
+    
+    for (Sound sound: sounds)
+    {
+      SoundData newData = sound.getSoundData();
+      newData.setSoundId(sound.getId().toString());
+      newData.setCommentMode(sound.getProfile().getCommentMode());
+      soundData.add(newData);
+    }
+
+    return soundData;
+  }
+
 }

@@ -169,4 +169,29 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("profile.createdTime").greaterThan(startTime);
     return this.find(query).asList();
   }
+
+  public List<Sound> getSoundsByIds(List<ObjectId> soundIds){
+    Query<Sound> query = createQuery();
+    query.criteria("_id").in(soundIds);
+    
+    return this.find(query).asList();
+  }
+  
+  public List<Sound> findTopOnes(Integer number, Map<String, List<Object>> exclude) {
+    Query<Sound> query = createQuery();
+
+    for (String key : exclude.keySet()) {
+      query.field(key).hasNoneOf(exclude.get(key));
+    }
+
+    List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PRIVATE.getStatusId());
+    status.add(SoundState.DELETE.getStatusId());
+    query.criteria("profile.status").hasNoneOf(status);
+    query.criteria("soundData").exists();
+    
+    query.offset(0).limit(number);
+
+    return this.find(query).asList();
+  }
 }

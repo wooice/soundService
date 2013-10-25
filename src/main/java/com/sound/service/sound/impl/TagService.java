@@ -108,10 +108,10 @@ public class TagService implements com.sound.service.sound.itf.TagService {
     sound.getTags().removeAll(tags);
 
     soundDAO.updateProperty("_id", sound.getId(), "tags", sound.getTags());
-    deleteOrphanTags(tags);
+//    deleteOrphanTags(tags);
   }
 
-  private void deleteOrphanTags(List<Tag> tags) {
+  protected void deleteOrphanTags(List<Tag> tags) {
     for (Tag tag : tags) {
       if (CollectionUtils.isEmpty(getSoundsWithTag(tag.getLabel()))) {
         tagDAO.delete(tag);

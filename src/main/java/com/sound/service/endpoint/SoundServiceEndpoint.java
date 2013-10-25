@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
+import com.sound.model.Sound.SoundData;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.Tag;
 import com.sound.model.User;
@@ -95,6 +96,25 @@ public class SoundServiceEndpoint {
     return sound;
   }
 
+  @POST
+  @Path("/data")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<SoundData> loadSoundData(@NotNull final List<String> soundIds) {
+    List<SoundData> soundData = null;
+    User currentUser = userService.getCurrentUser(req);
+
+    try {
+      soundData = soundService.loadData(currentUser, soundIds);
+    } catch (WebApplicationException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.BAD_REQUEST);
+    }
+
+    return soundData;
+  }
+  
   @PUT
   @Path("/{soundName}")
   @Consumes(MediaType.APPLICATION_JSON)

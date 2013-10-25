@@ -86,6 +86,7 @@ public class Sound extends BaseModel {
     this.profile = profile;
   }
 
+  @JsonIgnore
   public SoundData getSoundData() {
     return soundData;
   }
@@ -545,6 +546,28 @@ public class Sound extends BaseModel {
 
     @Serialized
     private float[][] wave;
+    
+    @Transient
+    private String soundId;
+    
+    @Transient
+    private String commentMode;
+    
+    public String getSoundId() {
+      return soundId;
+    }
+
+    public void setSoundId(String soundId) {
+      this.soundId = soundId;
+    }
+    
+    public String getCommentMode() {
+      return commentMode;
+    }
+
+    public void setCommentMode(String commentMode) {
+      this.commentMode = commentMode;
+    }
 
     public String getObjectId() {
       return objectId;

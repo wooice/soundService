@@ -6,10 +6,11 @@ import java.util.List;
 
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
+import com.sound.model.Sound.QueueNode;
+import com.sound.model.Sound.SoundData;
+import com.sound.model.Sound.SoundProfile;
 import com.sound.model.SoundLocal;
 import com.sound.model.Tag;
-import com.sound.model.Sound.QueueNode;
-import com.sound.model.Sound.SoundProfile;
 import com.sound.model.User;
 import com.sound.processor.exception.AudioProcessException;
 
@@ -24,6 +25,8 @@ public interface SoundService {
   public void delete(String soundAlias);
 
   public Sound load(User user, String soundId);
+  
+  public List<SoundData> loadData(User user, List<String> soundIds);
   
   public Sound loadByRemoteId(String remoteId);
 
