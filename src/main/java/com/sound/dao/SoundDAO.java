@@ -169,4 +169,11 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("profile.createdTime").greaterThan(startTime);
     return this.find(query).asList();
   }
+
+  public List<Sound> getSoundsByIds(List<ObjectId> soundIds){
+    Query<Sound> query = createQuery();
+    query.criteria("_id").in(soundIds);
+    
+    return this.find(query).asList();
+  }
 }
