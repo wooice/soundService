@@ -20,7 +20,7 @@ import com.sound.exception.RemoteStorageException;
 
 @Service
 @Scope("singleton")
-public class RemoteStorageServiceV2 implements com.sound.service.storage.itf.RemoteStorageServiceV2 {
+public class RemoteStorageService implements com.sound.service.storage.itf.RemoteStorageServiceV2 {
 
   private static final String CONFIG_FILE = "storeConfig.properties";
 
@@ -28,7 +28,7 @@ public class RemoteStorageServiceV2 implements com.sound.service.storage.itf.Rem
 
   private Mac mac;
 
-  public RemoteStorageServiceV2() throws RemoteStorageException {
+  public RemoteStorageService() throws RemoteStorageException {
     loadPropertiesConfiguration();
 
     initClientConfig();
@@ -79,44 +79,11 @@ public class RemoteStorageServiceV2 implements com.sound.service.storage.itf.Rem
     GetSound getSound = new GetSound();
     getSound.key = fileName;
     getSound.type = type;
-    String baseURL = generateDownToken(getSound, format);
 
-    return baseURL;
+    return generateDownUrl(getSound, format);
   }
-
-  private String generateUpToken(PutSound input) {
-    PutPolicy putPolicy = null;
-    if (input.type.equals("sound")) {
-      putPolicy = new PutPolicy(config.getString("SOUND_BUCKET") + ":" + input.key);
-    } else {
-      putPolicy = new PutPolicy(config.getString("IMAGE_BUCKET") + ":" + input.key);
-    }
-
-    putPolicy.asyncOps = input.asyncOps;
-    putPolicy.callbackBody = input.callbackBody;
-    putPolicy.callbackUrl = input.callbackUrl;
-    putPolicy.endUser = input.endUser;
-    putPolicy.expires = config.getLong("AccessExpires", 300000);
-    putPolicy.returnBody = input.returnBody;
-    putPolicy.returnUrl = input.returnUrl;
-
-    try {
-      String uptoken = putPolicy.token(mac);
-
-      return uptoken;
-    } catch (AuthException e) {
-      e.printStackTrace();
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
-
-    return null;
-  }
-
-  private String generateDownToken(GetSound input, String format) {
-    GetPolicy getPolicy = new GetPolicy();
-    getPolicy.expires = config.getInt("AccessExpires", 300000);
-
+  
+  private String generateDownUrl(GetSound input, String format) {
     try {
       String baseUrl = null;
 
@@ -129,15 +96,61 @@ public class RemoteStorageServiceV2 implements com.sound.service.storage.itf.Rem
             URLUtils.makeBaseUrl(config.getString("IMAGE_DOMAIN"), input.key)
                 + ((null == format) ? "" : "?" + format);
       }
-      String uptoken = getPolicy.makeRequest(baseUrl, mac);
 
-      return uptoken;
-    } catch (AuthException e) {
-      e.printStackTrace();
+      return getDownloadToken(baseUrl, input.type);
     } catch (EncoderException e) {
       e.printStackTrace();
     }
 
+    return null;
+  }
+  
+  private String getDownloadToken(String baseUrl, String type) {
+    GetPolicy getPolicy = new GetPolicy();
+    if (type.equals("sound"))
+    {
+      getPolicy.expires = config.getInt("SOUND_ACCESS_EXPIRE", 300000);
+    }
+    else
+    {
+      getPolicy.expires = config.getInt("IMAGE_ACCESS_EXPIRE", 300000);
+    }
+
+    try {
+      return getPolicy.makeRequest(baseUrl, mac);
+    } catch (AuthException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  private String generateUpToken(PutSound input) {
+    PutPolicy putPolicy = null;
+    if (input.type.equals("sound")) {
+      putPolicy = new PutPolicy(config.getString("SOUND_BUCKET") + ":" + input.key);
+    } else {
+      putPolicy = new PutPolicy(config.getString("IMAGE_BUCKET") + ":" + input.key);
+    }
+  
+    putPolicy.asyncOps = input.asyncOps;
+    putPolicy.callbackBody = input.callbackBody;
+    putPolicy.callbackUrl = input.callbackUrl;
+    putPolicy.endUser = input.endUser;
+    putPolicy.expires = config.getLong("AccessExpires", 300000);
+    putPolicy.returnBody = input.returnBody;
+    putPolicy.returnUrl = input.returnUrl;
+  
+    try {
+      String uptoken = putPolicy.token(mac);
+  
+      return uptoken;
+    } catch (AuthException e) {
+      e.printStackTrace();
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+  
     return null;
   }
 

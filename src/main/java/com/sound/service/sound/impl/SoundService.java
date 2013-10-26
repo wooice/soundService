@@ -39,7 +39,7 @@ import com.sound.processor.exception.AudioProcessException;
 import com.sound.processor.factory.ProcessorFactory;
 import com.sound.processor.itf.Extractor;
 import com.sound.processor.model.AudioInfo;
-import com.sound.service.storage.impl.RemoteStorageServiceV2;
+import com.sound.service.storage.impl.RemoteStorageService;
 
 @Service
 @Scope("singleton")
@@ -66,7 +66,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   ProcessorFactory processFactory;
 
   @Autowired
-  RemoteStorageServiceV2 remoteStorageService;
+  RemoteStorageService remoteStorageService;
 
   @Override
   public void addToSet(String soundId, String setId) {}
@@ -87,8 +87,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
       queueNodeDAO.deleteByProperty("fileName", sound.getProfile().getRemoteId());
 
-      // remoteStorageService.deleteFile("sound", sound.getProfile().getRemoteId());
-      // remoteStorageService.deleteFile("image", sound.getProfile().getRemoteId());
+       remoteStorageService.deleteFile("sound", sound.getProfile().getRemoteId());
+       remoteStorageService.deleteFile("image", sound.getProfile().getRemoteId());
 
       soundDAO.delete(sound);
     }
@@ -518,6 +518,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     soundSoical.setReportsCount(sound.getRecords().size() - 1);
     soundSoical.setVisitsCount(sound.getVisits().size());
     sound.setSoundSocial(soundSoical);
+    
+    sound.getProfile().setUrl(remoteStorageService.getDownloadURL(sound.getSoundData().getObjectId(),
+        "sound", "avthumb/mp3"));
   }
 
   private void generateSoundPoster(Sound sound) {

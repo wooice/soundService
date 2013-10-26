@@ -28,11 +28,11 @@ import com.sound.model.User;
 import com.sound.service.sound.itf.SoundService;
 
 @Component
-@Path("/storageV2")
+@Path("/storage")
 @RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
-public class StorageServiceEndpointV2 {
+public class StorageServiceEndpoint {
 
-  Logger logger = Logger.getLogger(StorageServiceEndpointV2.class);
+  Logger logger = Logger.getLogger(StorageServiceEndpoint.class);
 
   @Autowired
   com.sound.service.storage.itf.RemoteStorageServiceV2 remoteStorageService;

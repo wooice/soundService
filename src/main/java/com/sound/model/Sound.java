@@ -296,6 +296,17 @@ public class Sound extends BaseModel {
     private boolean downloadable;
     
     private Long duration;
+    
+    @Transient
+    private String url;
+    
+    public String getUrl() {
+      return url;
+    }
+
+    public void setUrl(String url) {
+      this.url = url;
+    }
 
     @JsonIgnore
     public String getRecordType() {
