@@ -56,8 +56,8 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
     Map<String, String> playResult = new HashMap<String, String>();
     playResult.put("played", String.valueOf(sound.getPlays().size()));
-    playResult.put("url", remoteStorageService.getDownloadURL(sound.getSoundData().getObjectId(),
-        "sound", "avthumb/mp3"));
+    playResult.put("url", remoteStorageService.getDownloadURL(sound.getSoundData().getObjectId(), "sound",
+        "avthumb/mp3"));
 
     return playResult;
   }
