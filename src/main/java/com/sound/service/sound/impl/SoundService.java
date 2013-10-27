@@ -32,6 +32,7 @@ import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.SoundLocal;
 import com.sound.model.Tag;
 import com.sound.model.User;
+import com.sound.model.User.UserRole;
 import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
@@ -303,6 +304,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
         throw new SoundException("User " + user.getProfile().getAlias()
           + " can't upload more sounds due to weekly limitation.");
       }
+      
+      
 
       SoundLocal soundLocal = new SoundLocal();
       soundLocal.setDuration(soundInfo.getDuration() / 1000);
@@ -573,6 +576,30 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     }
 
     return soundData;
+  }
+
+  @Override
+  public void promoreUser(User user) {
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("profile.owner", user);
+    cratiaries.put("profile.recordType", "original");
+    List<Sound> sounds = soundDAO.find(cratiaries);
+    
+    if (sounds.size() >= 3 && user.getUserRoles().contains(Constant.USER_ROLE))
+    {
+      List<UserRole> roles = new ArrayList<UserRole>();
+      roles.add(Constant.PRO_ROLE_OBJ);
+      user.setUserRoles(roles);
+      userDAO.save(user);
+    }
+    
+    if (sounds.size() >= 9 && (user.getUserRoles().contains(Constant.USER_ROLE) || user.getUserRoles().contains(Constant.PRO_ROLE_OBJ)))
+    {
+      List<UserRole> roles = new ArrayList<UserRole>();
+      roles.add(Constant.SPRO_ROLE_OBJ);
+      user.setUserRoles(roles);
+      userDAO.save(user);
+    } 
   }
 
 }

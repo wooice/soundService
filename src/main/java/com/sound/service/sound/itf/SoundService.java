@@ -66,4 +66,6 @@ public interface SoundService {
   public void promoteSound(Sound sound);
   
   public void demoteSound(Sound sound);
+  
+  public void promoreUser(User user);
 }
