@@ -76,6 +76,8 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         soundService.saveData(sound, owner);
 
         soundService.dequeue(node);
+        
+        soundService.promoreUser(owner);
       } catch (SoundException e) {
         logger.error(e);
         Sound toDeleteSound = soundService.loadByRemoteId(node.getFileName());
