@@ -110,22 +110,9 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
 
       try {
         userService.sendUserMessage(null, owner, titile, message);
-
-        HttpSession session = req.getSession(false);
-        if (null != session.getAttribute("eventOutput")) {
-          EventOutput eventOutput = (EventOutput) session.getAttribute("eventOutput");
-          final OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-          eventBuilder.name("newMessage");
-          OutboundEvent event = eventBuilder.build();
-          eventOutput.write(event);
-        }
-
       } catch (UserException e) {
         e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-
+      } 
     }
     return Response.status(Status.OK).build();
   }

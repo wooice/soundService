@@ -93,7 +93,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
-          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "format/png"));
+          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "imageView/2/w/200/h/200/format/png"));
     }
 
     return user;
@@ -107,7 +107,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
-          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "format/png"));
+          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "imageView/2/w/200/h/200/format/png"));
     }
 
     return user;

@@ -295,7 +295,7 @@ public class Sound extends BaseModel {
     
     private boolean downloadable;
     
-    private Long duration;
+    private Long duration = 0L;
     
     @Transient
     private String url;

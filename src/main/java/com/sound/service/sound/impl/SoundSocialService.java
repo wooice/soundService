@@ -86,7 +86,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
               .getProfile()
               .setAvatorUrl(
                   remoteStorageService.getDownloadURL(play.getOwner().getId().toString(), "image",
-                      "format/png"));
+                      "imageView/2/w/100/h/100/format/png"));
         } else {
           play.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
         }
@@ -152,7 +152,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
             .getProfile()
             .setAvatorUrl(
                 remoteStorageService.getDownloadURL(like.getOwner().getId().toString(), "image",
-                    "format/png"));
+                    "imageView/2/w/100/h/100/format/png"));
       } else {
         like.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
       }
@@ -223,7 +223,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
             .getProfile()
             .setAvatorUrl(
                 remoteStorageService.getDownloadURL(repost.getOwner().getId().toString(), "image",
-                    "format/png"));
+                    "imageView/2/w/100/h/100/format/png"));
       } else {
         repost.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
       }
@@ -285,7 +285,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
             .getProfile()
             .setAvatorUrl(
                 remoteStorageService.getDownloadURL(comment.getOwner().getId().toString(), "image",
-                    "format/png"));
+                    "imageView/2/w/100/h/100/format/png"));
       } else {
         comment.getOwner().getProfile().setAvatorUrl(null);
       }
@@ -314,7 +314,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
             .getProfile()
             .setAvatorUrl(
                 remoteStorageService.getDownloadURL(comment.getOwner().getId().toString(), "image",
-                    "format/png"));
+                    "imageView/2/w/100/h/100/format/png"));
       } else {
         comment.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
       }
@@ -356,7 +356,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
           .getPoster()
           .setUrl(
               remoteStorageService.getDownloadURL(sound.getProfile().getPoster().getPosterId(),
-                  "image", "format/png"));
+                  "image", "imageView/2/w/200/h/200/format/png"));
     } else {
       SoundPoster poster = new SoundPoster();
       poster.setUrl("img/voice.jpg");
@@ -421,7 +421,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
               .getProfile()
               .setAvatorUrl(
                   remoteStorageService.getDownloadURL(visit.getOwner().getId().toString(), "image",
-                      "format/png"));
+                      "imageView/2/w/100/h/100/format/png"));
         } else {
           visit.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
         }
