@@ -533,7 +533,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
           .getPoster()
           .setUrl(
               remoteStorageService.getDownloadURL(sound.getProfile().getPoster().getPosterId(),
-                  "image", "format/png"));
+                  "image", "imageView/2/w/200/h/200/format/png"));
     }
     else
     {
