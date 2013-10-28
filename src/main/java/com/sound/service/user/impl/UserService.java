@@ -46,7 +46,7 @@ import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
 import com.sound.model.UserAuth.PasswordResetRequest;
 import com.sound.model.UserMessage;
-import com.sound.service.storage.itf.RemoteStorageServiceV2;
+import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
 @Scope("singleton")
@@ -63,7 +63,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   UserConnectDAO userConnectDAO;
 
   @Autowired
-  RemoteStorageServiceV2 remoteStorageService;
+  RemoteStorageService remoteStorageService;
 
   @Autowired
   UserAuthDAO userAuthDAO;

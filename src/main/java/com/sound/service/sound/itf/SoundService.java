@@ -1,6 +1,5 @@
 package com.sound.service.sound.itf;
 
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -42,10 +41,10 @@ public interface SoundService {
   public List<Sound> getObservingSounds(User user, Integer pageNum, Integer soundsPerPage)
       throws SoundException;
 
-  public SoundLocal processSound(User user, File soundFile, String fileName)
+  public SoundLocal processSound(User user, String soundUrl, String fileName)
       throws SoundException, AudioProcessException;
 
-  public void saveData(SoundLocal soundFile, User owner);
+  public void saveData(SoundLocal soundFile, User owner) throws SoundException;
 
   public void enqueue(QueueNode node);
 
@@ -68,4 +67,6 @@ public interface SoundService {
   public void demoteSound(Sound sound);
   
   public void promoreUser(User user);
+  
+  public String getSoundInfo(String remoteId);
 }

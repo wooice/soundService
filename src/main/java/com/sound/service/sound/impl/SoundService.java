@@ -1,6 +1,7 @@
 package com.sound.service.sound.impl;
 
-import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,7 +9,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -23,6 +34,7 @@ import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.Sound.SoundData;
+import com.sound.model.Sound.SoundFormat;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.Sound.SoundProfile.SoundPoster;
 import com.sound.model.Sound.SoundSocial;
@@ -39,8 +51,7 @@ import com.sound.model.enums.SoundType;
 import com.sound.processor.exception.AudioProcessException;
 import com.sound.processor.factory.ProcessorFactory;
 import com.sound.processor.itf.Extractor;
-import com.sound.processor.model.AudioInfo;
-import com.sound.service.storage.impl.RemoteStorageService;
+import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
 @Scope("singleton")
@@ -140,28 +151,31 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   }
 
   @Override
-  public void saveData(SoundLocal soundLocal, User owner) {
+  public void saveData(SoundLocal soundLocal, User owner) throws SoundException {
     SoundData soundData = soundDataService.load(soundLocal.getFileName());
 
     if (null == soundData) {
       soundData = new SoundData();
       soundData.setObjectId(soundLocal.getFileName());
       soundData.setOriginName(soundLocal.getOriginName());
-      soundData.setDuration(soundLocal.getDuration());
+      soundData.setDuration(soundLocal.getSoundFormat().getDuration());
       soundData.setOwner(owner);
       soundData.setWave(soundLocal.getWave().getWaveData());
+      soundData.setSoundFormat(soundLocal.getSoundFormat());
       soundDataService.save(soundData);
     } else {
-      soundData.setDuration(soundLocal.getDuration());
+      soundData.setDuration(soundLocal.getSoundFormat().getDuration());
       soundData.setOriginName(soundLocal.getOriginName());
       soundData.setWave(soundLocal.getWave().getWaveData());
+      soundData.setSoundFormat(soundLocal.getSoundFormat());
       soundDataService.update(soundData);
     }
 
     Sound sound = soundDAO.findOne("profile.remoteId", soundLocal.getFileName());
+    
     if (null != sound) {
       sound.setSoundData(soundData);
-      sound.getProfile().setDuration(soundLocal.getDuration());
+      sound.getProfile().setDuration(soundLocal.getSoundFormat().getDuration());
 
       SoundRecord soundCreate = new SoundRecord();
       soundCreate.setOwner(owner);
@@ -174,7 +188,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     }
 
     userDAO.updateProperty("_id", owner.getId(), "userSocial.soundDuration", (owner.getUserSocial()
-        .getSoundDuration() + soundLocal.getDuration()));
+        .getSoundDuration() + soundLocal.getSoundFormat().getDuration()));
   }
 
   @Override
@@ -271,19 +285,80 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     return sounds;
   }
 
+  private boolean checkUserRight(User user, SoundFormat soundFormat)
+  {
+    if (null != soundFormat.getAlbum_artist() && soundFormat.getAlbum_artist().equals(user.getProfile().getAlias()))
+    {
+      return true;
+    }
+    
+    if (null != soundFormat.getAlbum_artist() && soundFormat.getAlbum_artist().equals(user.getProfile().getLastName() + user.getProfile().getFirstName()))
+    {
+      return true;
+    }
+    
+    if (null != soundFormat.getArtist() && soundFormat.getArtist().equals(user.getProfile().getAlias()))
+    {
+      return true;
+    }
+    
+    if (null != soundFormat.getArtist() && soundFormat.getArtist().equals(user.getProfile().getLastName() + user.getProfile().getFirstName()))
+    {
+      return true;
+    }
+    
+    if (null != soundFormat.getComposer() && soundFormat.getComposer().equals(user.getProfile().getAlias()))
+    {
+      return true;
+    }
+    
+    if (null != soundFormat.getComposer() && soundFormat.getComposer().equals(user.getProfile().getLastName() + user.getProfile().getFirstName()))
+    {
+      return true;
+    }
+    
+    if (null != soundFormat.getPerformer() && soundFormat.getPerformer().equals(user.getProfile().getAlias()))
+    {
+      return true;
+    }
+    
+    if (null != soundFormat.getPerformer() && soundFormat.getPerformer().equals(user.getProfile().getLastName() + user.getProfile().getFirstName()))
+    {
+      return true;
+    }
+    
+    return false;
+  }
+  
   @Override
-  public SoundLocal processSound(User user, File soundFile, String fileName)
+  public SoundLocal processSound(User user, String soundUrl, String fileName)
       throws SoundException, AudioProcessException {
     Extractor extractor = processFactory.getExtractor("wav");
+    String soundInfoString = this.getSoundInfo(fileName);
+
+    if (null == soundInfoString || !soundInfoString.contains("streams"))
+    {
+      throw new SoundException("EMPTY_STREAM"); 
+    }
 
     try {
-      AudioInfo soundInfo = extractor.extractInfo(soundFile);
-
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      
+      JsonNode rootNode = mapper.readTree(soundInfoString);
+      JsonNode formatNode = rootNode.path("format").path("tags");
+      SoundFormat soundFormat = mapper.readValue(formatNode, SoundFormat.class);
+      soundFormat.setDuration((float) rootNode.findValue("duration").asDouble());
+      
+      if (!checkUserRight(user, soundFormat))
+      {
+        throw new SoundException("NO_RIGHT");
+      }
+      
       if (user.getUserRoles().contains(Constant.USER_ROLE) || user.getUserRoles().contains(Constant.PRO_ROLE_OBJ))
       {
-        if ((user.getUserSocial().getSoundDuration() + soundInfo.getDuration() / 1000) > user.getUserRoles().get(0).getAllowedDuration() * 60) {
-          throw new SoundException("User " + user.getProfile().getAlias()
-              + " can't upload more sounds.");
+        if ((user.getUserSocial().getSoundDuration() + soundFormat.getDuration()) > user.getUserRoles().get(0).getAllowedDuration() * 60) {
+          throw new SoundException("TOTAL_LIMIT_ERROR");
         }
       }
       
@@ -301,22 +376,19 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       }
       if (totalDuration > Constant.WEEKLY_ALLOWED_DURATION)
       {
-        throw new SoundException("User " + user.getProfile().getAlias()
-          + " can't upload more sounds due to weekly limitation.");
+        throw new SoundException("WEEKLY_LIMIT_ERROR");
       }
-      
-      
 
       SoundLocal soundLocal = new SoundLocal();
-      soundLocal.setDuration(soundInfo.getDuration() / 1000);
       soundLocal.setFileName(fileName);
-      soundLocal.setWave(extractor.extractWaveByTotal(soundFile, null));
+      soundLocal.setWave(extractor.extractWaveByTotal(new URL(soundUrl), null));
+      soundLocal.setSoundFormat(soundFormat);
 
       return soundLocal;
-    } finally {
-      if (null != soundFile) {
-        soundFile.delete();
-      }
+    } catch (JsonProcessingException e) {
+      throw new SoundException("NO_FORMATINFO"); 
+    } catch (IOException e) {
+      throw new SoundException("NO_FORMATINFO"); 
     }
   }
 
@@ -600,6 +672,24 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       user.setUserRoles(roles);
       userDAO.save(user);
     } 
+  }
+
+  @Override
+  public String getSoundInfo(String remoteId) {
+    String infoURL = remoteStorageService.getDownloadURL(remoteId, "sound", "avinfo");
+    try 
+    {
+      HttpClient httpClient = new DefaultHttpClient(); 
+      HttpGet httpget = new HttpGet(infoURL);  
+      HttpResponse httpresponse = httpClient.execute(httpget);  
+      // 获取返回数据  
+      HttpEntity entity = httpresponse.getEntity();  
+      return EntityUtils.toString(entity);  
+    }
+    catch(Exception e)
+    {
+      return null;
+    }
   }
 
 }

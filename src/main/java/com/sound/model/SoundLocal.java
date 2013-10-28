@@ -2,6 +2,7 @@ package com.sound.model;
 
 import java.io.InputStream;
 
+import com.sound.model.Sound.SoundFormat;
 import com.sound.processor.model.Wave;
 
 public class SoundLocal {
@@ -16,7 +17,7 @@ public class SoundLocal {
 
   private Long length;
 
-  private Long duration;
+  private SoundFormat soundFormat;
 
   public String getOriginName() {
     return originName;
@@ -58,12 +59,12 @@ public class SoundLocal {
     this.length = length;
   }
 
-  public Long getDuration() {
-    return duration;
+  public SoundFormat getSoundFormat() {
+    return soundFormat;
   }
 
-  public void setDuration(Long duration) {
-    this.duration = duration;
+  public void setSoundFormat(SoundFormat soundFormat) {
+    this.soundFormat = soundFormat;
   }
-
+ 
 }

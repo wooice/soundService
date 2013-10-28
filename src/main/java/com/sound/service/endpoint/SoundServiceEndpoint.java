@@ -403,4 +403,18 @@ public class SoundServiceEndpoint {
     return soundCount;
   }
 
+  @GET
+  @Path("/{soundAlias}/info")
+  @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  public String getSoundInfo(@NotNull @PathParam("soundAlias") String soundAlias) {
+    String info = null;
+    try {
+      Sound sound = soundService.load(null, soundAlias);
+      info = soundService.getSoundInfo(sound.getProfile().getRemoteId());
+    } catch (Exception e) {
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+    return info;
+  }
 }
