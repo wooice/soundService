@@ -35,7 +35,7 @@ public class StorageServiceEndpoint {
   Logger logger = Logger.getLogger(StorageServiceEndpoint.class);
 
   @Autowired
-  com.sound.service.storage.itf.RemoteStorageServiceV2 remoteStorageService;
+  com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
 
   @Autowired
   com.sound.service.user.itf.UserService userService;

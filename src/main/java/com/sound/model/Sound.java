@@ -295,7 +295,7 @@ public class Sound extends BaseModel {
     
     private boolean downloadable;
     
-    private Long duration = 0L;
+    private float duration = 0;
     
     @Transient
     private String url;
@@ -447,14 +447,13 @@ public class Sound extends BaseModel {
       this.downloadable = downloadable;
     }
     
-    public Long getDuration() {
+    public float getDuration() {
       return duration;
     }
 
-    public void setDuration(Long duration) {
+    public void setDuration(float duration) {
       this.duration = duration;
     }
-
 
     public static class SoundPoster {
       // Id of stored poster
@@ -551,7 +550,7 @@ public class Sound extends BaseModel {
 
     private String extension;
 
-    private Long duration;
+    private float duration;
 
     private String url;
 
@@ -564,6 +563,18 @@ public class Sound extends BaseModel {
     @Transient
     private String commentMode;
     
+    @Embedded
+    private SoundFormat soundFormat;
+    
+    @JsonIgnore
+    public SoundFormat getSoundFormat() {
+      return soundFormat;
+    }
+
+    public void setSoundFormat(SoundFormat soundFormat) {
+      this.soundFormat = soundFormat;
+    }
+
     public String getSoundId() {
       return soundId;
     }
@@ -612,11 +623,11 @@ public class Sound extends BaseModel {
       this.originName = originName;
     }
 
-    public Long getDuration() {
+    public float getDuration() {
       return duration;
     }
 
-    public void setDuration(Long duration) {
+    public void setDuration(float duration) {
       this.duration = duration;
     }
 
@@ -786,6 +797,73 @@ public class Sound extends BaseModel {
       this.createdDate = createdDate;
     }
 
+  }
+  
+  public static class SoundFormat {
+    private float duration;
+    private String performer;
+    private int track;
+    private String title;
+    private String genre;
+    private String publisher;
+    private String composer;
+    private String artist;
+    private String album_artist;
+    
+    public float getDuration() {
+      return duration;
+    }
+    public void setDuration(float duration) {
+      this.duration = duration;
+    }
+    public String getPerformer() {
+      return performer;
+    }
+    public void setPerformer(String performer) {
+      this.performer = performer;
+    }
+    public int getTrack() {
+      return track;
+    }
+    public void setTrack(int track) {
+      this.track = track;
+    }
+    public String getTitle() {
+      return title;
+    }
+    public void setTitle(String title) {
+      this.title = title;
+    }
+    public String getGenre() {
+      return genre;
+    }
+    public void setGenre(String genre) {
+      this.genre = genre;
+    }
+    public String getPublisher() {
+      return publisher;
+    }
+    public void setPublisher(String publisher) {
+      this.publisher = publisher;
+    }
+    public String getComposer() {
+      return composer;
+    }
+    public void setComposer(String composer) {
+      this.composer = composer;
+    }
+    public String getArtist() {
+      return artist;
+    }
+    public void setArtist(String artist) {
+      this.artist = artist;
+    }
+    public String getAlbum_artist() {
+      return album_artist;
+    }
+    public void setAlbum_artist(String album_artist) {
+      this.album_artist = album_artist;
+    }
   }
 
   @Override

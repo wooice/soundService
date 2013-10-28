@@ -20,7 +20,7 @@ import com.sound.exception.RemoteStorageException;
 
 @Service
 @Scope("singleton")
-public class RemoteStorageService implements com.sound.service.storage.itf.RemoteStorageServiceV2 {
+public class RemoteStorageService implements com.sound.service.storage.itf.RemoteStorageService {
 
   private static final String CONFIG_FILE = "storeConfig.properties";
 

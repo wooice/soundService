@@ -1,23 +1,15 @@
 package com.sound.service.endpoint;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.glassfish.jersey.media.sse.EventOutput;
-import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,21 +17,20 @@ import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
 import com.sound.model.Sound;
-import com.sound.model.SoundLocal;
 import com.sound.model.Sound.QueueNode;
+import com.sound.model.SoundLocal;
 import com.sound.model.User;
 import com.sound.processor.exception.AudioProcessException;
 import com.sound.service.sound.itf.SoundService;
 
 @Component
-@Path("/queueV2")
-@RolesAllowed(Constant.ADMIN_ROLE)
+@Path("/queue")
 public class QueueProcessServiceEndpoint extends BaseEndpoint {
 
   Logger logger = Logger.getLogger(QueueProcessServiceEndpoint.class);
 
   @Autowired
-  com.sound.service.storage.itf.RemoteStorageServiceV2 remoteStorageService;
+  com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
 
   @Autowired
   SoundService soundService;
@@ -60,33 +51,58 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
       String titile = "";
       String message = "";
 
-      String queueNodeFilePath = Constant.UPLOAD_QUEUE_FOLDER + File.separator + node.getFileName();
       SoundLocal sound = null;
-      User owner = null;
+      User owner = node.getOwner();
       try {
-        owner = node.getOwner();
         String downURL =
             remoteStorageService.getDownloadURL(node.getFileName(), "sound",
                 "avthumb/wav/acodec/pcm_u8");
 
-        File soundFile = new File(queueNodeFilePath);
-        FileUtils.copyURLToFile(new URL(downURL), soundFile);
-        sound = soundService.processSound(owner, soundFile, node.getFileName());
+        sound =
+            soundService.processSound(owner, downURL, node.getFileName());
         sound.setOriginName(node.getOriginFileName());
         soundService.saveData(sound, owner);
 
-        soundService.dequeue(node);
-        
         soundService.promoreUser(owner);
       } catch (SoundException e) {
         logger.error(e);
-        Sound toDeleteSound = soundService.loadByRemoteId(node.getFileName());
-        soundService.delete(toDeleteSound.getId().toString());
 
         success = false;
         titile = "声音上传失败";
-        message =
-            "非常抱歉，由于您的上传时间以达到限额，您的声音" + ((null == sound) ? "" : sound.getOriginName()) + "无法完成上传。";
+        // if stream or format info not ready, just ignore it.
+        if ("EMPTY_STREAM".equals(e.getMessage()) || "NO_FORMATINFO".equals(e.getMessage())) {
+          return Response.status(Status.OK).build();
+        }
+        if ("NO_RIGHT".equals(e.getMessage())) {
+          message =
+              "非常抱歉，我们检测到您可能不是声音的原作者(表演者或词曲作者)，您的声音"
+                  + ((null == sound) ? "" : sound.getOriginName())
+                  + "无法完成上传。请确认您是声音的原作者，且上传的音频有完善的版权信息。";
+          Sound toDeleteSound = soundService.loadByRemoteId(node.getFileName());
+          if (null != toDeleteSound)
+          {
+            soundService.delete(toDeleteSound.getId().toString());
+          }
+          else
+          {
+            remoteStorageService.deleteFile("sound", node.getFileName());
+          }
+        }
+        if ("TOTAL_LIMIT_ERROR".equals(e.getMessage())) {
+          message =
+              "非常抱歉，由于您已达到上传时间限额(" + (owner.getUserRoles().get(0).getAllowedDuration())
+                  + "分钟)，您的声音" + ((null == sound) ? "" : sound.getOriginName())
+                  + "无法完成上传。请上传更多原创声音获得高级用户权限。";
+          Sound toDeleteSound = soundService.loadByRemoteId(node.getFileName());
+          soundService.delete(toDeleteSound.getId().toString());
+        }
+        if ("WEEKLY_LIMIT_ERROR".equals(e.getMessage())) {
+          message =
+              "非常抱歉，由于您已达到本周上传限额(" + Constant.WEEKLY_ALLOWED_DURATION + ")，您的声音"
+                  + ((null == sound) ? "" : sound.getOriginName()) + "无法完成上传。";
+          Sound toDeleteSound = soundService.loadByRemoteId(node.getFileName());
+          soundService.delete(toDeleteSound.getId().toString());
+        }
       } catch (AudioProcessException e) {
         logger.error(e);
         Sound toDeleteSound = soundService.loadByRemoteId(node.getFileName());
@@ -112,7 +128,9 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         userService.sendUserMessage(null, owner, titile, message);
       } catch (UserException e) {
         e.printStackTrace();
-      } 
+      }
+
+      soundService.dequeue(node);
     }
     return Response.status(Status.OK).build();
   }

@@ -25,7 +25,7 @@ import com.sound.model.SoundActivity.SoundRecord;
 import com.sound.model.SoundActivity.SoundVisit;
 import com.sound.model.Tag;
 import com.sound.model.User;
-import com.sound.service.storage.itf.RemoteStorageServiceV2;
+import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
 @Scope("singleton")
@@ -41,7 +41,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   TagService tagService;
 
   @Autowired
-  RemoteStorageServiceV2 remoteStorageService;
+  RemoteStorageService remoteStorageService;
 
   @Override
   public Map<String, String> play(User user, Sound sound) throws SoundException {
