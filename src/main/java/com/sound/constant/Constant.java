@@ -49,4 +49,6 @@ public class Constant {
   public static final int SOUND_NORMAL = 0;
   
   public static final int SOUND_HIGHLIGHT = 1;
+
+  public static final int REPORTS_LIMIT = 30;
 }

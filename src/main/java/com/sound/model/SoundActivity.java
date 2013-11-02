@@ -95,4 +95,5 @@ public class SoundActivity {
 
   public static class SoundVisit extends SoundActivity {}
 
+  public static class SoundReport extends SoundActivity {}
 }

@@ -461,8 +461,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public void sendUserMessage(User fromUser, User toUser, String topic, String content)
-      throws UserException {
+  public void sendUserMessage(User fromUser, User toUser, String topic, String content){
     String summary = content.length() <= 50 ? content : content.substring(0, 49) + "...";
 
     UserMessage message = new UserMessage();

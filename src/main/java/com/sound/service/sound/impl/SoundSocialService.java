@@ -22,6 +22,7 @@ import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.SoundActivity.SoundReport;
 import com.sound.model.SoundActivity.SoundVisit;
 import com.sound.model.Tag;
 import com.sound.model.User;
@@ -42,6 +43,9 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
   @Autowired
   RemoteStorageService remoteStorageService;
+
+  @Autowired
+  com.sound.service.user.itf.UserService userService;
 
   @Override
   public Map<String, String> play(User user, Sound sound) throws SoundException {
@@ -431,6 +435,23 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     }
 
     return visitsResult;
+  }
+
+  @Override
+  public Boolean report(User user, Sound sound) {
+    SoundReport report = new SoundReport();
+    report.setOwner(user);
+    report.setCreatedTime(new Date());
+    sound.addReport(report);
+    
+    if (sound.getReports().size() > Constant.REPORTS_LIMIT)
+    {
+      sound.getProfile().setStatus("deleted");
+      userService.sendUserMessage(null, user, "", "由于您的声音"+sound.getProfile().getAlias()+"被大量用户举报，该声音已被删除。如有不便，敬请谅解。");
+    }
+    this.soundDAO.save(sound);
+  
+    return sound.getReports().size() > Constant.REPORTS_LIMIT;
   }
 
 }

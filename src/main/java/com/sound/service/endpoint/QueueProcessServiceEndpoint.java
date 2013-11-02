@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
-import com.sound.exception.UserException;
 import com.sound.model.Sound;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.SoundLocal;
@@ -124,11 +123,7 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         message = "您的声音" + sound.getOriginName() + "上传并处理成功，将出在个人声音列表中，并推送给关注您的小伙伴。";
       }
 
-      try {
-        userService.sendUserMessage(null, owner, titile, message);
-      } catch (UserException e) {
-        e.printStackTrace();
-      }
+      userService.sendUserMessage(null, owner, titile, message);
 
       soundService.dequeue(node);
     }

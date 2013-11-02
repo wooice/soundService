@@ -368,4 +368,28 @@ public class SoundSocialServiceEndpoint {
     }
     return sounds;
   }
+  
+  @PUT
+  @Path("/report/{soundId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  public Map<String, Boolean> report(@NotNull @PathParam("soundId") String soundId) throws SoundException {
+    Boolean invalid = false;
+    User currentUser = null;
+    try {
+      currentUser = userService.getCurrentUser(req);
+      Sound sound = soundService.loadById(soundId);
+      if (null == sound) {
+        throw new WebApplicationException(Status.NOT_FOUND);
+      }
+
+      invalid = soundSocialService.report(currentUser, sound);
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+    Map<String, Boolean> result = new HashMap<String, Boolean>();
+    result.put("invalid", invalid);
+    return result;
+  }
 }

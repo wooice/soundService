@@ -24,11 +24,11 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     super(mongo, morphia, dbName);
   }
 
-  public List<Sound> findByKeyWord(String keyWord, Integer start, Integer range) {
+  public List<Sound> findByKeyWord(String keyWord, List<User> owners, Integer start, Integer range) {
     Query<Sound> query = createQuery();
 
     query.or(query.criteria("profile.name").containsIgnoreCase(keyWord)).or(
-        query.criteria("profile.description").containsIgnoreCase(keyWord));
+        query.criteria("profile.description").containsIgnoreCase(keyWord)).or(query.criteria("profile.owner").hasAnyOf(owners));
 
     List<Integer> status = new ArrayList<Integer>();
     status.add(SoundState.PRIVATE.getStatusId());

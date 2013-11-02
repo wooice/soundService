@@ -255,6 +255,26 @@ public class SoundServiceEndpoint {
 
     return sounds;
   }
+
+  @GET
+  @Path("/streams/history")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<Sound> listUserHistory( @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
+    pageNum = (null == pageNum) ? 0 : pageNum;
+    soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
+
+    List<Sound> sounds = null;
+    User curUser = null;
+    try {
+      curUser = userService.getCurrentUser(req);
+      sounds = soundService.loadUserHistory(curUser, pageNum, soundsPerPage);
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return sounds;
+  }
   
   @POST
   @Path("/streams/tags")

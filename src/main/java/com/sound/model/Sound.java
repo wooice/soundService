@@ -22,6 +22,7 @@ import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundRecord;
+import com.sound.model.SoundActivity.SoundReport;
 import com.sound.model.SoundActivity.SoundVisit;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
@@ -62,6 +63,9 @@ public class Sound extends BaseModel {
   
   @Embedded(concreteClass = java.util.ArrayList.class)
   private List<SoundRecord> records = new ArrayList<SoundRecord>();
+  
+  @Embedded(concreteClass = java.util.ArrayList.class)
+  private List<SoundReport> reports = new ArrayList<SoundReport>();
   
   @Transient
   private SoundSocial soundSocial;
@@ -236,6 +240,26 @@ public class Sound extends BaseModel {
   public void removeRecord(SoundRecord record)
   {
     this.records.remove(record);
+  }
+
+  @JsonIgnore
+  public List<SoundReport> getReports() {
+    return reports;
+  }
+
+  public void setReports(List<SoundReport> reports) {
+    this.reports = reports;
+  }
+
+  public void addReport(SoundReport report){
+     for (SoundReport oneReport: this.reports)
+     {
+       if (oneReport.getOwner().equals(report.getOwner()))
+       {
+         return;
+       }
+     }
+     this.reports.add(report);
   }
 
   /**
