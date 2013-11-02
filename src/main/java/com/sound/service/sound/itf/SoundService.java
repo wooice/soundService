@@ -34,6 +34,8 @@ public interface SoundService {
   
   public List<Sound> loadByTags(User user, List<Tag> tags, Integer pageNum,
       Integer soundsPerPage);
+  
+  public List<Sound> loadUserHistory(User user, Integer pageNum, Integer soundsPerPage);
 
   public List<Sound> getSoundsByUser(User user, User curUser, Integer pageNum, Integer soundsPerPage)
       throws SoundException;

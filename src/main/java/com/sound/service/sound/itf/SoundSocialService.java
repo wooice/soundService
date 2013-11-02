@@ -44,4 +44,6 @@ public interface SoundSocialService {
   public void addVisit(Sound sound, User user);
   
   public List<SoundVisit> getVisits(Sound sound, Integer pageNum, Integer perPage) throws SoundException;
+  
+  public Boolean report(User user, Sound sound);
 }
