@@ -51,8 +51,13 @@ public class TagService implements com.sound.service.sound.itf.TagService {
 
     TagCategory category = null;
 
-    if (null != input.getCategory() && null != input.getCategory().getName()) {
+    if (null != input.getCategory() && null != input.getCategory().getName())
+    {
       category = tagCategoryDAO.findOne("name", input.getCategory().getName());
+      if (null == category)
+      {
+        tagCategoryDAO.save(category);
+      }
       input.setCategory(category);
     }
 
@@ -81,7 +86,6 @@ public class TagService implements com.sound.service.sound.itf.TagService {
       Tag tag = new Tag();
       tag.setLabel(label);
       tag.setCurated(false);
-      tag.setCreatedUser(owner);
       tags.add(this.get(tag, true));
     }
 
@@ -100,7 +104,6 @@ public class TagService implements com.sound.service.sound.itf.TagService {
       Tag tag = new Tag();
       tag.setLabel(label);
       tag.setCurated(false);
-      tag.setCreatedUser(owner);
       tags.add(this.get(tag, true));
     }
 

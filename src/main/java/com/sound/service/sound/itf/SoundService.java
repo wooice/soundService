@@ -22,6 +22,8 @@ public interface SoundService {
   public void addToSet(String soundId, String setId);
 
   public void delete(String soundAlias);
+  
+  public void deleteByRemoteId(String remoteId);
 
   public Sound load(User user, String soundId);
   

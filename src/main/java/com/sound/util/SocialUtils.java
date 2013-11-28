@@ -3,7 +3,6 @@ package com.sound.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,18 +30,7 @@ public class SocialUtils {
     return toSort;
   }
 
-  public static <T> Map<T, Integer> toSeqMap(List<Entry<T, Long>> sortMapByValue) {
-
-    Map<T, Integer> result = new HashMap<T, Integer>();
-
-    for (int i = 0; i < sortMapByValue.size(); i++) {
-      result.put(sortMapByValue.get(i).getKey(), i);
-    }
-    return result;
-  }
-
   public static <T, K> List<T> toSeqList(List<Entry<T, K>> sortMapByValue) {
-
     List<T> result = new ArrayList<T>();
 
     for (int i = 0; i < sortMapByValue.size(); i++) {
@@ -51,16 +39,14 @@ public class SocialUtils {
     return result;
   }
 
-  public static <T> List<T> sliceList(List<T> allResult, Integer pageNum, Integer pageSize) {
-    int offset = (pageNum - 1) * pageSize;
-    int resultSize = allResult.size();
-    if (resultSize > offset) {
-      int left = resultSize - offset;
-      if (left > pageSize) {
-        return allResult.subList(offset, offset + pageSize);
-      } else {
-        return allResult.subList(offset, resultSize);
-      }
+  public static <T> List<T> subList(List<T> allResult, Integer pageNum, Integer pageSize) {
+    int start = (pageNum - 1) * pageSize;//inclusive
+    int end = pageNum * pageSize;//exclusive
+    int size = allResult.size();
+
+    if (size > start) 
+    {
+      return allResult.subList(start, end>=size?size: end);
     } else {
       return new ArrayList<T>();
     }

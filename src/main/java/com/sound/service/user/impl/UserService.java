@@ -1,5 +1,9 @@
 package com.sound.service.user.impl;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -7,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -55,6 +60,11 @@ public class UserService implements com.sound.service.user.itf.UserService {
   Logger logger = Logger.getLogger(UserService.class);
 
   private static final String CONFIG_FILE = "config.properties";
+  private static final String STORAGE_CONFIG_FILE = "storeConfig.properties";
+
+  char[] codeSequence = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+      'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6',
+      '7', '8', '9'};
 
   @Autowired
   UserDAO userDAO;
@@ -71,19 +81,21 @@ public class UserService implements com.sound.service.user.itf.UserService {
   @Autowired
   UserMessageDAO userMessageDAO;
 
-  @Autowired
-  PasswordResetRequestDAO passwordResetRequestDAO;
-
   private PropertiesConfiguration config;
+  private PropertiesConfiguration storageConfig;
 
   public UserService() {
     try {
       config = new PropertiesConfiguration(CONFIG_FILE);
+      storageConfig = new PropertiesConfiguration(STORAGE_CONFIG_FILE);
     } catch (ConfigurationException e) {
       e.printStackTrace();
     }
   }
 
+
+  @Autowired
+  PasswordResetRequestDAO passwordResetRequestDAO;
 
   @Override
   public User getUserByAlias(String userAlias) {
@@ -93,7 +105,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
-          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "imageView/2/w/200/h/200/format/png"));
+          remoteStorageService.getDownloadURL(user.getId().toString(), "image",
+              "imageView/2/w/200/h/200/format/png"));
     }
 
     return user;
@@ -107,7 +120,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user.getProfile().hasAvatar()) {
       user.getProfile().setAvatorUrl(
-          remoteStorageService.getDownloadURL(user.getId().toString(), "image", "imageView/2/w/200/h/200/format/png"));
+          remoteStorageService.getDownloadURL(user.getId().toString(), "image",
+              "imageView/2/w/200/h/200/format/png"));
     }
 
     return user;
@@ -116,27 +130,37 @@ public class UserService implements com.sound.service.user.itf.UserService {
   @Override
   public User createUser(String userAlias, String emailAddress, String password)
       throws UserException {
+    if (StringUtils.isBlank(userAlias)) {
+      throw new UserException("ALIAS_NOT_NULL");
+    }
+
+    if (StringUtils.isBlank(password)) {
+      throw new UserException("PASSWORD_NOT_NULL");
+    }
+
     User user = this.getUserByAlias(userAlias);
 
     if (null != user) {
-      throw new UserException("User with alias " + userAlias + " exists.");
+      throw new UserException("ALIAS_DUPLICATE");
     }
 
     user = this.getUserByEmail(emailAddress);
 
     if (null != user) {
-      throw new UserException("User with email address " + emailAddress + " exists.");
+      throw new UserException("EMAIL_DUPLICATE");
     }
 
     user = new User();
     UserProfile profile = new UserProfile();
     profile.setAlias(userAlias);
     profile.setGender("unset");
+    profile.setCreateDate(new Date());
 
     UserAuth auth = new UserAuth();
-    auth.setPassword(hashPassword(password));
+    auth.setSalt(String.valueOf(Math.random() * 1000));
+    auth.setPassword(hashPassword(password, auth.getSalt()));
+    auth.setAuthToken(hashPassword("auth token:" + (int) (Math.random() * 1000), auth.getSalt()));
     userAuthDAO.save(auth);
-
     user.setProfile(profile);
     user.setAuth(auth);
 
@@ -168,6 +192,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     userExternal.addSite(new Site("renren", "人人网", ""));
     userExternal.addSite(new Site("douban", "豆瓣", ""));
     userExternal.addSite(new Site("xiami", "虾米", ""));
+    userExternal.addSite(new Site("qq", "QQ", "", false));
     user.setExternal(userExternal);
 
     userDAO.save(user);
@@ -185,7 +210,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     User user = request.getUser();
 
-    if (!user.getAuth().getPassword().equals(hashPassword(oldPassword))) {
+    if (!user.getAuth().getPassword().equals(hashPassword(oldPassword, user.getAuth().getSalt()))) {
       throw new UserException("Old password not match!");
     }
 
@@ -199,11 +224,14 @@ public class UserService implements com.sound.service.user.itf.UserService {
       user.setAuth(auth);
       auth.setHistories(new ArrayList<ChangeHistory>());
     }
-    auth.setPassword(hashPassword(password));
+    auth.setPassword(hashPassword(password, user.getAuth().getSalt()));
+    auth.setAuthToken(hashPassword("auth token:" + (int) (Math.random() * 1000), user.getAuth()
+        .getSalt()));
+
     ChangeHistory history = new ChangeHistory();
     history.setIp(ip);
     history.setModifiedDate(new Date());
-    history.setPassword(hashPassword(password));
+    history.setPassword(hashPassword(password, auth.getPassword()));
     auth.addHistory(history);
 
     userAuthDAO.save(auth);
@@ -251,7 +279,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
       profile.setAlias(newProfile.getAlias());
     }
 
-    if (StringUtils.isNotBlank(newProfile.getAvatorUrl())) {
+    if (StringUtils.isNotBlank(newProfile.getAvatorUrl()) && newProfile.getAvatorUrl().contains(storageConfig.getString("IMAGE_DOMAIN"))) {
       profile.setAvatorUrl(newProfile.getAvatorUrl());
       profile.setHasAvatar(true);
     }
@@ -322,26 +350,33 @@ public class UserService implements com.sound.service.user.itf.UserService {
       throws UserException {
     User user = this.getUserByAlias(userAlias);
     if (user == null) {
-      throw new UserException("Cannot find user : " + userAlias);
+      throw new UserException("USER_404");
     }
     List<UserEmail> emails = user.getEmails();
     for (UserEmail email : emails) {
-      if (email.getEmailAddress().equals(emailAddress)) {
-        doSendEmail("[Wooice]注册确认", emailAddress, userAlias,
-            generateConformEmailBody(email.getConfirmCode(), userAlias));
+      if (email.getEmailAddress().equals(emailAddress) && email.isContact()) {
+        if (email.isConfirmed()) {
+          throw new UserException("CONFIRMED");
+        } else {
+          doSendEmail("[Wowoice]注册确认", emailAddress, userAlias,
+              generateConformEmailBody(email.getConfirmCode(), userAlias));
+          return;
+        }
       }
     }
+
+    throw new UserException("VALID_EMAIL_404");
   }
 
   @Override
   public void sendChangePassLink(String emailAddress) throws UserException {
     User user = this.getUserByEmail(emailAddress);
     if (user == null) {
-      throw new UserException("Cannot find user by email " + emailAddress);
+      throw new UserException("USER_404");
     }
     List<UserEmail> emails = user.getEmails();
     for (UserEmail email : emails) {
-      if (email.getEmailAddress().equals(emailAddress)) {
+      if (email.getEmailAddress().equals(emailAddress) && email.isContact() && email.isConfirmed()) {
         passwordResetRequestDAO.deleteByProperty("user", user);
 
         PasswordResetRequest passwordResetRequest = new PasswordResetRequest();
@@ -350,7 +385,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
         passwordResetRequest.setCancelCode(this.generateRandomCode());
 
         doSendEmail(
-            "[Wooice]重置密码",
+            "[e]重置密码",
             emailAddress,
             user.getProfile().getAlias(),
             generateChangePassBody(passwordResetRequest.getResetCode(),
@@ -360,19 +395,31 @@ public class UserService implements com.sound.service.user.itf.UserService {
         return;
       }
     }
+
+    throw new UserException("VALID_EMAIL_404");
   }
 
   @Override
   public void confirmEmailAddress(String confirmCode) throws UserException {
     User user = userDAO.findOne("emails.confirmCode", confirmCode);
     if (user == null) {
-      throw new UserException("Cannot find user by email confirm code: " + confirmCode);
+      throw new UserException("USER_404");
     }
+    boolean found = false;
     List<UserEmail> emails = user.getEmails();
     for (UserEmail email : emails) {
-      if (email.getConfirmCode().equals(confirmCode)) {
-        email.setConfirmed(true);
+      if (email.isContact() && email.getConfirmCode().equals(confirmCode)) {
+        if (email.isConfirmed()) {
+          throw new UserException("CONFIRMED");
+        } else {
+          found = true;
+          email.setConfirmed(true);
+        }
       }
+    }
+
+    if (!found) {
+      throw new UserException("TO_CONFIRM_404");
     }
 
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
@@ -428,17 +475,40 @@ public class UserService implements com.sound.service.user.itf.UserService {
       throws UserException {
     User user = this.getUserByAlias(userAlias);
     if (user == null) {
-      throw new UserException("Cannot find user : " + userAlias);
+      throw new UserException("USER_404");
     }
+    UserEmail newEmail = null;
     List<UserEmail> emails = user.getEmails();
+
     for (UserEmail email : emails) {
       if (email.getEmailAddress().equals(targetEmailAddress)) {
-        email.setContact(true);
+        if (email.isContact() && email.isConfirmed()) {
+          throw new UserException("CONFIRMED");
+        }
+        newEmail = email;
       } else {
         email.setContact(false);
       }
     }
+
+    if (null == newEmail) {
+      newEmail = new UserEmail();
+      newEmail.setEmailAddress(targetEmailAddress);
+      newEmail.setConfirmCode(generateRandomCode());
+      newEmail.setConfirmed(false);
+      newEmail.setContact(true);
+      newEmail.setSetting(new EmailSetting());
+      emails.add(newEmail);
+    } else {
+      newEmail.setConfirmCode(generateRandomCode());
+      newEmail.setConfirmed(false);
+      newEmail.setContact(true);
+    }
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
+
+    doSendEmail("[Wowoice]添加新邮箱", targetEmailAddress, userAlias,
+        changeEmailBody(newEmail.getConfirmCode(), userAlias));
+
     return user;
   }
 
@@ -461,7 +531,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public void sendUserMessage(User fromUser, User toUser, String topic, String content){
+  public void sendUserMessage(User fromUser, User toUser, String topic, String content) {
     String summary = content.length() <= 50 ? content : content.substring(0, 49) + "...";
 
     UserMessage message = new UserMessage();
@@ -534,7 +604,10 @@ public class UserService implements com.sound.service.user.itf.UserService {
     return user;
   }
 
-  private String hashPassword(String password) {
+  private String hashPassword(String password, String salt) {
+    if (!StringUtils.isBlank(salt)) {
+      password += salt;
+    }
     byte[] passHash = null;
     try {
       MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
@@ -547,12 +620,23 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   private String generateConformEmailBody(String code, String userAlias) {
     StringBuilder sb = new StringBuilder();
-    sb.append("<h2>感谢您注册Wooice!</h2>");
+    sb.append("<h2>感谢您注册Wowoice!</h2>");
     sb.append("Hi " + userAlias + ",<br/><br/>");
-    sb.append("感谢您注册Wooice，请点击以下面链接 ");
+    sb.append("感谢您注册Wowoice，请点击以下面链接 ");
     sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?confirmCode=" + code
         + "\">激活您的账号.</a> <br/><br/>");
-    sb.append("<h4>WOOICE团队<h4/>");
+    sb.append("<h4>WOWOICE<h4/>");
+    return sb.toString();
+  }
+
+  private String changeEmailBody(String code, String userAlias) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<h2>添加新邮箱到Wowoice</h2>");
+    sb.append("Hi " + userAlias + ",<br/><br/>");
+    sb.append("Wowoice收到您的邮件变更请求，请点击以下面链接 ");
+    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?confirmCode=" + code
+        + "\">确认.谢谢合作。</a> <br/><br/>");
+    sb.append("<h4>WOWOICE<h4/>");
     return sb.toString();
   }
 
@@ -566,18 +650,166 @@ public class UserService implements com.sound.service.user.itf.UserService {
     sb.append("如果您没有发出修改密码请求，请访问以下连续取消修改 ");
     sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?cancelCode=" + cancelCode
         + "\">取消修改</a> <br/><br/>");
-    sb.append("<h4>WOOICE团队<h4/>");
+    sb.append("<h4>WOWOICE<h4/>");
     return sb.toString();
   }
 
   @Override
   public boolean authVerify(User user, String password) {
-    return user.getAuth().getPassword().equals(hashPassword(password));
+    return user.getAuth().getPassword().equals(hashPassword(password, user.getAuth().getSalt()));
   }
 
   @Override
   public User saveUser(User user) {
     userDAO.save(user);
+    return user;
+  }
+
+  @Override
+  public boolean tokenVerify(User user, String token) {
+    return user.getAuth().getAuthToken().equals(token);
+  }
+
+
+  @Override
+  public BufferedImage generateVerifyImage(HttpServletRequest req) {
+    int width = 85, height = 20;
+    Random random = new Random();
+    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    Graphics g = image.getGraphics();
+    g.setColor(getRandColor(200, 250));
+    g.fillRect(0, 0, width, height);
+    g.setFont(new Font("Times New Roman", Font.PLAIN, 18));
+    g.setColor(getRandColor(160, 200));
+
+    // 随机产生155条干扰线
+    for (int i = 0; i < 155; i++) {
+      int x = random.nextInt(width);
+      int y = random.nextInt(height);
+      int xl = random.nextInt(12);
+      int yl = random.nextInt(12);
+      g.drawLine(x, y, x + xl, y + yl);
+    }
+
+    String code = "";
+    for (int i = 0; i < 5; i++) {
+      String randomString = String.valueOf(codeSequence[random.nextInt(36)]);
+      g.setColor(new Color(20 + random.nextInt(110), 20 + random.nextInt(110), 20 + random
+          .nextInt(110)));
+      g.drawString(randomString, 13 * i + 6, 16);
+
+      code += randomString;
+    }
+    g.dispose();
+
+    HttpSession session = req.getSession(true);
+    session.setAttribute("verifyCode", code);
+
+    return image;
+  }
+
+  private Color getRandColor(int fc, int bc) {
+    Random random = new Random();
+    if (fc > 255) fc = 255;
+    if (bc > 255) bc = 255;
+    int r = fc + random.nextInt(bc - fc);
+    int g = fc + random.nextInt(bc - fc);
+    int b = fc + random.nextInt(bc - fc);
+    return new Color(r, g, b);
+  }
+
+  @Override
+  public User syncExternalUser(User user, String type) throws UserException {
+    Site newSite = null;
+    for (Site site : user.getExternal().getSites()) {
+      if (site.getName().equals(type)) {
+        newSite = site;
+      }
+    }
+    if (null == newSite) {
+      throw new UserException("SITE_NULL");
+    }
+    if (null == newSite.getUid()) {
+      throw new UserException("UID_NULL");
+    }
+    if (null == newSite.getUserName()) {
+      throw new UserException("USERNAME_NULL");
+    }
+
+    Map<String, Object> cratiaries = new HashMap<String, Object>();
+    cratiaries.put("external.sites.uid", newSite.getUid());
+    User exsitingUser = userDAO.findOne(cratiaries);
+
+    if (null == exsitingUser) {
+      if (userDAO.count("profile.alias", newSite.getUserName()) > 0) {
+        if (userDAO.count("profile.alias", newSite.getUserName() + user.getProfile().getAge()) > 0) {
+          Random random = new Random(1000);
+          String alias = null;
+          do {
+            alias = newSite.getUserName() + random.nextInt();
+          } while (userDAO.count("profile.alias", alias) > 0);
+          user.getProfile().setAlias(alias);
+        } else {
+          user.getProfile().setAlias(newSite.getUserName() + user.getProfile().getAge());
+        }
+      } else {
+        user.getProfile().setAlias(newSite.getUserName());
+      }
+      
+      user.getProfile().setCreateDate(new Date());
+
+      UserAuth auth = new UserAuth();
+      auth.setSalt(String.valueOf(Math.random() * 1000));
+      auth.setPassword(hashPassword(String.valueOf(Math.random() * 1000), auth.getSalt()));
+      auth.setAuthToken(hashPassword("auth token:" + (int) (Math.random() * 1000), auth.getSalt()));
+      userAuthDAO.save(auth);
+      user.setAuth(auth);
+
+      UserRole role = new UserRole(Constant.USER_ROLE);
+      role.setAllowedDuration(Constant.USER_ALLOWED_DURATION);
+      List<UserRole> roles = new ArrayList<UserRole>();
+      roles.add(role);
+      user.setUserRoles(roles);
+
+      UserSocial social = new UserSocial();
+      social.setFollowed(0L);
+      social.setFollowing(0L);
+      social.setSounds(0L);
+      social.setSoundDuration(0L);
+      social.setReposts(0L);
+      user.setUserSocial(social);
+
+      UserExternal userExternal = new UserExternal();
+      userExternal.addSite(new Site("site", "个人网站", ""));
+      userExternal.addSite(new Site("sina", "新浪微博", ""));
+      userExternal.addSite(new Site("tencent", "腾讯微博", ""));
+      userExternal.addSite(new Site("renren", "人人网", ""));
+      userExternal.addSite(new Site("douban", "豆瓣", ""));
+      userExternal.addSite(new Site("xiami", "虾米", ""));
+      userExternal.addSite(new Site("qq", "QQ", "", false));
+      user.setExternal(userExternal);
+      user.getExternal().updateSite(newSite);
+
+      userDAO.save(user);
+    } else {
+      if (null != user.getProfile().getAvatorUrl()) {
+        exsitingUser.getProfile().setAvatorUrl(user.getProfile().getAvatorUrl());
+      }
+      if (null != user.getProfile().getCity()) {
+        exsitingUser.getProfile().setCity(user.getProfile().getCity());
+      }
+      if (null != user.getProfile().getDescription()) {
+        exsitingUser.getProfile().setDescription(user.getProfile().getDescription());
+      }
+      if (null != user.getProfile().getGender()) {
+        exsitingUser.getProfile().setGender(user.getProfile().getGender());
+      }
+      exsitingUser.getExternal().updateSite(newSite);
+
+      userDAO.save(exsitingUser);
+      user = exsitingUser;
+    }
+
     return user;
   }
 }

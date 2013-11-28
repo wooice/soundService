@@ -1,9 +1,14 @@
 package com.sound.service.endpoint;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
+import javax.imageio.ImageIO;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
@@ -26,11 +31,13 @@ import org.springframework.stereotype.Component;
 import com.sound.constant.Constant;
 import com.sound.exception.AuthException;
 import com.sound.exception.UserException;
+import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.User;
 
 @Component
 @Path("/auth")
 @RolesAllowed({Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.ADMIN_ROLE, Constant.GUEST_ROLE})
+@ResourceAllowed
 public class AuthServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserServiceEndpoint.class);
@@ -46,7 +53,12 @@ public class AuthServiceEndpoint {
   public Response confirmEmailAddress(@NotNull @PathParam("confirmCode") String confirmCode) {
     try {
       userService.confirmEmailAddress(confirmCode);
-    } catch (Exception e) {
+    } 
+    catch (UserException e)
+    {
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+    }
+    catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -123,5 +135,22 @@ public class AuthServiceEndpoint {
     }
 
     return user;
+  }
+
+  @GET
+  @Path("/verify/image")
+  @Produces("image/png")
+  public Response getVerifyImage() {
+    BufferedImage image = userService.generateVerifyImage(req);
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      ImageIO.write(image, "png", baos);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    byte[] imageData = baos.toByteArray();
+
+    return Response.ok(new ByteArrayInputStream(imageData)).build();
   }
 }

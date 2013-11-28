@@ -1,6 +1,7 @@
 package com.sound.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -49,6 +50,7 @@ public class User extends BaseModel {
   @Embedded
   private List<UserRole> userRoles = new ArrayList<UserRole>();
   
+  //tags interested
   @Reference(lazy = true)
   private List<Tag> tags = new ArrayList<Tag>();
 
@@ -110,7 +112,6 @@ public class User extends BaseModel {
     this.groups = groups;
   }
 
-  @JsonIgnore
   public UserExternal getExternal() {
     return external;
   }
@@ -146,6 +147,13 @@ public class User extends BaseModel {
 
   public void addEmail(UserEmail email) {
     this.emails = (null == this.emails) ? new ArrayList<UserEmail>() : this.emails;
+    for (UserEmail oneEmail: this.emails)
+    {
+      if (oneEmail.equals(email))
+      {
+        return;
+      }
+    }
     this.emails.add(email);
   }
 
@@ -195,6 +203,7 @@ public class User extends BaseModel {
     private int age;
     private Boolean gender = null;
     private boolean hasAvatar = false;
+    private Date createDate;
     private Color color;
     private List<Integer> occupations = new ArrayList<Integer>();
 
@@ -216,6 +225,14 @@ public class User extends BaseModel {
 
     public void setAvatorUrl(String avatorUrl) {
       this.avatorUrl = avatorUrl;
+    }
+
+    public Date getCreateDate() {
+      return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+      this.createDate = createDate;
     }
 
     public String getAlias() {
@@ -445,6 +462,17 @@ public class User extends BaseModel {
       }
       sites.add(site);
     }
+    
+    public void updateSite(Site site)
+    {
+      for (int i=0; i<sites.size(); i++) {
+        if (sites.get(i).equals(site)) {
+          sites.set(i, site);
+          return;
+        }
+      }
+      sites.add(site);
+    }
 
     public static class Site {
       String name;
@@ -452,8 +480,13 @@ public class User extends BaseModel {
       String displayName;
 
       String url;
+      
+      String uid;
+      
+      String userName;
 
       boolean userCreated = false;
+      boolean visible = true;
 
       public Site() {
         super();
@@ -464,6 +497,14 @@ public class User extends BaseModel {
         this.name = name;
         this.displayName = displayName;
         this.url = url;
+      }
+      
+      public Site(String name, String displayName, String url, boolean visible) {
+        super();
+        this.name = name;
+        this.displayName = displayName;
+        this.url = url;
+        this.visible = visible;
       }
 
       public String getName() {
@@ -496,6 +537,22 @@ public class User extends BaseModel {
 
       public void setUserCreated(boolean userCreated) {
         this.userCreated = userCreated;
+      }
+
+      public String getUid() {
+        return uid;
+      }
+
+      public void setUid(String uid) {
+        this.uid = uid;
+      }
+
+      public String getUserName() {
+        return userName;
+      }
+
+      public void setUserName(String userName) {
+        this.userName = userName;
       }
 
       @Override
@@ -674,6 +731,28 @@ public class User extends BaseModel {
         this.survey = survey;
       }
     }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((emailAddress == null) ? 0 : emailAddress.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
+      UserEmail other = (UserEmail) obj;
+      if (emailAddress == null) {
+        if (other.emailAddress != null) return false;
+      } else if (!emailAddress.equals(other.emailAddress)) return false;
+      return true;
+    }
+ 
+  
   }
 
   public static class UserPrefer {

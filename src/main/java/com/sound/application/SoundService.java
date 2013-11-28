@@ -4,12 +4,11 @@ import javax.json.stream.JsonGenerator;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.media.sse.SseFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
-import com.sound.interceptor.encode.GZIPWriterInterceptor;
+import com.sound.filter.authentication.AuthenticationFeature;
 import com.sound.jackson.extension.SoundModelMapperProvider;
 
 @ApplicationPath("/")
@@ -19,8 +18,9 @@ public class SoundService extends ResourceConfig {
     packages("com.sound.service.endpoint");
 
 //    register(EntityFilteringFeature.class);
-    register(SseFeature.class);
-    register(GZIPWriterInterceptor.class);
+//    register(SseFeature.class);
+//    register(GZIPWriterInterceptor.class);
+    register(AuthenticationFeature.class);
     register(RolesAllowedDynamicFeature.class);
     register(SoundModelMapperProvider.class);
     register(JacksonFeature.class);

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
+import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.Sound;
 import com.sound.model.Sound.SoundData;
 import com.sound.model.Sound.SoundProfile;
@@ -66,6 +67,7 @@ public class SoundServiceEndpoint {
   @GET
   @Path("/{soundAlias}")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public Sound loadSound(@NotNull @PathParam("soundAlias") String soundAlias) {
     Sound sound = null;
     User currentUser = userService.getCurrentUser(req);
@@ -99,6 +101,7 @@ public class SoundServiceEndpoint {
   @POST
   @Path("/data")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public List<SoundData> loadSoundData(@NotNull final List<String> soundIds) {
     List<SoundData> soundData = null;
     User currentUser = userService.getCurrentUser(req);

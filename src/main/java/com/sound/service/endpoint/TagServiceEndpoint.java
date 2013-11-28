@@ -58,9 +58,7 @@ public class TagServiceEndpoint {
   public Response createTag(@NotNull @PathParam("tag") String label,
       @NotNull @QueryParam("curated") Boolean curated,
       @PathParam("categoryName") String categoryName) {
-    User curUser = null;
     try {
-      curUser = userService.getCurrentUser(req);
       Tag tag = new Tag();
       tag.setLabel(label);
       tag.setCurated(curated);
@@ -68,7 +66,6 @@ public class TagServiceEndpoint {
       TagCategory category = new TagCategory();
       category.setName(categoryName);
       tag.setCategory(category);
-      tag.setCreatedUser(curUser);
       tag.setCreatedDate(new Date());
       tagService.get(tag, true);
     } catch (SoundException e) {
@@ -140,6 +137,22 @@ public class TagServiceEndpoint {
     return tags;
   }
 
+  @GET
+  @Path("/user/{userAlias}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<Tag> getTagsByUser(@NotNull @PathParam("userAlias") String userAlias) {
+    List<Tag> tags = null;
+    try {
+      User user = userService.getUserByAlias(userAlias);
+      tags = user.getTags();
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return tags;
+  }
+  
   @GET
   @Path("/list/curated")
   @Produces(MediaType.APPLICATION_JSON)

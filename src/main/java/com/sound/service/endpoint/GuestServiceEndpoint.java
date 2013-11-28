@@ -22,6 +22,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
@@ -30,12 +31,15 @@ import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.UserException;
+import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.User;
 import com.sound.model.User.UserRole;
+import com.sound.model.UserAuth;
 
 @Component
 @Path("/guest")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.GUEST_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.GUEST_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
+@ResourceAllowed
 public class GuestServiceEndpoint {
 
   Logger logger = Logger.getLogger(UserServiceEndpoint.class);
@@ -54,8 +58,109 @@ public class GuestServiceEndpoint {
     User user = null;
 
     try {
+      HttpSession session = req.getSession();
+      String verifyCode = (String) session.getAttribute("verifyCode");
+      String inputVerify = null;
+      boolean rememberUser =  false;
+      try
+      {
+        inputVerify = inputJsonObj.getString("verifyCode");
+        rememberUser = Boolean.parseBoolean(inputJsonObj.getString("rememberUser"));
+      }
+      catch(Exception e)
+      {}
+      Object errorObj = session.getAttribute("ERROR_TIMES");
+      if (null != errorObj)
+      {
+        int errorTimes = (Integer) errorObj;
+        if (errorTimes >= 3 && (null == verifyCode || null == inputVerify || !verifyCode.equalsIgnoreCase(inputVerify)))
+        {
+            throw new UserException("VERIFY_CODE");
+        }
+      }
+      
       String userId = inputJsonObj.getString("userId");
       String password = inputJsonObj.getString("password");
+      String emailRegex =
+          "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
+      Pattern regex = Pattern.compile(emailRegex);
+      Matcher matcher = regex.matcher(userId);
+      boolean isEmail = matcher.matches();
+
+      if (isEmail) {
+        user = userService.getUserByEmail(userId);
+      } else {
+        user = userService.getUserByAlias(userId);
+      }
+
+      if (null == user) {
+        throw new UserException("USER_404");
+      }
+
+      if (!userService.authVerify(user, password)) {
+        int errorTimes = 0;
+        Object errorTimesObj = session.getAttribute("ERROR_TIMES");
+        if (null == errorTimesObj)
+        {
+          errorTimes = 0;
+        }
+        else
+        {
+          errorTimes = (Integer) errorTimesObj;
+        }
+        
+        if (errorTimes >= 3)
+        {
+          throw new UserException("PASSWORD_VERIFY");
+        }
+        else
+        {
+          session.setAttribute("ERROR_TIMES", errorTimes+1);
+          throw new UserException("PASSWORD");
+        }
+      }
+      else
+      {
+        session.removeAttribute("ERROR_TIMES");
+      }
+      
+      if (rememberUser)
+      {
+        UserAuth userAuth = new UserAuth();
+        userAuth.setAuthToken(user.getAuth().getAuthToken());
+        user.setAuth(userAuth);
+      }
+
+      session.setAttribute("userAlias", user.getProfile().getAlias());
+
+      List<String> roles = new ArrayList<String>();
+      for (UserRole role : user.getUserRoles()) {
+        roles.add(role.getRole());
+      }
+      session.setAttribute("userRoles", roles);
+    } 
+    catch (UserException e)
+    {
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+    }
+    catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity("ERROR").build());
+    }
+
+    return user;
+  }
+
+  @POST
+  @Path("/login/token")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public User tokenLogin(@NotNull final JsonObject inputJsonObj) {
+    User user = null;
+
+    try {
+      String userId = inputJsonObj.getString("userId");
+      String token = inputJsonObj.getString("token");
 
       String emailRegex =
           "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
@@ -73,8 +178,8 @@ public class GuestServiceEndpoint {
         throw new RuntimeException("The user " + userId + " does not exist.");
       }
 
-      if (!userService.authVerify(user, password)) {
-        throw new RuntimeException("Password is not correct.");
+      if (!userService.tokenVerify(user, token)) {
+        throw new RuntimeException("Invalid token.");
       }
 
       HttpSession session = req.getSession(true);
@@ -135,15 +240,23 @@ public class GuestServiceEndpoint {
   public User create(@NotNull JsonObject inputJsonObj) {
     User user = null;
     try {
+      HttpSession session = req.getSession(false);
+      String verifyCode = (String) session.getAttribute("verifyCode");
+      String inputVerify = inputJsonObj.getString("verifyCode");
+
+      if (null == verifyCode || null == inputVerify || !verifyCode.equalsIgnoreCase(inputVerify))
+      {
+        throw new UserException("VERIFY_CODE");
+      }
       String userAlias = inputJsonObj.getString("userAlias");
       String emailAddress = inputJsonObj.getString("emailAddress");
       String password = inputJsonObj.getString("password");
       user = userService.createUser(userAlias, emailAddress, password);
     } catch (UserException e) {
       logger.error(e);
-      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
     } catch (Exception e) {
-      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+      throw new WebApplicationException("ERROR", Status.INTERNAL_SERVER_ERROR);
     }
 
     return user;
@@ -158,11 +271,38 @@ public class GuestServiceEndpoint {
       userService.sendChangePassLink(emailAddress);
     } catch (UserException e) {
       logger.error(e);
+      if ("USER_404".equals(e.getMessage()))
+      {
+        throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity("USER_404").build());
+      }
       throw new WebApplicationException(Status.BAD_REQUEST);
     } catch (Exception e) {
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
     return "true";
+  }
+
+  @POST
+  @Path("/sync/{type}")
+  public User syncExternalUser(@NotNull User user, @NotNull @PathParam("type") String type)
+  {
+    try {
+      user = userService.syncExternalUser(user, type);
+      
+      HttpSession session = req.getSession();
+      session.setAttribute("userAlias", user.getProfile().getAlias());
+
+      List<String> roles = new ArrayList<String>();
+      for (UserRole role : user.getUserRoles()) {
+        roles.add(role.getRole());
+      }
+      session.setAttribute("userRoles", roles);
+    } catch (UserException e) {
+      throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+    } catch (Exception e) {
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).build());
+    }
+    return user;
   }
 }
