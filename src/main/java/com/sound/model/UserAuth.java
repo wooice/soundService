@@ -17,11 +17,36 @@ import com.github.jmkgreen.morphia.annotations.Id;
 public class UserAuth extends BaseModel {
 
   @Id
+  @JsonIgnore
   private ObjectId id;
 
+  @JsonIgnore
   private String password;
+  
+  @JsonIgnore
+  private String authToken;
+  
+  @JsonIgnore
+  private String salt;
+  
+  public String getAuthToken() {
+    return authToken;
+  }
+
+  public void setAuthToken(String authToken) {
+    this.authToken = authToken;
+  }
+
+  public String getSalt() {
+    return salt;
+  }
+
+  public void setSalt(String salt) {
+    this.salt = salt;
+  }
 
   @Embedded
+  @JsonIgnore
   private List<ChangeHistory> histories;
 
   @JsonIgnore

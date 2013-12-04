@@ -51,4 +51,6 @@ public class Constant {
   public static final int SOUND_HIGHLIGHT = 1;
 
   public static final int REPORTS_LIMIT = 30;
+  
+  public static final int SOUND_CACHE_TIME = 7 * 24 * 60 * 60 * 1000;
 }

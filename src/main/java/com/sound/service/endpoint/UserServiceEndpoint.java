@@ -249,7 +249,7 @@ public class UserServiceEndpoint {
       user = userService.getCurrentUser(req);
 
       if (null == user) {
-        throw new RuntimeException("You are not logged in.");
+        return Response.status(Status.UNAUTHORIZED).build();
       }
       HttpSession session = req.getSession(false);
 
@@ -271,7 +271,7 @@ public class UserServiceEndpoint {
     try {
       user = userService.getCurrentUser(req);
       if (user == null || (user.getEmails() == null || user.getEmails().size() == 0)) {
-        return Response.status(Status.FORBIDDEN).build();
+        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("NO_EMAIL_BIND").build();
       }
       userService.sendChangePassLink(user.getEmails().get(0).getEmailAddress());
     } catch (UserException e) {
@@ -284,4 +284,5 @@ public class UserServiceEndpoint {
 
     return Response.status(Status.OK).build();
   }
+
 }

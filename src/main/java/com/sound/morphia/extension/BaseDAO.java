@@ -110,14 +110,14 @@ public class BaseDAO<T, PK> extends BasicDAO<T, PK> {
     return this.find(query).asList();
   }
 
-  public List<T> findTopOnes(Integer number, Map<String, List<Object>> exclude) {
+  public List<T> findTopOnes(Integer number, Map<String, List<Object>> exclude, String order) {
     Query<T> query = ds.createQuery(clazz);
 
     for (String key : exclude.keySet()) {
       query.field(key).hasNoneOf(exclude.get(key));
     }
 
-    query.offset(0).limit(number);
+    query.order(order).offset(0).limit(number);
 
     return this.find(query).asList();
   }

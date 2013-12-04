@@ -2,7 +2,7 @@ package com.sound.model.enums;
 
 public enum SoundState {
 
-  PRIVATE(1, "private"), PUBLIC(2, "public"), DELETE(3, "delete");
+  PROCESSING(0, "processing"), PRIVATE(1, "private"), PUBLIC(2, "public"), DELETE(3, "delete");
 
   private int statusId;
   private String statusName;

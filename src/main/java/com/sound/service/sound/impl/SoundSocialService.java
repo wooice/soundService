@@ -1,6 +1,9 @@
 package com.sound.service.sound.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +20,6 @@ import com.sound.dao.SoundDAO;
 import com.sound.dao.UserDAO;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
-import com.sound.model.Sound.SoundProfile.SoundPoster;
 import com.sound.model.SoundActivity.SoundComment;
 import com.sound.model.SoundActivity.SoundLike;
 import com.sound.model.SoundActivity.SoundPlay;
@@ -55,13 +57,33 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
       play.setOwner(user);
       play.setCreatedTime(new Date());
       sound.addPlay(play);
-      soundDAO.save(sound);
     }
 
+    if (null == sound.getProfile().getUrlGeneratedDate())
+    {
+      SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+      try {
+        sound.getProfile().setUrlGeneratedDate(sdf.parse("2013-11-24 00:00:00"));
+      } catch (ParseException e) {
+        e.printStackTrace();
+      }
+    }
+    Calendar cal = Calendar.getInstance(); 
+    cal.setTime(sound.getProfile().getUrlGeneratedDate());
+    long generatedDate = cal.getTimeInMillis();
+    cal.setTime(new Date());
+    long curTime = cal.getTimeInMillis();
+    
+    if (null == sound.getProfile().getUrl() || (null != sound.getProfile().getUrl() && (curTime-generatedDate >= Constant.SOUND_CACHE_TIME)))
+    {
+      sound.getProfile().setUrl(remoteStorageService.getDownloadURL(sound.getProfile().getRemoteId(), "sound", "avthumb/mp3"));
+      sound.getProfile().setUrlGeneratedDate(new Date());
+    }
+    soundDAO.save(sound);
+    
     Map<String, String> playResult = new HashMap<String, String>();
     playResult.put("played", String.valueOf(sound.getPlays().size()));
-    playResult.put("url", remoteStorageService.getDownloadURL(sound.getSoundData().getObjectId(), "sound",
-        "avthumb/mp3"));
+    playResult.put("url", sound.getProfile().getUrl());
 
     return playResult;
   }
@@ -81,23 +103,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     }
     
     List<SoundPlay> playResults = new ArrayList<SoundPlay>();
-    
-    for (SoundPlay play : plays) {
-      if (null != play.getOwner())
-      {
-        if (play.getOwner().getProfile().hasAvatar()) {
-          play.getOwner()
-              .getProfile()
-              .setAvatorUrl(
-                  remoteStorageService.getDownloadURL(play.getOwner().getId().toString(), "image",
-                      "imageView/2/w/100/h/100/format/png"));
-        } else {
-          play.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
-        }
-        playResults.add(play);
-      }
-      
-    }
 
     return playResults;
   }
@@ -149,17 +154,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
           likes.subList((pageNum - 1) * perPage, pageNum * perPage > likes.size()
               ? likes.size()
               : pageNum * perPage);
-    }
-    for (SoundLike like : likes) {
-      if (like.getOwner().getProfile().hasAvatar()) {
-        like.getOwner()
-            .getProfile()
-            .setAvatorUrl(
-                remoteStorageService.getDownloadURL(like.getOwner().getId().toString(), "image",
-                    "imageView/2/w/100/h/100/format/png"));
-      } else {
-        like.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
-      }
     }
 
     return likes;
@@ -218,24 +212,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
               pageNum * perPage > records.size() ? records.size() : pageNum * perPage);
     }
 
-    List<SoundRecord> reposts = new ArrayList<SoundRecord>();
-
-    for (SoundRecord repost : records) {
-      if (repost.getOwner().getProfile().hasAvatar()) {
-        repost
-            .getOwner()
-            .getProfile()
-            .setAvatorUrl(
-                remoteStorageService.getDownloadURL(repost.getOwner().getId().toString(), "image",
-                    "imageView/2/w/100/h/100/format/png"));
-      } else {
-        repost.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
-      }
-
-      reposts.add(repost);
-    }
-
-    return reposts;
+    return records;
   }
 
   @Override
@@ -282,19 +259,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
       }
     }
 
-    for (SoundComment comment : comments) {
-      if (comment.getOwner().getProfile().hasAvatar()) {
-        comment
-            .getOwner()
-            .getProfile()
-            .setAvatorUrl(
-                remoteStorageService.getDownloadURL(comment.getOwner().getId().toString(), "image",
-                    "imageView/2/w/100/h/100/format/png"));
-      } else {
-        comment.getOwner().getProfile().setAvatorUrl(null);
-      }
-    }
-
     return comments;
   }
 
@@ -310,18 +274,6 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
           comments.subList((pageNum - 1) * commentsPerPage,
               pageNum * commentsPerPage > comments.size() ? comments.size() : pageNum
                   * commentsPerPage);
-    }
-    for (SoundComment comment : comments) {
-      if (comment.getOwner().getProfile().hasAvatar()) {
-        comment
-            .getOwner()
-            .getProfile()
-            .setAvatorUrl(
-                remoteStorageService.getDownloadURL(comment.getOwner().getId().toString(), "image",
-                    "imageView/2/w/100/h/100/format/png"));
-      } else {
-        comment.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
-      }
     }
 
     return comments;
@@ -346,26 +298,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
       toReturn.addAll(recommandRandomSounds(recommendTo, pageNum - toReturn.size()));
     }
 
-    for (Sound sound : toReturn) {
-      generateSoundPoster(sound);
-    }
-
     return toReturn;
-  }
-
-  private void generateSoundPoster(Sound sound) {
-    if (null != sound.getProfile().getPoster()) {
-      sound
-          .getProfile()
-          .getPoster()
-          .setUrl(
-              remoteStorageService.getDownloadURL(sound.getProfile().getPoster().getPosterId(),
-                  "image", "imageView/2/w/200/h/200/format/png"));
-    } else {
-      SoundPoster poster = new SoundPoster();
-      poster.setUrl("img/voice.jpg");
-      sound.getProfile().setPoster(poster);
-    }
   }
 
   private List<Sound> recommandRandomSounds(User recommendTo, int number) {
@@ -414,27 +347,8 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
               ? visits.size()
               : pageNum * perPage);
     }
-    
-    List<SoundVisit> visitsResult = new ArrayList<SoundVisit>();
-    for (SoundVisit visit : visits) {
-      if (null != visit.getOwner())
-      {
-        if (visit.getOwner().getProfile().hasAvatar()) {
-          visit
-              .getOwner()
-              .getProfile()
-              .setAvatorUrl(
-                  remoteStorageService.getDownloadURL(visit.getOwner().getId().toString(), "image",
-                      "imageView/2/w/100/h/100/format/png"));
-        } else {
-          visit.getOwner().getProfile().setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
-        }
-        
-        visitsResult.add(visit);
-      }
-    }
 
-    return visitsResult;
+    return visits;
   }
 
   @Override

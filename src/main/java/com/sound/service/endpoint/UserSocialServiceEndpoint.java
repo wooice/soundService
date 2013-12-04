@@ -33,7 +33,9 @@ import org.springframework.stereotype.Component;
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.exception.UserException;
+import com.sound.model.Tag;
 import com.sound.model.User;
+import com.sound.service.sound.itf.TagService;
 import com.sound.service.user.itf.UserSocialService;
 
 @Component
@@ -48,6 +50,9 @@ public class UserSocialServiceEndpoint {
 
   @Autowired
   com.sound.service.user.itf.UserService userService;
+  
+  @Autowired
+  TagService tagService;
 
   @Context
   HttpServletRequest req;
@@ -224,11 +229,24 @@ public class UserSocialServiceEndpoint {
       Integer pageSize = inputJsonObj.getInt("pageSize");
 
       List<String> tagList = new ArrayList<String>();
+      List<Tag> tags = new ArrayList<Tag>();
       int len = inputJsonObj.getJsonArray("tags").size();
       for (int i = 0; i < len; i++) {
+        Tag tag = new Tag();
+        tag.setLabel(inputJsonObj.getJsonArray("tags").getString(i));
+        tags.add(tagService.get(tag, false));
         tagList.add(inputJsonObj.getJsonArray("tags").getString(i));
       }
       users.addAll(userSocialService.recommandUsersByTags(currentUser, tagList, pageNum, pageSize));
+      for (Tag temp: currentUser.getTags())
+      {
+        if (!temp.isCurated())
+        {
+          tags.add(temp);
+        }
+      }
+      currentUser.setTags(tags);
+      userService.saveUser(currentUser);
     } catch (UserException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

@@ -1,4 +1,4 @@
-package com.sound.filter.auth;
+package com.sound.filter.authrization;
 
 import java.security.Principal;
 import java.util.List;

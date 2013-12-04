@@ -24,9 +24,6 @@ public class Tag extends BaseModel {
   private Date createdDate;
 
   @Reference(lazy = true)
-  private User createdUser;
-
-  @Reference(lazy = true)
   private TagCategory category;
   
   @Transient
@@ -65,15 +62,6 @@ public class Tag extends BaseModel {
     this.createdDate = createdDate;
   }
 
-  @JsonIgnore
-  public User getCreatedUser() {
-    return createdUser;
-  }
-
-  public void setCreatedUser(User createdUser) {
-    this.createdUser = createdUser;
-  }
-
   public TagCategory getCategory() {
     return category;
   }
@@ -89,8 +77,6 @@ public class Tag extends BaseModel {
   public void setInterested(Boolean interested) {
     this.interested = interested;
   }
-
-
 
   @Entity(noClassnameStored = true)
   public static class TagCategory {

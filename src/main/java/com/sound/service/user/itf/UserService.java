@@ -1,5 +1,6 @@
 package com.sound.service.user.itf;
 
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,8 +61,14 @@ public interface UserService {
       Integer perPage);
 
   public boolean authVerify(User user, String password);
+  
+  public boolean tokenVerify(User user, String token);
 
   public UserPrefer getUserPrefer(User currentUser, User targetUser);
   
   public User saveUser(User user);
+
+  public BufferedImage generateVerifyImage(HttpServletRequest req);
+
+  public User syncExternalUser(User user, String type) throws UserException;
 }

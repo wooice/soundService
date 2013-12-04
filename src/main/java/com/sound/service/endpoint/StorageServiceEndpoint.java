@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.sound.constant.Constant;
 import com.sound.model.Sound.QueueNode;
 import com.sound.model.User;
+import com.sound.service.sound.itf.QueueService;
 import com.sound.service.sound.itf.SoundService;
 
 @Component
@@ -39,6 +40,9 @@ public class StorageServiceEndpoint {
 
   @Autowired
   com.sound.service.user.itf.UserService userService;
+  
+  @Autowired
+  QueueService queueService;
 
   @Autowired
   SoundService soundService;
@@ -90,8 +94,9 @@ public class StorageServiceEndpoint {
       node.setFileName(fileName);
       node.setOriginFileName(originName);
       node.setOwner(currentUser);
+      node.setStatus("live");
 
-      soundService.enqueue(node);
+      queueService.enqueue(node);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

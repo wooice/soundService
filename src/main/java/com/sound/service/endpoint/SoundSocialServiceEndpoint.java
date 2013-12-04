@@ -21,12 +21,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
+import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.RequestModel.commentRequest;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundComment;
@@ -38,7 +40,8 @@ import com.sound.service.sound.itf.SoundSocialService;
 
 @Component
 @Path("/soundActivity")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE, Constant.GUEST_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE,
+    Constant.GUEST_ROLE})
 public class SoundSocialServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundSocialServiceEndpoint.class);
@@ -58,6 +61,7 @@ public class SoundSocialServiceEndpoint {
   @PUT
   @Path("/play/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public Map<String, String> play(@NotNull @PathParam("soundId") String soundId) {
     Map<String, String> result = null;
     User currentUser = null;
@@ -148,10 +152,9 @@ public class SoundSocialServiceEndpoint {
       }
 
       likes = soundSocialService.getLiked(sound, pageNum, perPage);
-      
+
       User curUser = userService.getCurrentUser(req);
-      for (SoundLike like : likes)
-      {
+      for (SoundLike like : likes) {
         like.getOwner().setUserPrefer(userService.getUserPrefer(curUser, like.getOwner()));
       }
     } catch (SoundException e) {
@@ -164,7 +167,7 @@ public class SoundSocialServiceEndpoint {
 
     return likes;
   }
-  
+
   @PUT
   @Path("/repost/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
@@ -234,10 +237,9 @@ public class SoundSocialServiceEndpoint {
       }
 
       reports = soundSocialService.getReposts(sound, pageNum, perPage);
-      
+
       User curUser = userService.getCurrentUser(req);
-      for (SoundRecord report : reports)
-      {
+      for (SoundRecord report : reports) {
         report.getOwner().setUserPrefer(userService.getUserPrefer(curUser, report.getOwner()));
       }
     } catch (SoundException e) {
@@ -265,15 +267,15 @@ public class SoundSocialServiceEndpoint {
       if (null == sound) {
         throw new WebApplicationException(Status.NOT_FOUND);
       }
-      
-      if (null != sound.getProfile().getCommentMode() && sound.getProfile().getCommentMode().equals(Constant.COMMENT_CLOSED))
-      {
+
+      if (null != sound.getProfile().getCommentMode()
+          && sound.getProfile().getCommentMode().equals(Constant.COMMENT_CLOSED)) {
         throw new WebApplicationException(Status.FORBIDDEN);
       }
 
       currentUser = userService.getCurrentUser(req);
       User toUser = null;
-      if (null != request.getToUserAlias()) {
+      if (!StringUtils.isBlank(request.getToUserAlias())) {
         toUser = userService.getUserByAlias(request.getToUserAlias());
       }
 
@@ -318,7 +320,8 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/{soundId}/comments")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE, Constant.GUEST_ROLE})
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE,
+      Constant.GUEST_ROLE})
   public List<SoundComment> comment(@NotNull @PathParam("soundId") String soundId,
       @QueryParam("pageNum") Integer pageNum,
       @QueryParam("commentsPerPage") Integer commentsPerPage,
@@ -329,14 +332,11 @@ public class SoundSocialServiceEndpoint {
       if (null == sound) {
         throw new WebApplicationException(Status.NOT_FOUND);
       }
-      
-      boolean commentsInSound = (null == justInSound)? false: Boolean.parseBoolean(justInSound);
-      if (commentsInSound)
-      {
+
+      boolean commentsInSound = (null == justInSound) ? false : Boolean.parseBoolean(justInSound);
+      if (commentsInSound) {
         comments = soundSocialService.getCommentsInsound(sound);
-      }
-      else
-      {
+      } else {
         comments = soundSocialService.getComments(sound, pageNum, commentsPerPage);
       }
     } catch (SoundException e) {
@@ -354,8 +354,7 @@ public class SoundSocialServiceEndpoint {
   @Path("/recommand/sounds")
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
-  public List<Sound> getRecommandedSounds(
-      @NotNull @QueryParam("pageNum") Integer pageNum,
+  public List<Sound> getRecommandedSounds(@NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<Sound> sounds = new ArrayList<Sound>();
     User currentUser = null;
@@ -368,12 +367,13 @@ public class SoundSocialServiceEndpoint {
     }
     return sounds;
   }
-  
+
   @PUT
   @Path("/report/{soundId}")
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
-  public Map<String, Boolean> report(@NotNull @PathParam("soundId") String soundId) throws SoundException {
+  public Map<String, Boolean> report(@NotNull @PathParam("soundId") String soundId)
+      throws SoundException {
     Boolean invalid = false;
     User currentUser = null;
     try {

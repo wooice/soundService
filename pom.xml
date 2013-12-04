@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sound</groupId>
-	<artifactId>commonService</artifactId>
+	<artifactId>Services</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
@@ -26,40 +26,58 @@
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<!-- if your container implements Servlet API older than 3.0, use "jersey-container-servlet-core" -->
 			<artifactId>jersey-container-servlet</artifactId>
-			<version>2.3.1</version>
+			<version>2.4.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-multipart</artifactId>
-			<version>2.3.1</version>
+			<version>2.4.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>2.3.1</version>
+			<version>2.4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.ext</groupId>
+			<artifactId>jersey-entity-filtering</artifactId>
+			<version>2.4.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-processing</artifactId>
-			<version>2.3.1</version>
+			<version>2.4.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-sse</artifactId>
-			<version>2.3.1</version>
+			<version>2.4.1</version>
 		</dependency>
 
-<!-- 
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
 			<artifactId>jersey-entity-filtering</artifactId>
-			<version>2.3.1</version>
+			<version>2.4.1</version>
 		</dependency>
--->
+
+		<!-- validation -->
+		<dependency>
+			<groupId>org.glassfish.jersey.ext</groupId>
+			<artifactId>jersey-bean-validation</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+
+		<!-- Jersey + Spring -->
+		<dependency>
+			<groupId>org.glassfish.jersey.ext</groupId>
+			<artifactId>jersey-spring3</artifactId>
+			<version>2.4.1</version>
+		</dependency>
 
 		<!-- Spring framework -->
 		<dependency>
@@ -80,13 +98,6 @@
 			<version>3.2.2.RELEASE</version>
 		</dependency>
 
-		<!-- Jersey + Spring -->
-		<dependency>
-			<groupId>org.glassfish.jersey.ext</groupId>
-			<artifactId>jersey-spring3</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-
 		<!-- morphia -->
 		<dependency>
 			<groupId>com.github.jmkgreen.morphia</groupId>
@@ -99,13 +110,6 @@
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 			<version>2.11.1</version>
-		</dependency>
-
-		<!-- validation -->
-		<dependency>
-			<groupId>org.glassfish.jersey.ext</groupId>
-			<artifactId>jersey-bean-validation</artifactId>
-			<version>2.3.1</version>
 		</dependency>
 
 		<!-- apache commons-io -->
@@ -163,8 +167,45 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>local</id>
+			<properties>
+				<SOUND_BUCKET>wooice-dev</SOUND_BUCKET>
+				<SOUND_DOMAIN>wooice-dev.u.qiniudn.com</SOUND_DOMAIN>
+				<IMAGE_BUCKET>wooice-img-dev</IMAGE_BUCKET>
+				<IMAGE_DOMAIN>wooice-img-dev.u.qiniudn.com</IMAGE_DOMAIN>
+				<WAVE_BUCKET>wooice-wave-dev</WAVE_BUCKET>
+				<WAVE_DOMAIN>wooice-wave-dev.u.quniudn.com</WAVE_DOMAIN>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<SOUND_BUCKET>wowoice</SOUND_BUCKET>
+				<SOUND_DOMAIN>wowoice.u.qiniudn.com</SOUND_DOMAIN>
+				<IMAGE_BUCKET>wowoice-img</IMAGE_BUCKET>
+				<IMAGE_DOMAIN>wowoice-img.u.qiniudn.com</IMAGE_DOMAIN>
+				<WAVE_BUCKET>wowoice-wave</WAVE_BUCKET>
+				<WAVE_DOMAIN>wowoice-wave.u.quniudn.com</WAVE_DOMAIN>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
-		<finalName>commonService</finalName>
+		<finalName>Services</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>*.*</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -80,6 +80,7 @@ public class SoundActivity {
   public static class SoundPlay extends SoundActivity {}
 
   public static class SoundRecord extends SoundActivity {
+    //create or repost
     private String type;
 
     public String getType() {
