@@ -3,15 +3,12 @@ package com.sound.model;
 import java.io.InputStream;
 
 import com.sound.model.Sound.SoundFormat;
-import com.sound.processor.model.Wave;
 
 public class SoundLocal {
 
   private String originName;
 
   private String fileName;
-
-  private Wave wave;
 
   private InputStream soundStream;
 
@@ -33,14 +30,6 @@ public class SoundLocal {
 
   public void setFileName(String fileName) {
     this.fileName = fileName;
-  }
-
-  public Wave getWave() {
-    return wave;
-  }
-
-  public void setWave(Wave wave) {
-    this.wave = wave;
   }
 
   public InputStream getSoundStream() {

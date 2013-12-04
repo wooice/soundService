@@ -1,42 +1,37 @@
-<web-app id="WebApp_ID" version="2.4" 
-	xmlns="http://java.sun.com/xml/ns/j2ee" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<web-app id="WebApp_ID" version="2.4"
+	xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
- 
+
 	<display-name>Sound Service</display-name>
- 
+
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:applicationContext.xml</param-value>
 	</context-param>
- 
+
 	<listener>
-		<listener-class>
-			org.springframework.web.context.ContextLoaderListener
-		</listener-class>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
- 
-	 <filter>
-	   <filter-name>userRoleFilter</filter-name>
-	   <filter-class>com.sound.filter.authrization.UserRoleFilter</filter-class>
+
+	<filter>
+		<filter-name>userRoleFilter</filter-name>
+		<filter-class>com.sound.filter.authrization.UserRoleFilter</filter-class>
 	</filter>
-	
+
 	<filter-mapping>
-	   <filter-name>userRoleFilter</filter-name>
-	   <url-pattern>/*</url-pattern>
+		<filter-name>userRoleFilter</filter-name>
+		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
-	<!-- 
-	 	 <filter>
-		   <filter-name>CORSFilter</filter-name>
-		   <filter-class>com.sound.interceptor.filter.CORSFilter</filter-class>
-		</filter>
-		
-		<filter-mapping>
-		   <filter-name>CORSFilter</filter-name>
-		   <url-pattern>/*</url-pattern>
-		</filter-mapping>
-	 -->
- 
+
+	<filter>
+		<filter-name>CORSFilter</filter-name>
+		<filter-class>com.sound.interceptor.filter.CORSFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CORSFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 </web-app>

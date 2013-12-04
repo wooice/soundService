@@ -28,12 +28,6 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
-	<bean id="soundDataDAO" class="com.sound.dao.SoundDataDAO">
-		<constructor-arg ref="mongo"></constructor-arg>  
-        <constructor-arg ref="morphia"></constructor-arg>  
-        <constructor-arg value="dev"></constructor-arg> 
-	</bean>
-	
 	<bean id="userConnectDAO" class="com.sound.dao.UserConnectDAO">
 		<constructor-arg ref="mongo"></constructor-arg>  
         <constructor-arg ref="morphia"></constructor-arg>  

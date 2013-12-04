@@ -24,7 +24,8 @@ public class CORSFilter implements Filter {
             }
         } else {
             // This is a cross-domain request, add headers allowing access
-            httpResp.setHeader("Access-Control-Allow-Origin", origin);
+            httpResp.setHeader("Access-Control-Allow-Origin", "http://api.wowoice.com");
+            httpResp.setHeader("Access-Control-Allow-Origin", "http://www.wowoice.com");
             httpResp.setHeader("Access-Control-Allow-Methods", VALID_METHODS);
 
             String headers = httpReq.getHeader("Access-Control-Request-Headers");

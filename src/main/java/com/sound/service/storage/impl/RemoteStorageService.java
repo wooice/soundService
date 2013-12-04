@@ -6,16 +6,25 @@ import java.util.Map;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.qiniu.api.auth.AuthException;
 import com.qiniu.api.auth.digest.Mac;
+import com.qiniu.api.io.IoApi;
+import com.qiniu.api.io.PutExtra;
 import com.qiniu.api.rs.GetPolicy;
 import com.qiniu.api.rs.PutPolicy;
 import com.qiniu.api.rs.RSClient;
 import com.qiniu.api.rs.URLUtils;
+import com.sound.constant.Constant;
 import com.sound.exception.RemoteStorageException;
 
 @Service
@@ -56,7 +65,7 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     PutSound putSound = new PutSound();
     putSound.key = fileKey;
     putSound.type = "sound";
-    putSound.asyncOps = "avthumb/wav/acodec/pcm_u8;avthumb/mp3";
+    putSound.asyncOps = "avthumb/wav/acodec/pcm_s16le;avthumb/mp3";
 
     Map<String, String> uploadInfo = new HashMap<String, String>();
     uploadInfo.put("token", generateUpToken(putSound));
@@ -109,11 +118,7 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     GetPolicy getPolicy = new GetPolicy();
     if (type.equals("sound"))
     {
-      getPolicy.expires = config.getInt("SOUND_ACCESS_EXPIRE", 300000);
-    }
-    else
-    {
-      getPolicy.expires = config.getInt("IMAGE_ACCESS_EXPIRE", 300000);
+      getPolicy.expires = Constant.SOUND_CACHE_TIME / 1000;
     }
 
     try {
@@ -159,7 +164,42 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     if (type.equals("sound")) {
       client.delete(config.getString("SOUND_BUCKET"), fileKey);
     } else {
-      client.delete(config.getString("IMAGE_BUCKET"), fileKey);
+      if (type.equals("wave"))
+      {
+        client.delete(config.getString("IMAGE_BUCKET"), fileKey);
+      }
+      else
+      {
+        client.delete(config.getString("IMAGE_BUCKET"), fileKey);
+      }
+    }
+  }
+  
+  public void uploadFile(String type, String fileKey, String filePath) {
+    PutPolicy putPolicy = new PutPolicy(config.getString("WAVE_BUCKET"));
+    try {
+      String uptoken = putPolicy.token(mac);
+      PutExtra extra = new PutExtra();
+      IoApi.putFile(uptoken, fileKey, filePath, extra);
+    } catch (AuthException e) {
+      e.printStackTrace();
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  @Override
+  public String getSoundInfo(String remoteId) {
+    String infoURL = this.getDownloadURL(remoteId, "sound", "avinfo");
+    try {
+      HttpClient httpClient = new DefaultHttpClient();
+      HttpGet httpget = new HttpGet(infoURL);
+      HttpResponse httpresponse = httpClient.execute(httpget);
+      // 获取返回数据
+      HttpEntity entity = httpresponse.getEntity();
+      return EntityUtils.toString(entity);
+    } catch (Exception e) {
+      return null;
     }
   }
 }

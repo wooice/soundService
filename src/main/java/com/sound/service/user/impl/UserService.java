@@ -60,7 +60,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
   Logger logger = Logger.getLogger(UserService.class);
 
   private static final String CONFIG_FILE = "config.properties";
-  private static final String STORAGE_CONFIG_FILE = "storeConfig.properties";
+  private static final String STORE_CONFIG_FILE = "storeConfig.properties";
 
   char[] codeSequence = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
       'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6',
@@ -82,12 +82,13 @@ public class UserService implements com.sound.service.user.itf.UserService {
   UserMessageDAO userMessageDAO;
 
   private PropertiesConfiguration config;
-  private PropertiesConfiguration storageConfig;
+  
+  private PropertiesConfiguration storeConfig;
 
   public UserService() {
     try {
       config = new PropertiesConfiguration(CONFIG_FILE);
-      storageConfig = new PropertiesConfiguration(STORAGE_CONFIG_FILE);
+      storeConfig = new PropertiesConfiguration(STORE_CONFIG_FILE);
     } catch (ConfigurationException e) {
       e.printStackTrace();
     }
@@ -103,12 +104,6 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
     if (user == null) return null;
 
-    if (user.getProfile().hasAvatar()) {
-      user.getProfile().setAvatorUrl(
-          remoteStorageService.getDownloadURL(user.getId().toString(), "image",
-              "imageView/2/w/200/h/200/format/png"));
-    }
-
     return user;
   }
 
@@ -117,12 +112,6 @@ public class UserService implements com.sound.service.user.itf.UserService {
     User user = userDAO.findOne("emails.emailAddress", emailAddress);
 
     if (user == null) return null;
-
-    if (user.getProfile().hasAvatar()) {
-      user.getProfile().setAvatorUrl(
-          remoteStorageService.getDownloadURL(user.getId().toString(), "image",
-              "imageView/2/w/200/h/200/format/png"));
-    }
 
     return user;
   }
@@ -279,9 +268,13 @@ public class UserService implements com.sound.service.user.itf.UserService {
       profile.setAlias(newProfile.getAlias());
     }
 
-    if (StringUtils.isNotBlank(newProfile.getAvatorUrl()) && newProfile.getAvatorUrl().contains(storageConfig.getString("IMAGE_DOMAIN"))) {
-      profile.setAvatorUrl(newProfile.getAvatorUrl());
+    if (StringUtils.isNotBlank(newProfile.getAvatorUrl()) && newProfile.hasAvatar()) {
+      profile.setAvatorUrl("http://" + storeConfig.getString("IMAGE_DOMAIN") + "/" + newProfile.getAvatorUrl());
       profile.setHasAvatar(true);
+    }
+    else
+    {
+      profile.setAvatorUrl(Constant.DEFAULT_USER_AVATOR);
     }
 
     if (StringUtils.isNotBlank(newProfile.getFirstName())) {
@@ -792,7 +785,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
       userDAO.save(user);
     } else {
-      if (null != user.getProfile().getAvatorUrl()) {
+      if (null != user.getProfile().getAvatorUrl() && !exsitingUser.getProfile().hasAvatar()) {
         exsitingUser.getProfile().setAvatorUrl(user.getProfile().getAvatorUrl());
       }
       if (null != user.getProfile().getCity()) {

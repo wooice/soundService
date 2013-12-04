@@ -13,7 +13,6 @@ import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
-import com.github.jmkgreen.morphia.annotations.Serialized;
 import com.github.jmkgreen.morphia.annotations.Transient;
 import com.sound.constant.Constant;
 import com.sound.jackson.extension.DateSerializer;
@@ -30,15 +29,11 @@ import com.sound.model.enums.SoundType;
 @Entity(noClassnameStored = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sound extends BaseModel {
-
   @Id
   private ObjectId id;
 
   @Embedded
   private SoundProfile profile;
-
-  @Reference
-  private SoundData soundData;
 
   @Reference(lazy = true)
   private List<Sound> innerSounds;
@@ -88,15 +83,6 @@ public class Sound extends BaseModel {
 
   public void setProfile(SoundProfile profile) {
     this.profile = profile;
-  }
-
-  @JsonIgnore
-  public SoundData getSoundData() {
-    return soundData;
-  }
-
-  public void setSoundData(SoundData soundData) {
-    this.soundData = soundData;
   }
 
   public SoundSocial getSoundSocial() {
@@ -321,8 +307,11 @@ public class Sound extends BaseModel {
     
     private float duration = 0;
     
-    @Transient
+    private boolean processed = false;
+    
     private String url;
+    
+    private Date urlGeneratedDate;
     
     public String getUrl() {
       return url;
@@ -330,6 +319,14 @@ public class Sound extends BaseModel {
 
     public void setUrl(String url) {
       this.url = url;
+    }
+    
+    public Date getUrlGeneratedDate() {
+      return urlGeneratedDate;
+    }
+
+    public void setUrlGeneratedDate(Date urlGeneratedDate) {
+      this.urlGeneratedDate = urlGeneratedDate;
     }
 
     @JsonIgnore
@@ -478,23 +475,20 @@ public class Sound extends BaseModel {
     public void setDuration(float duration) {
       this.duration = duration;
     }
+    
+    public boolean isProcessed() {
+      return processed;
+    }
+
+    public void setProcessed(boolean processed) {
+      this.processed = processed;
+    }
 
     public static class SoundPoster {
-      // Id of stored poster
-      private String posterId;
 
       private String extension;
 
-      @Transient
       private String url;
-
-      public String getPosterId() {
-        return posterId;
-      }
-
-      public void setPosterId(String posterId) {
-        this.posterId = posterId;
-      }
 
       public String getExtension() {
         return extension;
@@ -556,130 +550,6 @@ public class Sound extends BaseModel {
     public void setRightNumber(String rightNumber) {
       this.rightNumber = rightNumber;
     }
-  }
-
-  @Entity(noClassnameStored = true)
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public static class SoundData {
-    @Id
-    private ObjectId id;
-
-    @Reference(lazy = true)
-    private User owner;
-
-    private String originName;
-
-    // route id in resource server.
-    private String objectId;
-
-    private String extension;
-
-    private float duration;
-
-    private String url;
-
-    @Serialized
-    private float[][] wave;
-    
-    @Transient
-    private String soundId;
-    
-    @Transient
-    private String commentMode;
-    
-    @Embedded
-    private SoundFormat soundFormat;
-    
-    @JsonIgnore
-    public SoundFormat getSoundFormat() {
-      return soundFormat;
-    }
-
-    public void setSoundFormat(SoundFormat soundFormat) {
-      this.soundFormat = soundFormat;
-    }
-
-    public String getSoundId() {
-      return soundId;
-    }
-
-    public void setSoundId(String soundId) {
-      this.soundId = soundId;
-    }
-    
-    public String getCommentMode() {
-      return commentMode;
-    }
-
-    public void setCommentMode(String commentMode) {
-      this.commentMode = commentMode;
-    }
-
-    public String getObjectId() {
-      return objectId;
-    }
-
-    public void setObjectId(String objectId) {
-      this.objectId = objectId;
-    }
-
-    public User getOwner() {
-      return owner;
-    }
-
-    public void setOwner(User owner) {
-      this.owner = owner;
-    }
-
-    public String getExtension() {
-      return extension;
-    }
-
-    public void setExtension(String extension) {
-      this.extension = extension;
-    }
-
-    public String getOriginName() {
-      return originName;
-    }
-
-    public void setOriginName(String originName) {
-      this.originName = originName;
-    }
-
-    public float getDuration() {
-      return duration;
-    }
-
-    public void setDuration(float duration) {
-      this.duration = duration;
-    }
-
-    public String getUrl() {
-      return url;
-    }
-
-    public void setUrl(String url) {
-      this.url = url;
-    }
-
-    public float[][] getWave() {
-      return wave;
-    }
-
-    public void setWave(float[][] wave) {
-      this.wave = wave;
-    }
-
-    @JsonIgnore
-    public ObjectId getId() {
-      return id;
-    }
-
-    public void setId(ObjectId id) {
-      this.id = id;
-    }
-
   }
 
   public static class SoundSocial {
@@ -779,6 +649,8 @@ public class Sound extends BaseModel {
     private User owner;
 
     private Date createdDate;
+    
+    private String status;
 
     @JsonIgnore
     public ObjectId getId() {
@@ -821,6 +693,13 @@ public class Sound extends BaseModel {
       this.createdDate = createdDate;
     }
 
+    public String getStatus() {
+      return status;
+    }
+
+    public void setStatus(String status) {
+      this.status = status;
+    }
   }
   
   public static class SoundFormat {

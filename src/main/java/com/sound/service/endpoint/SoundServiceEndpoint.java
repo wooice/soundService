@@ -33,7 +33,6 @@ import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
 import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.Sound;
-import com.sound.model.Sound.SoundData;
 import com.sound.model.Sound.SoundProfile;
 import com.sound.model.Tag;
 import com.sound.model.User;
@@ -41,6 +40,7 @@ import com.sound.model.enums.SoundState;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.service.sound.itf.SoundSocialService;
 import com.sound.service.sound.itf.TagService;
+import com.sound.service.storage.itf.RemoteStorageService;
 
 @Component
 @Path("/sound")
@@ -60,6 +60,9 @@ public class SoundServiceEndpoint {
 
   @Autowired
   com.sound.service.user.itf.UserService userService;
+  
+  @Autowired
+  RemoteStorageService remoteStorageService;
 
   @Context
   HttpServletRequest req;
@@ -96,26 +99,6 @@ public class SoundServiceEndpoint {
     }
 
     return sound;
-  }
-
-  @POST
-  @Path("/data")
-  @Produces(MediaType.APPLICATION_JSON)
-  @ResourceAllowed
-  public List<SoundData> loadSoundData(@NotNull final List<String> soundIds) {
-    List<SoundData> soundData = null;
-    User currentUser = userService.getCurrentUser(req);
-
-    try {
-      soundData = soundService.loadData(currentUser, soundIds);
-    } catch (WebApplicationException e) {
-      throw e;
-    } catch (Exception e) {
-      logger.error(e);
-      throw new WebApplicationException(Status.BAD_REQUEST);
-    }
-
-    return soundData;
   }
   
   @PUT
@@ -434,7 +417,7 @@ public class SoundServiceEndpoint {
     String info = null;
     try {
       Sound sound = soundService.load(null, soundAlias);
-      info = soundService.getSoundInfo(sound.getProfile().getRemoteId());
+      info = remoteStorageService.getSoundInfo(sound.getProfile().getRemoteId());
     } catch (Exception e) {
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }

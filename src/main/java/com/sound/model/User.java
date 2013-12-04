@@ -35,9 +35,9 @@ public class User extends BaseModel {
 
   @Embedded
   private List<UserEmail> emails;
-
-  @JsonIgnore
+  
   @Reference(lazy = true)
+  @JsonIgnore
   private UserAuth auth;
 
   @Reference(lazy = true)
@@ -56,6 +56,9 @@ public class User extends BaseModel {
 
   @Transient
   private UserPrefer userPrefer;
+  
+  @Transient
+  private String authToken;
 
   @JsonSerialize(using = IdSerializer.class)
   public ObjectId getId() {
@@ -72,6 +75,14 @@ public class User extends BaseModel {
 
   public void setProfile(UserProfile profile) {
     this.profile = profile;
+  }
+
+  public String getAuthToken() {
+    return authToken;
+  }
+
+  public void setAuthToken(String authToken) {
+    this.authToken = authToken;
   }
 
   @JsonIgnore
@@ -157,7 +168,6 @@ public class User extends BaseModel {
     this.emails.add(email);
   }
 
-  @JsonIgnore
   public UserAuth getAuth() {
     return auth;
   }
@@ -377,6 +387,7 @@ public class User extends BaseModel {
 
     private Long reposts;
 
+    //second
     private Long soundDuration;
 
     private Long inputMessages;
@@ -481,11 +492,16 @@ public class User extends BaseModel {
 
       String url;
       
+      @JsonIgnore
       String uid;
       
+      @JsonIgnore
       String userName;
 
+      @JsonIgnore
       boolean userCreated = false;
+      
+      @JsonIgnore
       boolean visible = true;
 
       public Site() {

@@ -167,7 +167,6 @@
 		</dependency>
 	</dependencies>
 
-
 	<profiles>
 		<profile>
 			<id>local</id>
@@ -176,6 +175,8 @@
 				<SOUND_DOMAIN>wooice-dev.u.qiniudn.com</SOUND_DOMAIN>
 				<IMAGE_BUCKET>wooice-img-dev</IMAGE_BUCKET>
 				<IMAGE_DOMAIN>wooice-img-dev.u.qiniudn.com</IMAGE_DOMAIN>
+				<WAVE_BUCKET>wooice-wave-dev</WAVE_BUCKET>
+				<WAVE_DOMAIN>wooice-wave-dev.u.quniudn.com</WAVE_DOMAIN>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -188,6 +189,8 @@
 				<SOUND_DOMAIN>wowoice.u.qiniudn.com</SOUND_DOMAIN>
 				<IMAGE_BUCKET>wowoice-img</IMAGE_BUCKET>
 				<IMAGE_DOMAIN>wowoice-img.u.qiniudn.com</IMAGE_DOMAIN>
+				<WAVE_BUCKET>wowoice-wave</WAVE_BUCKET>
+				<WAVE_DOMAIN>wowoice-wave.u.quniudn.com</WAVE_DOMAIN>
 			</properties>
 		</profile>
 	</profiles>

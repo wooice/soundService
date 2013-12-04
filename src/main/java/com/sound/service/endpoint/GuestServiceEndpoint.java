@@ -34,7 +34,6 @@ import com.sound.exception.UserException;
 import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.User;
 import com.sound.model.User.UserRole;
-import com.sound.model.UserAuth;
 
 @Component
 @Path("/guest")
@@ -126,9 +125,7 @@ public class GuestServiceEndpoint {
       
       if (rememberUser)
       {
-        UserAuth userAuth = new UserAuth();
-        userAuth.setAuthToken(user.getAuth().getAuthToken());
-        user.setAuth(userAuth);
+        user.setAuthToken(user.getAuth().getAuthToken());
       }
 
       session.setAttribute("userAlias", user.getProfile().getAlias());

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sound.model.User;
-import com.sound.service.sound.impl.SoundDataService;
 import com.sound.service.sound.itf.SoundService;
 
 @Component
@@ -21,9 +20,6 @@ public class MockServiceEndpoint {
 
   @Autowired
   SoundService soundService;
-
-  @Autowired
-  SoundDataService soundDataService;
 
   @GET
   @Path("/create")

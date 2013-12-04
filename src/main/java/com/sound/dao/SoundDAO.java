@@ -31,10 +31,10 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
         query.criteria("profile.description").containsIgnoreCase(keyWord)).or(query.criteria("profile.owner").hasAnyOf(owners));
 
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
 
     query.offset(start).limit(range).order("-profile.priority, -profile.priorityUpdatedDate, -records.createdTime");
 
@@ -51,10 +51,10 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
       query.criteria("profile.owner").notEqual(curUser);
     }
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
 
     query.offset(start).limit(range).order("-profile.priority, -profile.priorityUpdatedDate, -records.createdTime");
 
@@ -69,9 +69,9 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     if (!user.equals(curUser)) {
       status.add(SoundState.PRIVATE.getStatusId());
     }
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
 
     if (curUser.getUserRoles().contains(Constant.USER_ROLE_OBJ))
     {
@@ -91,10 +91,10 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("records.owner").notEqual(curUser);
 
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
 
     query.offset(start).limit(range).order("-profile.priority, -profile.priorityUpdatedDate, -records.createdTime");
 
@@ -105,10 +105,11 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     Query<Sound> query = createQuery();
     query.criteria("records.owner").hasAnyOf(users);
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
+    
     query.criteria("records.createdTime").greaterThan(startTime);
 
     return this.count(query);
@@ -119,9 +120,9 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("records.owner").equal(user);
     query.criteria("records.type").equal(Constant.SOUND_RECORD_CREATE);
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
     query.criteria("records.createdTime").greaterThan(startTime);
 
     return this.count(query);
@@ -134,10 +135,10 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("records.owner").equal(user);
 
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
     query.offset(start).limit(range).order("-records.createdTime");
 
     return this.find(query).asList();
@@ -150,10 +151,10 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("records.owner").notEqual(recommendTo);
 
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
 
     query.offset(start).limit(range).order("-profile.createdTime");
 
@@ -185,10 +186,10 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     }
 
     List<Integer> status = new ArrayList<Integer>();
+    status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.PRIVATE.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
-    query.criteria("soundData").exists();
     
     query.offset(0).limit(number);
 
