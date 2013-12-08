@@ -42,6 +42,9 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
   @Autowired
   TagService tagService;
+  
+  @Autowired
+  UtilService util;
 
   @Autowired
   RemoteStorageService remoteStorageService;
@@ -216,7 +219,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   @Override
-  public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt) {
+  public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt) throws SoundException {
+    if (util.contianInvalidWords(comment))
+    {
+      throw new SoundException("INVALID_COMMENT");
+    }
+    
     SoundComment soundComment = new SoundComment();
     soundComment.setCommentId(String.valueOf(System.currentTimeMillis()));
     soundComment.setOwner(user);

@@ -488,14 +488,13 @@ public class User extends BaseModel {
     public static class Site {
       String name;
 
+      @JsonIgnore
       String displayName;
 
       String url;
       
-      @JsonIgnore
       String uid;
       
-      @JsonIgnore
       String userName;
 
       @JsonIgnore

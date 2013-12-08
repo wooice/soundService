@@ -30,7 +30,7 @@ public interface SoundSocialService {
   
   public List<SoundRecord> getReposts(Sound sound, Integer pageNum, Integer perPage) throws SoundException;
 
-  public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt);
+  public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt) throws SoundException;
 
   public Integer uncomment(Sound sound, String commentId) throws SoundException;
 

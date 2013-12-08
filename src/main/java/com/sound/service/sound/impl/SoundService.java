@@ -54,6 +54,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
   @Autowired
   QueueNodeDAO queueNodeDAO;
+  
+  @Autowired
+  UtilService util;
 
   @Autowired
   ProcessorFactory processFactory;
@@ -157,16 +160,18 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     }
 
     Sound sound = soundDAO.findOne("profile.remoteId", soundProfile.getRemoteId());
-    if (null == sound)
-    {
+    if (null == sound) {
       sound = new Sound();
       sound.setProfile(new SoundProfile());
     }
-    
+
     SoundProfile profile = sound.getProfile();
     profile.setName(soundProfile.getName());
     profile.setStatus(soundProfile.getStatus());
-    profile.setDescription(soundProfile.getDescription());
+    if (!util.contianInvalidWords(soundProfile.getDescription()))
+    {
+      profile.setDescription(soundProfile.getDescription());
+    }
     profile.setCreatedTime(new Date());
     profile.setDownloadable(soundProfile.isDownloadable());
     profile.setModifiedTime(new Date());
@@ -178,34 +183,20 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     profile.setRemoteId(soundProfile.getRemoteId());
     profile.setCommentMode(soundProfile.getCommentMode());
     profile.setRecordType(soundProfile.getRecordType());
-    
+
     SoundPoster poster = new SoundPoster();
     if (null != soundProfile.getPoster()) {
-      poster
-          .setUrl(
-              remoteStorageService.getDownloadURL(sound.getProfile().getRemoteId(),
-                  "image", "imageView/2/w/200/h/200/format/png"));
+      poster.setUrl(remoteStorageService.getDownloadURL(sound.getProfile().getRemoteId(), "image",
+          "imageView/2/w/200/h/200/format/png"));
     } else {
       poster.setUrl("img/voice.jpg");
     }
     profile.setPoster(poster);
 
-    if (null == soundProfile.getPoster()) {
-      SoundPoster soundPoster = new SoundPoster();
-      profile.setPoster(soundPoster);
-    }
-    else
-    {
-      profile.setPoster(soundProfile.getPoster());
-    }
-    
-    if (null == soundProfile.getSoundRight())
-    {
+    if (null == soundProfile.getSoundRight()) {
       SoundRight right = new SoundRight();
       profile.setSoundRight(right);
-    }
-    else
-    {
+    } else {
       profile.setSoundRight(soundProfile.getSoundRight());
     }
 
@@ -274,8 +265,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       soundDAO.updateProperty("_id", new ObjectId(id), "profile.alias", newAlias);
       soundProfile.setAlias(newAlias);
     }
-
-    if (null != soundProfile.getDescription()) {
+    if (null != soundProfile.getDescription() && !util.contianInvalidWords(soundProfile.getDescription())) {
       soundDAO.updateProperty("_id", new ObjectId(id), "profile.description",
           soundProfile.getDescription());
     }
@@ -286,13 +276,11 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     }
 
     if (null != soundProfile.getPoster()) {
-      soundProfile
-            .getPoster()
-            .setUrl(
-                remoteStorageService.getDownloadURL(soundProfile.getRemoteId(),
-                    "image", "imageView/2/w/200/h/200/format/png"));
+      soundProfile.getPoster().setUrl(
+          remoteStorageService.getDownloadURL(soundProfile.getRemoteId(), "image",
+              "imageView/2/w/200/h/200/format/png"));
       soundDAO.updateProperty("_id", new ObjectId(id), "profile.poster", soundProfile.getPoster());
-    }
+    } 
 
     if (null != soundProfile.getCommentMode()) {
       soundDAO.updateProperty("_id", new ObjectId(id), "profile.commentMode",
@@ -448,13 +436,12 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
         alias = alias.substring(0, defaultAliasLength);
       }
     }
-    
+
     Random random = new Random();
-    while (null != soundDAO.findOne("profile.alias", alias))
-    {
+    while (null != soundDAO.findOne("profile.alias", alias)) {
       alias += random.nextInt(10);
     }
-    
+
     return alias;
   }
 
