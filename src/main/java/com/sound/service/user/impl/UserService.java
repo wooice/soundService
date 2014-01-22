@@ -449,11 +449,11 @@ public class UserService implements com.sound.service.user.itf.UserService {
       throws UserException {
     try {
       HtmlEmail email = new HtmlEmail();
-      email.setAuthentication("wooice", "dxd123456");
+      email.setAuthentication("passport@wowoice.com", "wowoice168");
       email.setCharset("utf-8");
       email.setSubject(title);
-      email.setHostName("smtp.126.com");
-      email.setFrom("wooice@126.com", "Wooice");
+      email.setHostName("smtp.qq.com");
+      email.setFrom("passport@wowoice.com", "WOWOICE");
       email.addTo(emailAddress, userAlias);
       email.setContent(body, "text/html; charset=UTF-8");
       email.send();

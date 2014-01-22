@@ -19,6 +19,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
@@ -140,7 +141,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/{soundId}/likes")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  @ResourceAllowed
   public List<SoundLike> likes(@NotNull @PathParam("soundId") String soundId,
       @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("perPage") Integer perPage) {
@@ -225,7 +226,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/{soundId}/reposts")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  @ResourceAllowed
   public List<SoundRecord> reports(@NotNull @PathParam("soundId") String soundId,
       @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("perPage") Integer perPage) {
@@ -282,7 +283,12 @@ public class SoundSocialServiceEndpoint {
       commentsCount =
           soundSocialService.comment(sound, currentUser, toUser, request.getComment(),
               request.getPointAt());
-    } catch (Exception e) {
+    } 
+    catch (SoundException e)
+    {
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build()); 
+    }
+    catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
@@ -320,8 +326,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/{soundId}/comments")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE,
-      Constant.GUEST_ROLE})
+  @ResourceAllowed
   public List<SoundComment> comment(@NotNull @PathParam("soundId") String soundId,
       @QueryParam("pageNum") Integer pageNum,
       @QueryParam("commentsPerPage") Integer commentsPerPage,

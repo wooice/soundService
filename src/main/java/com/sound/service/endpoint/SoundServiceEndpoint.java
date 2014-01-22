@@ -37,6 +37,7 @@ import com.sound.model.Sound.SoundProfile;
 import com.sound.model.Tag;
 import com.sound.model.User;
 import com.sound.model.enums.SoundState;
+import com.sound.service.sound.itf.PlayListService;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.service.sound.itf.SoundSocialService;
 import com.sound.service.sound.itf.TagService;
@@ -63,6 +64,9 @@ public class SoundServiceEndpoint {
   
   @Autowired
   RemoteStorageService remoteStorageService;
+  
+  @Autowired
+  PlayListService playListService;
 
   @Context
   HttpServletRequest req;
@@ -161,6 +165,39 @@ public class SoundServiceEndpoint {
   public Response addToSet(@NotNull @FormParam("userId") String userId,
       @NotNull @FormParam("soundId") String soundId, @FormParam("SetId") String setId) {
     soundService.addToSet(soundId, setId);
+
+    return Response.status(Status.OK).build();
+  }
+ 
+  @GET
+  @Path("/playlist")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  public List<Sound> getPlayList() {
+    User curUser = userService.getCurrentUser(req);
+
+    return playListService.getPlayRecords(curUser);
+  }
+  
+  @POST
+  @Path("/playlist")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  public Response addToPlaylist(@NotNull @QueryParam("soundId") String soundId) {
+    Sound sound = soundService.loadById(soundId);
+    User curUser = userService.getCurrentUser(req);
+    playListService.addPlayRecord(curUser, sound);
+    userService.saveUser(curUser);
+
+    return Response.status(Status.OK).build();
+  }
+  
+  @DELETE
+  @Path("/playlist")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  public Response deleteFromPlaylist(@NotNull @QueryParam("soundId") String soundId) {
+    Sound sound = soundService.loadById(soundId);
+    User curUser = userService.getCurrentUser(req);
+    playListService.removePlayRecord(curUser, sound);
+    userService.saveUser(curUser);
 
     return Response.status(Status.OK).build();
   }

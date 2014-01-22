@@ -4,13 +4,12 @@ import org.bson.types.ObjectId;
 
 import com.github.jmkgreen.morphia.Morphia;
 import com.mongodb.Mongo;
-import com.sound.model.Sound.SoundData;
+import com.sound.model.User.PlayRecord;
 import com.sound.morphia.extension.BaseDAO;
 
-public class SoundDataDAO extends BaseDAO<SoundData, ObjectId> {
+public class PlayRecordDAO extends BaseDAO<PlayRecord, ObjectId> {
 
-  protected SoundDataDAO(Mongo mongo, Morphia morphia, String dbName) {
+  public PlayRecordDAO(Mongo mongo, Morphia morphia, String dbName) {
     super(mongo, morphia, dbName);
   }
-
 }

@@ -37,7 +37,8 @@ import com.sound.model.User.UserRole;
 
 @Component
 @Path("/guest")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.GUEST_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.GUEST_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE,
+    Constant.SPRO_ROLE})
 @ResourceAllowed
 public class GuestServiceEndpoint {
 
@@ -55,29 +56,29 @@ public class GuestServiceEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   public User login(@NotNull final JsonObject inputJsonObj) {
     User user = null;
-
     try {
       HttpSession session = req.getSession();
       String verifyCode = (String) session.getAttribute("verifyCode");
       String inputVerify = null;
-      boolean rememberUser =  false;
-      try
-      {
+      boolean rememberUser = false;
+      
+      try {
         inputVerify = inputJsonObj.getString("verifyCode");
-        rememberUser = Boolean.parseBoolean(inputJsonObj.getString("rememberUser"));
-      }
-      catch(Exception e)
-      {}
+      } catch (Exception e) {}
+      try {
+        rememberUser = inputJsonObj.getBoolean("rememberUser");
+      } catch (Exception e) {}
+      
       Object errorObj = session.getAttribute("ERROR_TIMES");
-      if (null != errorObj)
-      {
+      if (null != errorObj) {
         int errorTimes = (Integer) errorObj;
-        if (errorTimes >= 3 && (null == verifyCode || null == inputVerify || !verifyCode.equalsIgnoreCase(inputVerify)))
-        {
-            throw new UserException("VERIFY_CODE");
+        if (errorTimes >= 3
+            && (null == verifyCode || null == inputVerify || !verifyCode
+                .equalsIgnoreCase(inputVerify))) {
+          throw new UserException("VERIFY_CODE");
         }
       }
-      
+
       String userId = inputJsonObj.getString("userId");
       String password = inputJsonObj.getString("password");
       String emailRegex =
@@ -99,32 +100,23 @@ public class GuestServiceEndpoint {
       if (!userService.authVerify(user, password)) {
         int errorTimes = 0;
         Object errorTimesObj = session.getAttribute("ERROR_TIMES");
-        if (null == errorTimesObj)
-        {
+        if (null == errorTimesObj) {
           errorTimes = 0;
-        }
-        else
-        {
+        } else {
           errorTimes = (Integer) errorTimesObj;
         }
-        
-        if (errorTimes >= 3)
-        {
+
+        if (errorTimes >= 3) {
           throw new UserException("PASSWORD_VERIFY");
-        }
-        else
-        {
-          session.setAttribute("ERROR_TIMES", errorTimes+1);
+        } else {
+          session.setAttribute("ERROR_TIMES", errorTimes + 1);
           throw new UserException("PASSWORD");
         }
-      }
-      else
-      {
+      } else {
         session.removeAttribute("ERROR_TIMES");
       }
-      
-      if (rememberUser)
-      {
+
+      if (rememberUser) {
         user.setAuthToken(user.getAuth().getAuthToken());
       }
 
@@ -135,14 +127,13 @@ public class GuestServiceEndpoint {
         roles.add(role.getRole());
       }
       session.setAttribute("userRoles", roles);
-    } 
-    catch (UserException e)
-    {
-      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
-    }
-    catch (Exception e) {
+    } catch (UserException e) {
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(e.getMessage()).build());
+    } catch (Exception e) {
       logger.error(e);
-      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity("ERROR").build());
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity("ERROR").build());
     }
 
     return user;
@@ -241,8 +232,7 @@ public class GuestServiceEndpoint {
       String verifyCode = (String) session.getAttribute("verifyCode");
       String inputVerify = inputJsonObj.getString("verifyCode");
 
-      if (null == verifyCode || null == inputVerify || !verifyCode.equalsIgnoreCase(inputVerify))
-      {
+      if (null == verifyCode || null == inputVerify || !verifyCode.equalsIgnoreCase(inputVerify)) {
         throw new UserException("VERIFY_CODE");
       }
       String userAlias = inputJsonObj.getString("userAlias");
@@ -251,7 +241,8 @@ public class GuestServiceEndpoint {
       user = userService.createUser(userAlias, emailAddress, password);
     } catch (UserException e) {
       logger.error(e);
-      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(e.getMessage()).build());
     } catch (Exception e) {
       throw new WebApplicationException("ERROR", Status.INTERNAL_SERVER_ERROR);
     }
@@ -268,9 +259,9 @@ public class GuestServiceEndpoint {
       userService.sendChangePassLink(emailAddress);
     } catch (UserException e) {
       logger.error(e);
-      if ("USER_404".equals(e.getMessage()))
-      {
-        throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity("USER_404").build());
+      if ("USER_404".equals(e.getMessage())) {
+        throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+            .entity("USER_404").build());
       }
       throw new WebApplicationException(Status.BAD_REQUEST);
     } catch (Exception e) {
@@ -282,11 +273,10 @@ public class GuestServiceEndpoint {
 
   @POST
   @Path("/sync/{type}")
-  public User syncExternalUser(@NotNull User user, @NotNull @PathParam("type") String type)
-  {
+  public User syncExternalUser(@NotNull User user, @NotNull @PathParam("type") String type) {
     try {
       user = userService.syncExternalUser(user, type);
-      
+
       HttpSession session = req.getSession();
       session.setAttribute("userAlias", user.getProfile().getAlias());
 
@@ -296,7 +286,8 @@ public class GuestServiceEndpoint {
       }
       session.setAttribute("userRoles", roles);
     } catch (UserException e) {
-      throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+      throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(e.getMessage())
+          .build());
     } catch (Exception e) {
       throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).build());
     }

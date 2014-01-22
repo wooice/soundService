@@ -488,14 +488,13 @@ public class User extends BaseModel {
     public static class Site {
       String name;
 
+      @JsonIgnore
       String displayName;
 
       String url;
       
-      @JsonIgnore
       String uid;
       
-      @JsonIgnore
       String userName;
 
       @JsonIgnore
@@ -849,7 +848,45 @@ public class User extends BaseModel {
       } else if (!role.equals(other.role)) return false;
       return true;
     }
+  }
+  
+  @Entity(noClassnameStored = true)
+  public static class PlayRecord
+  {
+    @Id
+    private ObjectId id;
+    
+    @Reference(lazy = true)
+    @JsonIgnore
+    private User user;
+    
+    @Reference(lazy = true)
+    private Sound sound;
+    
+    @JsonIgnore
+    public ObjectId getId() {
+      return id;
+    }
 
+    public void setId(ObjectId id) {
+      this.id = id;
+    }
+
+    public User getUser() {
+      return user;
+    }
+
+    public void setUser(User user) {
+      this.user = user;
+    }
+
+    public Sound getSound() {
+      return sound;
+    }
+
+    public void setSound(Sound sound) {
+      this.sound = sound;
+    }
   }
 
   @Override

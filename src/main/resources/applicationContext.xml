@@ -88,6 +88,12 @@
         <constructor-arg value="dev"></constructor-arg> 
 	</bean>
 	
+	<bean id="playRecordDAO" class="com.sound.dao.PlayRecordDAO">
+		<constructor-arg ref="mongo"></constructor-arg>  
+        <constructor-arg ref="morphia"></constructor-arg>  
+        <constructor-arg value="dev"></constructor-arg> 
+	</bean>
+	
 	<bean id="processFactory" class="com.sound.processor.factory.ProcessorFactory">
 	</bean>
 

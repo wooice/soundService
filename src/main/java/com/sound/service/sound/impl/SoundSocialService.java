@@ -28,6 +28,7 @@ import com.sound.model.SoundActivity.SoundReport;
 import com.sound.model.SoundActivity.SoundVisit;
 import com.sound.model.Tag;
 import com.sound.model.User;
+import com.sound.service.sound.itf.PlayListService;
 import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
@@ -42,6 +43,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
   @Autowired
   TagService tagService;
+  
+  @Autowired
+  PlayListService playListService;
+  
+  @Autowired
+  UtilService util;
 
   @Autowired
   RemoteStorageService remoteStorageService;
@@ -80,6 +87,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
       sound.getProfile().setUrlGeneratedDate(new Date());
     }
     soundDAO.save(sound);
+    
+    if (null != user)
+    {
+      playListService.addPlayRecord(user, sound);
+      userService.saveUser(user);
+    }
     
     Map<String, String> playResult = new HashMap<String, String>();
     playResult.put("played", String.valueOf(sound.getPlays().size()));
@@ -216,7 +229,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   }
 
   @Override
-  public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt) {
+  public Integer comment(Sound sound, User user, User toUser, String comment, Float pointAt) throws SoundException {
+    if (util.contianInvalidWords(comment))
+    {
+      throw new SoundException("INVALID_COMMENT");
+    }
+    
     SoundComment soundComment = new SoundComment();
     soundComment.setCommentId(String.valueOf(System.currentTimeMillis()));
     soundComment.setOwner(user);

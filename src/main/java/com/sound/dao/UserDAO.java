@@ -12,5 +12,4 @@ public class UserDAO extends BaseDAO<User, ObjectId> {
   protected UserDAO(Mongo mongo, Morphia morphia, String dbName) {
     super(mongo, morphia, dbName);
   }
-
 }
