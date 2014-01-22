@@ -27,6 +27,16 @@ public class BaseDAO<T, PK> extends BasicDAO<T, PK> {
     Query<T> q = ds.find(clazz, key, value);
     this.deleteByQuery(q);
   }
+  
+  public void deleteByProperties(Map<String, Object> cratiaries) {
+    Query<T> query = this.ds.createQuery(clazz);
+
+    for (String key : cratiaries.keySet()) {
+      query.field(key).equal(cratiaries.get(key));
+    }
+
+    this.deleteByQuery(query);
+  }
 
   public List<T> find(String key, Object value) {
     Query<T> query = this.ds.createQuery(clazz);

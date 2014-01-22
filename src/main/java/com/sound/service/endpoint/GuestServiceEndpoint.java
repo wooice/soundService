@@ -56,7 +56,6 @@ public class GuestServiceEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   public User login(@NotNull final JsonObject inputJsonObj) {
     User user = null;
-
     try {
       HttpSession session = req.getSession();
       String verifyCode = (String) session.getAttribute("verifyCode");
@@ -67,7 +66,7 @@ public class GuestServiceEndpoint {
         inputVerify = inputJsonObj.getString("verifyCode");
       } catch (Exception e) {}
       try {
-        rememberUser = Boolean.parseBoolean(inputJsonObj.getString("rememberUser"));
+        rememberUser = inputJsonObj.getBoolean("rememberUser");
       } catch (Exception e) {}
       
       Object errorObj = session.getAttribute("ERROR_TIMES");

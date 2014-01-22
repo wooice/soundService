@@ -35,6 +35,7 @@ import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.enums.SoundState;
 import com.sound.model.enums.SoundType;
 import com.sound.processor.factory.ProcessorFactory;
+import com.sound.service.sound.itf.PlayListService;
 import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
@@ -63,6 +64,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
   @Autowired
   RemoteStorageService remoteStorageService;
+  
+  @Autowired
+  PlayListService playListService;
 
   @Override
   public void addToSet(String soundId, String setId) {}
@@ -77,7 +81,9 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       userDAO.updateProperty("_id", sound.getProfile().getOwner().getId(),
           "userSocial.soundDuration", (sound.getProfile().getOwner().getUserSocial()
               .getSoundDuration() - sound.getProfile().getDuration()));
-
+      
+      playListService.removePlayRecord(null, sound);
+      
       queueNodeDAO.deleteByProperty("fileName", sound.getProfile().getRemoteId());
       remoteStorageService.deleteFile("sound", sound.getProfile().getRemoteId());
       remoteStorageService.deleteFile("image", sound.getProfile().getRemoteId());
@@ -101,6 +107,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
       queueNodeDAO.deleteByProperty("fileName", remoteId);
       userDAO.decrease("_id", sound.getProfile().getOwner().getId(), "userSocial.sounds");
+      
+      playListService.removePlayRecord(null, sound);
     }
 
     soundDAO.deleteByProperty("profile.remoteId", remoteId);

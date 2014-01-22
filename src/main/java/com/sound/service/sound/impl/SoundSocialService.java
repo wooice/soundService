@@ -28,6 +28,7 @@ import com.sound.model.SoundActivity.SoundReport;
 import com.sound.model.SoundActivity.SoundVisit;
 import com.sound.model.Tag;
 import com.sound.model.User;
+import com.sound.service.sound.itf.PlayListService;
 import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
@@ -42,6 +43,9 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
   @Autowired
   TagService tagService;
+  
+  @Autowired
+  PlayListService playListService;
   
   @Autowired
   UtilService util;
@@ -83,6 +87,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
       sound.getProfile().setUrlGeneratedDate(new Date());
     }
     soundDAO.save(sound);
+    
+    if (null != user)
+    {
+      playListService.addPlayRecord(user, sound);
+      userService.saveUser(user);
+    }
     
     Map<String, String> playResult = new HashMap<String, String>();
     playResult.put("played", String.valueOf(sound.getPlays().size()));

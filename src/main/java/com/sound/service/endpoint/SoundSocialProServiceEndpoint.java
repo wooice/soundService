@@ -24,12 +24,13 @@ import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.SoundActivity.SoundPlay;
 import com.sound.model.SoundActivity.SoundVisit;
+import com.sound.model.User;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.service.sound.itf.SoundSocialService;
 
 @Component
 @Path("/soundActivityPro")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
 public class SoundSocialProServiceEndpoint {
 
   Logger logger = Logger.getLogger(SoundSocialProServiceEndpoint.class);
@@ -49,6 +50,7 @@ public class SoundSocialProServiceEndpoint {
   @GET
   @Path("/{soundId}/plays")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
   public List<SoundPlay> played(@NotNull @PathParam("soundId") String soundId,
       @NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("perPage") Integer perPage) {
@@ -60,6 +62,11 @@ public class SoundSocialProServiceEndpoint {
       }
 
       plays = soundSocialService.getPlayed(sound, pageNum, perPage);
+      
+      User curUser = userService.getCurrentUser(req);
+      for (SoundPlay play : plays) {
+        play.getOwner().setUserPrefer(userService.getUserPrefer(curUser, play.getOwner()));
+      }
     } catch (SoundException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -86,6 +93,11 @@ public class SoundSocialProServiceEndpoint {
       }
 
       visits = soundSocialService.getVisits(sound, pageNum, perPage);
+ 
+      User curUser = userService.getCurrentUser(req);
+      for (SoundVisit visit : visits) {
+        visit.getOwner().setUserPrefer(userService.getUserPrefer(curUser, visit.getOwner()));
+      }
     } catch (SoundException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
