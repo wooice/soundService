@@ -52,4 +52,5 @@ public interface SoundService {
   public void demoteSound(Sound sound);
   
   public void promoteUser(User user);
+  
 }

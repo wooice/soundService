@@ -24,6 +24,7 @@ import com.sound.constant.Constant;
 import com.sound.dao.QueueNodeDAO;
 import com.sound.dao.SoundDAO;
 import com.sound.dao.UserDAO;
+import com.sound.exception.SoundAuthException;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Sound.QueueNode;
@@ -62,7 +63,7 @@ public class QueueService implements com.sound.service.sound.itf.QueueService{
   RemoteStorageService remoteStorageService;
 
   @Override
-  public SoundLocal processSound(User user, String soundUrl, QueueNode node) throws SoundException,
+  public SoundLocal processSound(User user, String soundUrl, QueueNode node) throws SoundException, SoundAuthException,
       AudioProcessException {
     Extractor extractor = processFactory.getExtractor("wav");
     String soundInfoString = remoteStorageService.getSoundInfo(node.getFileName());
@@ -83,7 +84,7 @@ public class QueueService implements com.sound.service.sound.itf.QueueService{
       soundFormat.setDuration((float) rootNode.findValue("duration").asDouble());
 
       if (!checkUserRight(user, soundFormat)) {
-        throw new SoundException("NO_RIGHT");
+        throw new SoundAuthException(soundFormat.getAlbum_artist(), soundFormat.getArtist(), soundFormat.getComposer());
       }
 
       // Check total sounds sum
@@ -189,6 +190,11 @@ public class QueueService implements com.sound.service.sound.itf.QueueService{
 
 
   private boolean checkUserRight(User user, SoundFormat soundFormat) {
+    if (null == soundFormat.getAlbum_artist() && null == soundFormat.getArtist())
+    {
+      return true;
+    }
+    
     if (null != soundFormat.getAlbum_artist()
         && Arrays.asList(soundFormat.getAlbum_artist().split("/")).contains(
             user.getProfile().getAlias())) {

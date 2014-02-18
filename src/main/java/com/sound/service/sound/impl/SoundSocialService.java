@@ -56,6 +56,9 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   @Autowired
   com.sound.service.user.itf.UserService userService;
 
+  @Autowired
+  com.sound.service.user.itf.MessageService messageService;
+  
   @Override
   public Map<String, String> play(User user, Sound sound) throws SoundException {
     if (!sound.getProfile().getOwner().equals(user))
@@ -319,7 +322,8 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     return toReturn;
   }
 
-  private List<Sound> recommandRandomSounds(User recommendTo, int number) {
+  @Override
+  public List<Sound> recommandRandomSounds(User recommendTo, int number) {
     Map<String, List<Object>> excludes = new HashMap<String, List<Object>>();
     List<Object> users = new ArrayList<Object>();
     users.add(recommendTo);
@@ -379,7 +383,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     if (sound.getReports().size() > Constant.REPORTS_LIMIT)
     {
       sound.getProfile().setStatus("deleted");
-      userService.sendUserMessage(null, user, "", "由于您的声音"+sound.getProfile().getAlias()+"被大量用户举报，该声音已被删除。如有不便，敬请谅解。");
+      messageService.sendUserMessage(null, user, "", "由于您的声音"+sound.getProfile().getAlias()+"被大量用户举报，该声音已被删除。如有不便，敬请谅解。");
     }
     this.soundDAO.save(sound);
   

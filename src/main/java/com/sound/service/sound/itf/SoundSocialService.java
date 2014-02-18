@@ -46,4 +46,6 @@ public interface SoundSocialService {
   public List<SoundVisit> getVisits(Sound sound, Integer pageNum, Integer perPage) throws SoundException;
   
   public Boolean report(User user, Sound sound);
+  
+  public List<Sound> recommandRandomSounds(User recommendTo, int number);
 }

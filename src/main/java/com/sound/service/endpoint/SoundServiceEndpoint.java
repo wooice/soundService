@@ -221,6 +221,19 @@ public class SoundServiceEndpoint {
     }
     return Response.status(Status.OK).build();
   }
+  
+  @DELETE
+  @Path("/{remoteId}/discard")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  public Response discard(@NotNull @PathParam("remoteId") String remoteId) {
+    try {
+      soundService.deleteByRemoteId(remoteId);
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+    return Response.status(Status.OK).build();
+  }
 
   @POST
   @Path("/streams/match/{q}")
@@ -331,6 +344,11 @@ public class SoundServiceEndpoint {
       userService.saveUser(currentUser);
       
       sounds = soundService.loadByTags(currentUser, tags, pageNum, soundsPerPage);
+      
+      if (sounds.size() < soundsPerPage)
+      {
+        sounds.addAll(soundSocialService.recommandRandomSounds(currentUser, soundsPerPage-sounds.size()));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

@@ -650,6 +650,7 @@ public class Sound extends BaseModel {
 
     private Date createdDate;
     
+    /* live, processed, deleted */
     private String status;
 
     @JsonIgnore

@@ -297,6 +297,10 @@ public class UserSocialServiceEndpoint {
     try {
       user = userService.getUserByAlias(userAlias);
       users.addAll(userSocialService.getFollowedUsers(user, pageNum, pageSize));
+      
+      for (User oneUser : users) {
+        oneUser.setUserPrefer(userService.getUserPrefer(userService.getCurrentUser(req), oneUser));
+      }
     } catch (UserException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -315,6 +319,10 @@ public class UserSocialServiceEndpoint {
     try {
       user = userService.getUserByAlias(userAlias);
       users.addAll(userSocialService.getFollowingUsers(user, pageNum, pageSize));
+      
+      for (User oneUser : users) {
+        oneUser.setUserPrefer(userService.getUserPrefer(userService.getCurrentUser(req), oneUser));
+      }
     } catch (UserException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

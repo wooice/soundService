@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
+import com.sound.exception.SoundAuthException;
 import com.sound.exception.SoundException;
 import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.Sound.QueueNode;
@@ -32,6 +33,9 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
 
   @Autowired
   com.sound.service.storage.itf.RemoteStorageService remoteStorageService;
+  
+  @Autowired
+  com.sound.service.user.itf.MessageService messageService;
 
   @Autowired
   SoundService soundService;
@@ -70,21 +74,39 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         sound.setOriginName(node.getOriginFileName());
 
         soundService.promoteUser(owner);
-      } catch (SoundException e) {
-        logger.error(e);
-
+      } 
+      catch (SoundAuthException authException)
+      {
+        success = false;
+        titile = "声音上传失败";
+        message = "  非常抱歉，您可能不是声音" + node.getOriginFileName() + "的原作者(表演者或词曲作者)，\n";
+        
+        if (null != authException.getAlbum())
+        {
+          message += "      唱片集:    "+ authException.getAlbum() + "\n";
+        }
+        if (null != authException.getAlbumArtists())
+        {
+          message += "      唱片集艺术家:  " + authException.getAlbumArtists() + "\n";
+        }
+        if (null != authException.getArtists())
+        {
+          message += "      歌曲艺术家:   " + authException.getArtists() + "\n";
+        }
+        if (null != authException.getComposer())
+        {
+          message += "      歌曲曲作者:      " + authException.getComposer() + "\n";
+        }
+        
+        message += "  由于以上原因，您的声音 无法完成上传。请确认您是声音的原作者，并修正上传的音频有完善的版权信息， 以免侵犯他人的著作权。";
+        soundService.deleteByRemoteId(node.getFileName());
+      }
+      catch (SoundException e) {
         success = false;
         titile = "声音上传失败";
         // if stream or format info not ready, just ignore it.
         if ("EMPTY_STREAM".equals(e.getMessage()) || "NO_FORMATINFO".equals(e.getMessage())) {
-          return Response.status(Status.OK).build();
-        }
-        if ("NO_RIGHT".equals(e.getMessage())) {
-          message =
-              "非常抱歉，由于我们检测到您可能不是声音" + node.getOriginFileName() + "的原作者(表演者或词曲作者)，您的声音"
-                  + node.getOriginFileName()
-                  + "无法完成上传。请确认您是声音的原作者，且上传的音频有完善的版权信息， 以免侵犯他人的著作权。";
-          soundService.deleteByRemoteId(node.getFileName());
+          continue;
         }
         if ("TOTAL_LIMIT_ERROR".equals(e.getMessage())) {
           message =
@@ -99,16 +121,15 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
                   + ((null == sound) ? "" : node.getOriginFileName()) + "无法完成上传。";
           soundService.deleteByRemoteId(node.getFileName());
         }
-      } catch (AudioProcessException e) {
-        logger.error(e);
-        soundService.deleteByRemoteId(node.getFileName());
-
+      } 
+      catch (AudioProcessException e) {
         success = false;
+        
+        soundService.deleteByRemoteId(node.getFileName());
         titile = "声音上传失败";
         message =
             "非常抱歉，由于您的声音文件格式不正确，您的声音" + ((null == sound) ? "" : node.getOriginFileName()) + "无法完成上传。";
       } catch (Exception e) {
-        logger.error(e);
         success = false;
         titile = "声音上传失败";
         message = "非常抱歉，您的声音" + node.getOriginFileName() + "上传失败，请稍后再次尝试或联系我们。";
@@ -119,7 +140,7 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         message = "您的声音" + node.getOriginFileName() + "上传并处理成功，将出在个人声音列表中，并推送给关注您的小伙伴。";
       }
 
-      userService.sendUserMessage(null, owner, titile, message);
+      messageService.sendUserMessage(null, owner, titile, message);
     }
     return Response.status(Status.OK).build();
   }

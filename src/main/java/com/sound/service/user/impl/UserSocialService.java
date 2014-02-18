@@ -242,7 +242,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   private List<User> getAllFollowingUsers(User fromUser) throws UserException {
     Map<String, Object> cratiaries = new HashMap<String, Object>();
     cratiaries.put("fromUser", fromUser);
-    List<UserConnect> list = userConnectDAO.findWithRange(cratiaries, 0, 100, "-createdTime");
+    List<UserConnect> list = userConnectDAO.findWithRange(cratiaries, 0, 25, "-createdTime");
     List<User> result = new ArrayList<User>();
     for (UserConnect uc : list) {
       result.add(uc.getToUser());
@@ -303,7 +303,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
 
     List<Tag> tagList = new ArrayList<Tag>();
     tagList.addAll(tags);
-    List<Sound> sounds = soundDAO.findByTag(curUser, tagList, 0, 100);
+    List<Sound> sounds = soundDAO.findByTag(curUser, tagList, 0, 25);
 
     for (Sound sound : sounds) {
       User user = sound.getProfile().getOwner();
@@ -329,7 +329,7 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
       throws UserException, SoundException {
     List<User> bySocial = recommandUsersBySocial(user);
 
-    List<Sound> liked = soundDAO.getRecommendSoundsByUser(user, 0, 50);
+    List<Sound> liked = soundDAO.getRecommendSoundsByUser(user, 0, 25);
     Set<Tag> tags = new HashSet<Tag>();
     for (Sound sound : liked) {
       tags.addAll(sound.getTags());
