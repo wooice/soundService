@@ -121,7 +121,7 @@ public class UserAuth extends BaseModel {
       this.cancelCode = cancelCode;
     }
   }
-
+  
   public static class ChangeHistory {
     private String ip;
     private String password;

@@ -76,6 +76,16 @@ public class BaseDAO<T, PK> extends BasicDAO<T, PK> {
 
     return this.find(query).asList();
   }
+  
+  public long count(Map<String, Object> cratiaries) {
+    Query<T> query = this.ds.createQuery(clazz);
+
+    for (String key : cratiaries.keySet()) {
+      query.field(key).equal(cratiaries.get(key));
+    }
+
+    return this.count(query);
+  }
 
   public void increase(String key, Object value, String property) {
     Query<T> updateQuery = ds.createQuery(this.clazz).field(key).equal(value);

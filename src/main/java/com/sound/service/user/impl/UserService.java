@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -50,7 +49,6 @@ import com.sound.model.UserActivity.UserConnect;
 import com.sound.model.UserAuth;
 import com.sound.model.UserAuth.ChangeHistory;
 import com.sound.model.UserAuth.PasswordResetRequest;
-import com.sound.model.UserMessage;
 import com.sound.service.storage.itf.RemoteStorageService;
 
 @Service
@@ -207,6 +205,30 @@ public class UserService implements com.sound.service.user.itf.UserService {
       throw new UserException("Password not changed!");
     }
 
+    changePass(password, ip, user);
+
+    passwordResetRequestDAO.delete(request);
+
+    return user;
+  }
+
+  @Override
+  public User resetPassword(String code, String password, String ip) throws UserException, AuthException {
+    PasswordResetRequest request = passwordResetRequestDAO.findOne("resetCode", code);
+    if (null == request) {
+      throw new AuthException("You can't update password.");
+    }
+
+    User user = request.getUser();
+
+    changePass(password, ip, user);
+
+    passwordResetRequestDAO.delete(request);
+
+    return user;
+  }
+
+  private void changePass(String password, String ip, User user) {
     UserAuth auth = user.getAuth();
     if (auth == null) {
       auth = new UserAuth();
@@ -224,12 +246,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
     auth.addHistory(history);
 
     userAuthDAO.save(auth);
-
-    passwordResetRequestDAO.delete(request);
-
-    return user;
   }
-
+  
   public void deleteByAlias(String userAlias) {
     userDAO.deleteByProperty("profile.alias", userAlias);
   }
@@ -339,9 +357,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public void sendEmailAddressConfirmation(String userAlias, String emailAddress)
+  public void sendEmailAddressConfirmation(User user, String emailAddress)
       throws UserException {
-    User user = this.getUserByAlias(userAlias);
     if (user == null) {
       throw new UserException("USER_404");
     }
@@ -351,8 +368,8 @@ public class UserService implements com.sound.service.user.itf.UserService {
         if (email.isConfirmed()) {
           throw new UserException("CONFIRMED");
         } else {
-          doSendEmail("[Wowoice]注册确认", emailAddress, userAlias,
-              generateConformEmailBody(email.getConfirmCode(), userAlias));
+          doSendEmail("[WOWOICE]注册确认", emailAddress, user.getProfile().getAlias(),
+              generateConformEmailBody(email.getConfirmCode(), user.getProfile().getAlias()));
           return;
         }
       }
@@ -378,7 +395,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
         passwordResetRequest.setCancelCode(this.generateRandomCode());
 
         doSendEmail(
-            "[e]重置密码",
+            "[WOWOICE]重置密码",
             emailAddress,
             user.getProfile().getAlias(),
             generateChangePassBody(passwordResetRequest.getResetCode(),
@@ -464,45 +481,65 @@ public class UserService implements com.sound.service.user.itf.UserService {
   }
 
   @Override
-  public User changeContactEmailAddress(String userAlias, String targetEmailAddress)
+  public String changeContactEmailAddress(User user, String targetEmailAddress)
       throws UserException {
-    User user = this.getUserByAlias(userAlias);
-    if (user == null) {
+    if (null == user)
+    {
       throw new UserException("USER_404");
     }
+    
     UserEmail newEmail = null;
     List<UserEmail> emails = user.getEmails();
+    String oldEmail = null;
 
-    for (UserEmail email : emails) {
-      if (email.getEmailAddress().equals(targetEmailAddress)) {
-        if (email.isContact() && email.isConfirmed()) {
-          throw new UserException("CONFIRMED");
+    for (UserEmail email : emails) 
+    {
+      if (email.isContact())
+      {
+        if (!email.isConfirmed())
+        {
+          throw new UserException("EMAIL_NOT_CONFIRMED");
         }
-        newEmail = email;
-      } else {
+        
+        if (email.getEmailAddress().equals(targetEmailAddress))
+        {
+          throw new UserException("CONFIRMED_ALREADY");
+        }
+        
         email.setContact(false);
+        oldEmail = email.getEmailAddress();
+      }
+      else
+      {
+        if (email.getEmailAddress().equals(targetEmailAddress))
+        {
+          newEmail = email;
+        }
       }
     }
 
     if (null == newEmail) {
       newEmail = new UserEmail();
       newEmail.setEmailAddress(targetEmailAddress);
-      newEmail.setConfirmCode(generateRandomCode());
-      newEmail.setConfirmed(false);
-      newEmail.setContact(true);
       newEmail.setSetting(new EmailSetting());
       emails.add(newEmail);
-    } else {
-      newEmail.setConfirmCode(generateRandomCode());
-      newEmail.setConfirmed(false);
-      newEmail.setContact(true);
-    }
+    } 
+
+    newEmail.setConfirmCode(generateRandomCode());
+    newEmail.setConfirmed(false);
+    newEmail.setContact(true);
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
+    
+    if (null == oldEmail)
+    {
+      // If no email bound, it means user account is created by external login.
+      oldEmail = targetEmailAddress;
+    }
 
-    doSendEmail("[Wowoice]添加新邮箱", targetEmailAddress, userAlias,
-        changeEmailBody(newEmail.getConfirmCode(), userAlias));
+    doSendEmail("[WOWOICE]添加新邮箱", oldEmail, user.getProfile().getAlias(),
+        changeEmailBody(newEmail.getConfirmCode(), user.getProfile().getAlias()));
 
-    return user;
+    return oldEmail;
   }
 
   @Override
@@ -521,59 +558,6 @@ public class UserService implements com.sound.service.user.itf.UserService {
     userDAO.updateProperty("_id", user.getId(), "emails", emails);
 
     return user;
-  }
-
-  @Override
-  public void sendUserMessage(User fromUser, User toUser, String topic, String content) {
-    String summary = content.length() <= 50 ? content : content.substring(0, 49) + "...";
-
-    UserMessage message = new UserMessage();
-    message.setFrom(fromUser);
-    message.setTo(toUser);
-    message.setTopic(topic);
-    message.setContent(content);
-    message.setSummary(summary);
-    message.setDate(new Date());
-    message.setStatus("unread");
-    userMessageDAO.save(message);
-
-    if (null != fromUser) {
-      userDAO.increase("profile.alias", fromUser.getProfile().getAlias(),
-          "userSocial.outputMessages");
-    }
-    userDAO.increase("profile.alias", toUser.getProfile().getAlias(), "userSocial.inputMessages");
-  }
-
-  @Override
-  public List<UserMessage> getUserMessages(User toUser, String status, Integer pageNum,
-      Integer perPage) {
-    Map<String, Object> cratiaries = new HashMap<String, Object>();
-    cratiaries.put("to", toUser);
-
-    if (null != status) {
-      cratiaries.put("status", status);
-    }
-
-    return userMessageDAO.findWithRange(cratiaries, (pageNum - 1) * perPage, perPage, "-date");
-  }
-
-  @Override
-  public void markUserMessage(String messageId, String status) throws UserException {
-    UserMessage userMessage = userMessageDAO.findOne("_id", new ObjectId(messageId));
-    if (status.equals("delete")) {
-      if (null != userMessage.getFrom()) {
-        userDAO.decrease("profile.alias", userMessage.getFrom().getProfile().getAlias(),
-            "userSocial.outputMessages");
-      }
-      userDAO.decrease("profile.alias", userMessage.getTo().getProfile().getAlias(),
-          "userSocial.inputMessages");
-    }
-
-    if (!status.equals("trash")) {
-      userMessageDAO.updateProperty("_id", userMessage.getId(), "status", status);
-    } else {
-      userMessageDAO.deleteByProperty("_id", userMessage.getId());
-    }
   }
 
   @Override
@@ -616,7 +600,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
     sb.append("<h2>感谢您注册Wowoice!</h2>");
     sb.append("Hi " + userAlias + ",<br/><br/>");
     sb.append("感谢您注册Wowoice，请点击以下面链接 ");
-    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?confirmCode=" + code
+    sb.append("<a href=\"" + config.getString("site") + "/auth/confirm?confirmCode=" + code
         + "\">激活您的账号.</a> <br/><br/>");
     sb.append("<h4>WOWOICE<h4/>");
     return sb.toString();
@@ -626,9 +610,9 @@ public class UserService implements com.sound.service.user.itf.UserService {
     StringBuilder sb = new StringBuilder();
     sb.append("<h2>添加新邮箱到Wowoice</h2>");
     sb.append("Hi " + userAlias + ",<br/><br/>");
-    sb.append("Wowoice收到您的邮件变更请求，请点击以下面链接 ");
-    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?confirmCode=" + code
-        + "\">确认.谢谢合作。</a> <br/><br/>");
+    sb.append("Wowoice收到您的联系邮件变更请求，请点击以下面链接 ");
+    sb.append("<a href=\"" + config.getString("site") + "/auth/confirm?confirmCode=" + code
+        + "\">完成确认</a>.谢谢合作。 <br/><br/>");
     sb.append("<h4>WOWOICE<h4/>");
     return sb.toString();
   }
@@ -638,10 +622,10 @@ public class UserService implements com.sound.service.user.itf.UserService {
     sb.append("<h3>请修改您的密码</h3>");
     sb.append("Hi " + userAlias + ",<br/><br/>");
     sb.append("我们收到您修改密码的请求，请访问以下链接 ");
-    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?resetCode=" + changeCode
+    sb.append("<a href=\"" + config.getString("site") + "/auth/confirm?resetCode=" + changeCode
         + "\">修改密码</a> <br/><br/>");
     sb.append("如果您没有发出修改密码请求，请访问以下连续取消修改 ");
-    sb.append("<a href=\"" + config.getString("site") + "#/auth/confirm?cancelCode=" + cancelCode
+    sb.append("<a href=\"" + config.getString("site") + "/auth/confirm?cancelCode=" + cancelCode
         + "\">取消修改</a> <br/><br/>");
     sb.append("<h4>WOWOICE<h4/>");
     return sb.toString();

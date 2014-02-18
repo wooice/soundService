@@ -1,9 +1,9 @@
 package com.sound.service.endpoint;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
-import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
@@ -14,7 +14,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -28,10 +27,10 @@ import org.springframework.stereotype.Component;
 import com.sound.constant.Constant;
 import com.sound.exception.UserException;
 import com.sound.model.User;
+import com.sound.model.User.UserEmail;
 import com.sound.model.User.UserEmail.EmailSetting;
 import com.sound.model.User.UserExternal;
 import com.sound.model.User.UserProfile;
-import com.sound.model.UserMessage;
 
 @Component
 @Path("/user")
@@ -127,13 +126,14 @@ public class UserServiceEndpoint {
   }
 
   @PUT
-  @Path("/addEmail/{userAlias}/{emailAddress}")
+  @Path("/addEmail/{emailAddress}")
   @Produces(MediaType.APPLICATION_JSON)
-  public User addEmailAddress(@NotNull @PathParam("userAlias") String userAlias,
+  public User addEmailAddress(
       @NotNull @PathParam("emailAddress") String emailAddress) {
     User user = null;
     try {
-      user = userService.addEmailAddress(userAlias, emailAddress);
+      user = userService.getCurrentUser(this.req);
+      user = userService.addEmailAddress(user.getProfile().getAlias(), emailAddress);
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -143,11 +143,13 @@ public class UserServiceEndpoint {
   }
 
   @PUT
-  @Path("/sendEmailConfirm/{userAlias}/{emailAddress}")
-  public Response sendEmailAddressConfirmation(@NotNull @PathParam("userAlias") String userAlias,
+  @Path("/sendEmailConfirm/{emailAddress}")
+  public Response sendEmailAddressConfirmation(
       @NotNull @PathParam("emailAddress") String emailAddress) {
+    User curUser = null;
     try {
-      userService.sendEmailAddressConfirmation(userAlias, emailAddress);
+      curUser =  userService.getCurrentUser(req);
+      userService.sendEmailAddressConfirmation(curUser, emailAddress);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -156,18 +158,24 @@ public class UserServiceEndpoint {
     return Response.status(Status.OK).build();
   }
 
-  @GET
-  @Path("/changeContactEmail/{userAlias}/{emailAddress}")
-  public Response changeContactEmail(@NotNull @PathParam("userAlias") String userAlias,
+  @POST
+  @Path("/changeContactEmail/{emailAddress}")
+  public Response changeContactEmail(
       @NotNull @PathParam("emailAddress") String emailAddress) {
+    User curUser = null;
+    String emailToVerify = null;
     try {
-      userService.changeContactEmailAddress(userAlias, emailAddress);
+      curUser =  userService.getCurrentUser(req);
+      emailToVerify = userService.changeContactEmailAddress(curUser, emailAddress);
     } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    return Response.status(Status.OK).build();
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("emailToVerify", emailToVerify);
+    
+    return Response.status(Status.OK).entity(result).build();
   }
 
   @PUT
@@ -185,60 +193,6 @@ public class UserServiceEndpoint {
     }
 
     return user;
-  }
-
-  @PUT
-  @Path("/messages/send")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response sendUserMessage(@NotNull JsonObject inputJsonObj) {
-    User curUser = null;
-    try {
-      String toUser = inputJsonObj.getString("toUser");
-      String topic = inputJsonObj.getString("topic");
-      String content = inputJsonObj.getString("content");
-      curUser = userService.getCurrentUser(req);
-      User to = userService.getUserByAlias(toUser);
-      userService.sendUserMessage(curUser, to, topic, content);
-    } catch (Exception e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-
-    return Response.status(Status.OK).build();
-  }
-
-  @POST
-  @Path("/messages/mark")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response markUserMessage(@NotNull JsonObject inputJsonObj) {
-    try {
-      String messageId = inputJsonObj.getString("id");
-      String status = inputJsonObj.getString("status");
-      userService.markUserMessage(messageId, status);
-    } catch (Exception e) {
-      logger.error(e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-
-    return Response.status(Status.OK).build();
-  }
-
-  @GET
-  @Path("/messages")
-  @Produces(MediaType.APPLICATION_JSON)
-  public List<UserMessage> getMessages(@QueryParam("pageNum") Integer pageNum,
-      @QueryParam("perPage") Integer perPage, @QueryParam("status") String status) {
-    User curUser = null;
-    List<UserMessage> messages = null;
-    try {
-      curUser = userService.getCurrentUser(req);
-      messages = userService.getUserMessages(curUser, status, pageNum, perPage);
-    } catch (Exception e) {
-      logger.error(e);
-      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-    }
-
-    return messages;
   }
 
   @POST
@@ -268,11 +222,29 @@ public class UserServiceEndpoint {
   @Path("/submitPassChange")
   public Response forgetPass() {
     User user = null;
-    try {
+    try 
+    {
       user = userService.getCurrentUser(req);
-      if (user == null || (user.getEmails() == null || user.getEmails().size() == 0)) {
+      UserEmail contactEmail = null;
+      
+      for (UserEmail email: user.getEmails())
+      {
+        if (email.isContact())
+        {
+          contactEmail = email;
+        }
+      }
+      
+      if (null == contactEmail) 
+      {
         return Response.status(Status.INTERNAL_SERVER_ERROR).entity("NO_EMAIL_BIND").build();
       }
+      
+      if (!contactEmail.isConfirmed())
+      {
+        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("NOT_CONFIRMED").build();
+      }
+      
       userService.sendChangePassLink(user.getEmails().get(0).getEmailAddress());
     } catch (UserException e) {
       logger.error(e);

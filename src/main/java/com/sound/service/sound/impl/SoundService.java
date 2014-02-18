@@ -84,7 +84,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       
       playListService.removePlayRecord(null, sound);
       
-      queueNodeDAO.deleteByProperty("fileName", sound.getProfile().getRemoteId());
+      queueNodeDAO.updateProperty("fileName", sound.getProfile().getRemoteId(), "status", "deleted");
       remoteStorageService.deleteFile("sound", sound.getProfile().getRemoteId());
       remoteStorageService.deleteFile("image", sound.getProfile().getRemoteId());
       remoteStorageService.deleteFile("wave", sound.getProfile().getRemoteId());
@@ -98,6 +98,8 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     remoteStorageService.deleteFile("sound", remoteId);
     remoteStorageService.deleteFile("image", remoteId);
     remoteStorageService.deleteFile("wave", remoteId);
+    queueNodeDAO.updateProperty("fileName", remoteId, "status", "deleted");
+    
     Sound sound = soundDAO.findOne("profile.remoteId", remoteId);
 
     if (null != sound) {
@@ -105,9 +107,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
           "userSocial.soundDuration", (sound.getProfile().getOwner().getUserSocial()
               .getSoundDuration() - sound.getProfile().getDuration()));
 
-      queueNodeDAO.deleteByProperty("fileName", remoteId);
       userDAO.decrease("_id", sound.getProfile().getOwner().getId(), "userSocial.sounds");
-      
       playListService.removePlayRecord(null, sound);
     }
 
@@ -168,6 +168,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     }
 
     Sound sound = soundDAO.findOne("profile.remoteId", soundProfile.getRemoteId());
+
     if (null == sound) {
       sound = new Sound();
       sound.setProfile(new SoundProfile());

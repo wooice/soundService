@@ -6,7 +6,6 @@ public class SoundException extends Exception {
 
   public SoundException() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   public SoundException(String message, Throwable cause) {

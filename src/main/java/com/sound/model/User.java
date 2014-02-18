@@ -59,6 +59,9 @@ public class User extends BaseModel {
   
   @Transient
   private String authToken;
+  
+  @Transient
+  private Long unreadMsgs;
 
   @JsonSerialize(using = IdSerializer.class)
   public ObjectId getId() {
@@ -83,6 +86,14 @@ public class User extends BaseModel {
 
   public void setAuthToken(String authToken) {
     this.authToken = authToken;
+  }
+  
+  public Long getUnreadMsgs() {
+    return unreadMsgs;
+  }
+
+  public void setUnreadMsgs(Long unreadMsgs) {
+    this.unreadMsgs = unreadMsgs;
   }
 
   @JsonIgnore
@@ -230,7 +241,14 @@ public class User extends BaseModel {
     }
 
     public String getAvatorUrl() {
-      return avatorUrl;
+      if (null != avatorUrl)
+      {
+        return avatorUrl; 
+      }
+      else
+      {
+        return Constant.DEFAULT_USER_AVATOR;
+      }
     }
 
     public void setAvatorUrl(String avatorUrl) {
@@ -390,10 +408,6 @@ public class User extends BaseModel {
     //second
     private Long soundDuration;
 
-    private Long inputMessages;
-
-    private Long outputMessages;
-
     public Long getFollowing() {
       return following;
     }
@@ -432,22 +446,6 @@ public class User extends BaseModel {
 
     public void setSoundDuration(Long soundDuration) {
       this.soundDuration = soundDuration;
-    }
-
-    public Long getInputMessages() {
-      return inputMessages;
-    }
-
-    public void setInputMessages(Long inputMessages) {
-      this.inputMessages = inputMessages;
-    }
-
-    public Long getOutputMessages() {
-      return outputMessages;
-    }
-
-    public void setOutputMessages(Long outputMessages) {
-      this.outputMessages = outputMessages;
     }
   }
 

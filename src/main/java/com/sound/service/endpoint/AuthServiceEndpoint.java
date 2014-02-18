@@ -36,7 +36,8 @@ import com.sound.model.User;
 
 @Component
 @Path("/auth")
-@RolesAllowed({Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.ADMIN_ROLE, Constant.GUEST_ROLE})
+@RolesAllowed({Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.ADMIN_ROLE,
+    Constant.GUEST_ROLE})
 @ResourceAllowed
 public class AuthServiceEndpoint {
 
@@ -44,6 +45,9 @@ public class AuthServiceEndpoint {
 
   @Autowired
   com.sound.service.user.itf.UserService userService;
+  
+  @Autowired
+  com.sound.service.user.itf.MessageService messageService;
 
   @Context
   HttpServletRequest req;
@@ -53,12 +57,10 @@ public class AuthServiceEndpoint {
   public Response confirmEmailAddress(@NotNull @PathParam("confirmCode") String confirmCode) {
     try {
       userService.confirmEmailAddress(confirmCode);
-    } 
-    catch (UserException e)
-    {
-      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
-    }
-    catch (Exception e) {
+    } catch (UserException e) {
+      throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(e.getMessage()).build());
+    } catch (Exception e) {
       logger.error(e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -122,6 +124,36 @@ public class AuthServiceEndpoint {
     return Response.status(Status.OK).build();
   }
 
+  @POST
+  @Path("/resetPassword")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response resetUserPassword(@NotNull JsonObject inputJsonObj) {
+
+    try {
+      String code = inputJsonObj.getString("confirmCode");
+
+      if (!userService.verifyResetRequest("confirm", code)) {
+        return Response.status(Status.FORBIDDEN).entity("You don't have rights to update password")
+            .build();
+      }
+
+      String password = inputJsonObj.getString("newPassword");
+
+      userService.resetPassword(code, password, null);
+    } catch (AuthException e) {
+      logger.error(e);
+      return Response.status(Status.FORBIDDEN).build();
+    } catch (UserException e) {
+      logger.error(e);
+      return Response.status(Status.BAD_REQUEST).build();
+    } catch (Exception e) {
+      logger.error(e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+
+    return Response.status(Status.OK).build();
+  }
+
   @GET
   @Path("/isAlive")
   @Produces(MediaType.APPLICATION_JSON)
@@ -129,6 +161,7 @@ public class AuthServiceEndpoint {
     User user = null;
     try {
       user = userService.getCurrentUser(req);
+      user.setUnreadMsgs(messageService.countUnreadMessage(user));
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

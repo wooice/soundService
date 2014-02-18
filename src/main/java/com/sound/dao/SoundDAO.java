@@ -191,7 +191,7 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
     
-    query.offset(0).limit(number);
+    query.offset(0).limit(number).order("-profile.createdTime");
 
     return this.find(query).asList();
   }

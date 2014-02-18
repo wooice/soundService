@@ -1,14 +1,19 @@
 package com.sound.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.github.jmkgreen.morphia.annotations.Reference;
+import com.sound.jackson.extension.DateSerializer;
 import com.sound.jackson.extension.IdSerializer;
 
 @Entity(noClassnameStored = true)
@@ -19,15 +24,24 @@ public class UserMessage extends BaseModel {
 
   @Reference
   private User from;
+  
+  /* unread  read deleted */
+  private String fromStatus;
 
   @Reference
   private User to;
 
-  private String status;
+  /* unread  read deleted */
+  private String toStatus;
+  
   private String topic;
   private String content;
-  private String summary;
   private Date date;
+  private Date updatedDate;
+  
+  @JsonIgnore
+  @Embedded
+  List<UserMessage> replies = new ArrayList<UserMessage>();
 
   @JsonSerialize(using = IdSerializer.class)
   public ObjectId getId() {
@@ -36,6 +50,16 @@ public class UserMessage extends BaseModel {
 
   public void setId(ObjectId id) {
     this.id = id;
+  }
+  
+  public UserMessage getLastReply()
+  {
+    if (replies.size() == 0)
+    {
+      return null;
+    }
+    
+    return replies.get(replies.size()-1);
   }
 
   public User getFrom() {
@@ -61,7 +85,7 @@ public class UserMessage extends BaseModel {
   public void setTopic(String topic) {
     this.topic = topic;
   }
-
+  
   public String getContent() {
     return content;
   }
@@ -71,13 +95,10 @@ public class UserMessage extends BaseModel {
   }
 
   public String getSummary() {
-    return summary;
+    return content.length() <= 30 ? content : content.substring(0, 29) + "...";
   }
 
-  public void setSummary(String summary) {
-    this.summary = summary;
-  }
-
+  @JsonSerialize(using = DateSerializer.class)
   public Date getDate() {
     return date;
   }
@@ -85,13 +106,37 @@ public class UserMessage extends BaseModel {
   public void setDate(Date date) {
     this.date = date;
   }
-
-  public String getStatus() {
-    return status;
+ 
+  public String getFromStatus() {
+    return fromStatus;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setFromStatus(String fromStatus) {
+    this.fromStatus = fromStatus;
+  }
+
+  public String getToStatus() {
+    return toStatus;
+  }
+
+  public void setToStatus(String toStatus) {
+    this.toStatus = toStatus;
+  }
+
+  public List<UserMessage> getReplies() {
+    return replies;
+  }
+
+  public void setReplies(List<UserMessage> replies) {
+    this.replies = replies;
+  }
+
+  public Date getUpdatedDate() {
+    return updatedDate;
+  }
+
+  public void setUpdatedDate(Date updatedDate) {
+    this.updatedDate = updatedDate;
   }
 
   @Override

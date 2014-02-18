@@ -239,6 +239,8 @@ public class GuestServiceEndpoint {
       String emailAddress = inputJsonObj.getString("emailAddress");
       String password = inputJsonObj.getString("password");
       user = userService.createUser(userAlias, emailAddress, password);
+      
+      session.removeAttribute("verifyCode");
     } catch (UserException e) {
       logger.error(e);
       throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
