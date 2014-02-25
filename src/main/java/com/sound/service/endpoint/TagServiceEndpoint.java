@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
+import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.Tag;
 import com.sound.model.Tag.TagCategory;
 import com.sound.model.User;
@@ -36,7 +37,8 @@ import com.sound.service.sound.itf.SoundService;
 
 @Component
 @Path("/tag")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.GUEST_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE,
+    Constant.SPRO_ROLE})
 public class TagServiceEndpoint {
 
   Logger logger = Logger.getLogger(TagServiceEndpoint.class);
@@ -55,6 +57,7 @@ public class TagServiceEndpoint {
 
   @PUT
   @Path("/{categoryName}/{tag}/create")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Response createTag(@NotNull @PathParam("tag") String label,
       @NotNull @QueryParam("curated") Boolean curated,
       @PathParam("categoryName") String categoryName) {
@@ -81,6 +84,7 @@ public class TagServiceEndpoint {
   @PUT
   @Path("/sound/{soundAlias}")
   @Consumes(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public List<Tag> attachTagsToSound(@NotNull @PathParam("soundAlias") String soundAlias,
       @NotNull JsonObject inputJsonObj) {
 
@@ -104,6 +108,7 @@ public class TagServiceEndpoint {
 
   @DELETE
   @Path("/sound/{soundAlias}/{tag}")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Response detachTagsFromSound(@NotNull @PathParam("soundAlias") String soundAlias,
       @NotNull @PathParam("tag") String tag) {
     User curUser = null;
@@ -125,6 +130,7 @@ public class TagServiceEndpoint {
   @GET
   @Path("/list")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public List<Tag> getTagsContains(@NotNull @QueryParam("term") String term) {
     List<Tag> tags = null;
     try {
@@ -140,6 +146,7 @@ public class TagServiceEndpoint {
   @GET
   @Path("/user/{userAlias}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public List<Tag> getTagsByUser(@NotNull @PathParam("userAlias") String userAlias) {
     List<Tag> tags = null;
     try {
@@ -156,6 +163,7 @@ public class TagServiceEndpoint {
   @GET
   @Path("/list/curated")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public List<Tag> getCuratedTags() {
     List<Tag> tags = null;
     User curUser = null;
@@ -178,6 +186,7 @@ public class TagServiceEndpoint {
   @GET
   @Path("/list/categories")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public List<TagCategory> getCategories() {
     List<TagCategory> categories = null;
     try {

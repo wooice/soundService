@@ -1,6 +1,7 @@
 package com.sound.service.user.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -251,10 +252,15 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   }
 
   private List<User> recommandUsersBySocial(User user) throws UserException, SoundException {
+	if (null == user)
+	{
+		return Collections.emptyList();
+	}
+	
     List<User> followingUsers = this.getAllFollowingUsers(user);
 
     if (followingUsers.size() == 0) {
-      return new ArrayList<User>();
+      return Collections.emptyList();
     }
 
     Map<User, Long> potentialFollowing = new HashMap<User, Long>();
@@ -327,8 +333,11 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
   @Override
   public List<User> recommandUsersForUser(User user, Integer pageNum, Integer pageSize)
       throws UserException, SoundException {
+	if (null == user)
+	{
+		return recommandRandomUsers(user, Collections.<String>emptyList(), pageSize);
+	}
     List<User> bySocial = recommandUsersBySocial(user);
-
     List<Sound> liked = soundDAO.getRecommendSoundsByUser(user, 0, 25);
     Set<Tag> tags = new HashSet<Tag>();
     for (Sound sound : liked) {
@@ -370,11 +379,21 @@ public class UserSocialService implements com.sound.service.user.itf.UserSocialS
     Map<String, List<Object>> exclude = new HashMap<String, List<Object>>();
     @SuppressWarnings("unchecked")
     List<Object> alias = (List<Object>) ((null == exclusiveUsers)?new ArrayList<Object>(): exclusiveUsers);
-    alias.add(currentUser.getProfile().getAlias());
-    exclude.put("profile.alias", alias);
+    
+    if (null != currentUser)
+    {
+    	alias.add(currentUser.getProfile().getAlias());
+    	exclude.put("profile.alias", alias);
+    }
     List<User> topUsers = userDAO.findTopOnes(number, exclude, "-userSocial.sounds, userSocial.followed,-profile.createDate");
+    
+    if (null == currentUser)
+    {
+    	return topUsers;
+    }
+    
     List<User> results = new ArrayList<User>();
-
+    // Filter out followed users
     for (User user : topUsers) {
       Map<String, Object> cretiaria = new HashMap<String, Object>();
       cretiaria.put("fromUser", currentUser);

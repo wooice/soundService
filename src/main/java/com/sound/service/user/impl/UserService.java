@@ -254,6 +254,10 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Override
   public UserPrefer getUserPrefer(User currentUser, User targetUser) {
+	if (null == currentUser || null == targetUser)
+	{
+		return new UserPrefer();
+	}
     UserPrefer userPrefer = new UserPrefer();
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();

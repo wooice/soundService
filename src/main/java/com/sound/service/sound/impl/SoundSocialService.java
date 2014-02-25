@@ -302,6 +302,11 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 
   @Override
   public List<Sound> recommandSoundsForUser(User recommendTo, Integer pageNum, Integer pageSize) {
+	if (null == recommendTo)
+	{
+		return recommandRandomSounds(recommendTo, pageSize);
+	}
+	
     List<Sound> liked = soundDAO.getRecommendSoundsByUser(recommendTo, 0, 50);
     Set<Tag> tags = new HashSet<Tag>();
     for (Sound sound : liked) {
@@ -325,9 +330,12 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   @Override
   public List<Sound> recommandRandomSounds(User recommendTo, int number) {
     Map<String, List<Object>> excludes = new HashMap<String, List<Object>>();
-    List<Object> users = new ArrayList<Object>();
-    users.add(recommendTo);
-    excludes.put("profile.owner", users);
+    if (null != recommendTo)
+    {
+	    List<Object> users = new ArrayList<Object>();
+	    users.add(recommendTo);
+	    excludes.put("profile.owner", users);
+    }
     return soundDAO.findTopOnes(number, excludes);
   }
 

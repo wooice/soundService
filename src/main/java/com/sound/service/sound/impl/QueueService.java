@@ -1,10 +1,7 @@
 package com.sound.service.sound.impl;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,7 +34,6 @@ import com.sound.processor.exception.AudioProcessException;
 import com.sound.processor.factory.ProcessorFactory;
 import com.sound.processor.itf.Extractor;
 import com.sound.processor.model.Wave;
-import com.sound.processor.mp3.WavExtractor;
 import com.sound.service.sound.itf.SoundService;
 import com.sound.service.storage.itf.RemoteStorageService;
 
@@ -120,7 +116,8 @@ public class QueueService implements com.sound.service.sound.itf.QueueService{
       soundLocal.setFileName(node.getFileName());
       soundLocal.setSoundFormat(soundFormat);
 
-      Wave wave = extractor.extractWaveByTotal(new URL(soundUrl), null);
+      Wave wave = null;
+//      wave = extractor.extractWaveByTotal(new URL(soundUrl), null);
       waveFile = new File(System.getProperty("java.io.tmpdir") + node.getFileName() + ".png");
       waveFile.createNewFile();
       mapper.writeValue(waveFile, wave);
@@ -269,15 +266,15 @@ public class QueueService implements com.sound.service.sound.itf.QueueService{
     return false;
   }
   
-  public static void main(String[] args) throws AudioProcessException, IOException
-  {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    Extractor extractor = new WavExtractor();
-    Wave wave = extractor.extractWaveByTotal(new BufferedInputStream(new FileInputStream(new File("C:\\server\\apache-tomcat-7.0.40\\temp\\test.wav"))), null);
-    File waveFile = new File(System.getProperty("java.io.tmpdir")+"aaa" + ".png", "");
-    waveFile.createNewFile();
-    System.out.println(waveFile.getAbsolutePath());
-    mapper.writeValue(waveFile, wave);
-  }
+//  public static void main(String[] args) throws AudioProcessException, IOException
+//  {
+//    ObjectMapper mapper = new ObjectMapper();
+//    mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+//    Extractor extractor = new WavExtractor();
+//    Wave wave = extractor.extractWaveByTotal(new BufferedInputStream(new FileInputStream(new File("C:\\server\\apache-tomcat-7.0.40\\temp\\test.wav"))), null);
+//    File waveFile = new File(System.getProperty("java.io.tmpdir")+"aaa" + ".png", "");
+//    waveFile.createNewFile();
+//    System.out.println(waveFile.getAbsolutePath());
+//    mapper.writeValue(waveFile, wave);
+//  }
 }

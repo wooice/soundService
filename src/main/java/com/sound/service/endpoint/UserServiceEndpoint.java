@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.UserException;
+import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.User;
 import com.sound.model.User.UserEmail;
 import com.sound.model.User.UserEmail.EmailSetting;
@@ -48,6 +49,8 @@ public class UserServiceEndpoint {
   @GET
   @Path("/{userAlias}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.GUEST_ROLE})
+  @ResourceAllowed
   public User load(@NotNull @PathParam("userAlias") String userAlias) {
     User user = null;
     User curUser = null;
@@ -72,6 +75,8 @@ public class UserServiceEndpoint {
   @GET
   @Path("/{userAlias}/external")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.GUEST_ROLE})
+  @ResourceAllowed
   public UserExternal loadExternal(@NotNull @PathParam("userAlias") String userAlias) {
     User user = null;
     try {

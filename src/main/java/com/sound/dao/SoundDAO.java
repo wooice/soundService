@@ -66,14 +66,14 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("records.owner").equal(user);
 
     List<Integer> status = new ArrayList<Integer>();
-    if (!user.equals(curUser)) {
+    if (null!=curUser && !user.equals(curUser)) {
       status.add(SoundState.PRIVATE.getStatusId());
     }
     status.add(SoundState.PROCESSING.getStatusId());
     status.add(SoundState.DELETE.getStatusId());
     query.criteria("profile.status").hasNoneOf(status);
 
-    if (curUser.getUserRoles().contains(Constant.USER_ROLE_OBJ))
+    if (null!=curUser && curUser.getUserRoles().contains(Constant.USER_ROLE_OBJ))
     {
       query.offset(start).limit(range).order("-records.createdTime");
     }

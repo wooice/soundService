@@ -159,7 +159,6 @@
 			<artifactId>servlet</artifactId>
 			<version>4.1.36</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>annotations-api</artifactId>
@@ -221,7 +220,7 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.1.1</version>
 				<configuration>
-					<outputDirectory>C:\server\apache-tomcat-7.0.40\webapps</outputDirectory>
+					<outputDirectory>/usr/local/Cellar/tomcat/7.0.50/libexec/webapps</outputDirectory>
 				</configuration>
 			</plugin>
 			<plugin>

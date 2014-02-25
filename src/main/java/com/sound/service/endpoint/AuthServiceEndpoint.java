@@ -41,7 +41,7 @@ import com.sound.model.User;
 @ResourceAllowed
 public class AuthServiceEndpoint {
 
-  Logger logger = Logger.getLogger(UserServiceEndpoint.class);
+  Logger logger = Logger.getLogger(AuthServiceEndpoint.class);
 
   @Autowired
   com.sound.service.user.itf.UserService userService;
@@ -161,7 +161,10 @@ public class AuthServiceEndpoint {
     User user = null;
     try {
       user = userService.getCurrentUser(req);
-      user.setUnreadMsgs(messageService.countUnreadMessage(user));
+      if (null != user)
+      {
+    	  user.setUnreadMsgs(messageService.countUnreadMessage(user));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

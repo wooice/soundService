@@ -238,7 +238,7 @@ public class SoundServiceEndpoint {
   @POST
   @Path("/streams/match/{q}")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  @ResourceAllowed
   public List<Sound> listSoundsByKeyword(@NotNull @PathParam("q") String keyword,
       @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
@@ -260,7 +260,7 @@ public class SoundServiceEndpoint {
   @POST
   @Path("/streams/tags/{tag}")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  @ResourceAllowed
   public List<Sound> listSoundsByTag(@NotNull @PathParam("tag") String tagLabel,
       @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
@@ -269,7 +269,6 @@ public class SoundServiceEndpoint {
     List<Sound> sounds = null;
     User curUser = null;
     try {
-      curUser = userService.getCurrentUser(req);
       List<Tag> tags = new ArrayList<Tag>();
       Tag tag = new Tag();
       tag.setLabel(tagLabel);
@@ -280,8 +279,14 @@ public class SoundServiceEndpoint {
         return Collections.emptyList();
       }
       tags.add(tag);
-      curUser.addTags(tags);
-      userService.saveUser(curUser);
+      
+      curUser = userService.getCurrentUser(req);
+      
+      if (null != curUser)
+      {
+	      curUser.addTags(tags);
+	      userService.saveUser(curUser);
+      }
       
       sounds = soundService.loadByTags(null, tags, pageNum, soundsPerPage);
     } catch (Exception e) {
@@ -315,7 +320,7 @@ public class SoundServiceEndpoint {
   @POST
   @Path("/streams/tags")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  @ResourceAllowed
   public List<Sound> listSoundsByTags(@NotNull final List<String> tagLabels,
       @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
@@ -324,7 +329,6 @@ public class SoundServiceEndpoint {
     List<Sound> sounds = null;
     User currentUser = null;
     try {
-      currentUser = userService.getCurrentUser(req);
       List<Tag> tags = new ArrayList<Tag>();
       for (String label: tagLabels)
       {
@@ -340,8 +344,13 @@ public class SoundServiceEndpoint {
         tags.add(tag);
       }
       
-      currentUser.addTags(tags);
-      userService.saveUser(currentUser);
+      currentUser = userService.getCurrentUser(req);
+      
+      if (null != currentUser)
+      {
+	      currentUser.addTags(tags);
+	      userService.saveUser(currentUser);
+      }
       
       sounds = soundService.loadByTags(currentUser, tags, pageNum, soundsPerPage);
       
@@ -360,7 +369,7 @@ public class SoundServiceEndpoint {
   @POST
   @Path("/streams/{userAlias}")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  @ResourceAllowed
   public List<Sound> listUsersSounds(@QueryParam("pageNum") Integer pageNum,
       @PathParam("userAlias") String userAlias, @QueryParam("soundsPerPage") Integer soundsPerPage) {
     pageNum = (null == pageNum) ? 0 : pageNum;
@@ -368,15 +377,13 @@ public class SoundServiceEndpoint {
 
     List<Sound> sounds = null;
     User user = null;
-    User currentUser = null;
     try {
-      currentUser = userService.getCurrentUser(req);
       user = userService.getUserByAlias(userAlias);
       if (null == user) {
         throw new WebApplicationException(Status.NOT_FOUND);
       }
 
-      sounds = soundService.getSoundsByUser(user, currentUser, pageNum, soundsPerPage);
+      sounds = soundService.getSoundsByUser(user, userService.getCurrentUser(req), pageNum, soundsPerPage);
     } catch (WebApplicationException e) {
       throw e;
     } catch (SoundException e) {
