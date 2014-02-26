@@ -2,6 +2,7 @@ package com.sound.service.sound.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -117,7 +118,7 @@ public class QueueService implements com.sound.service.sound.itf.QueueService{
       soundLocal.setSoundFormat(soundFormat);
 
       Wave wave = null;
-//      wave = extractor.extractWaveByTotal(new URL(soundUrl), null);
+      wave = extractor.extractWaveByTotal(new URL(soundUrl), null);
       waveFile = new File(System.getProperty("java.io.tmpdir") + node.getFileName() + ".png");
       waveFile.createNewFile();
       mapper.writeValue(waveFile, wave);

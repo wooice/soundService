@@ -168,12 +168,16 @@ public class TagServiceEndpoint {
     List<Tag> tags = null;
     User curUser = null;
     try {
-      curUser = userService.getCurrentUser(req);
       tags = tagService.findCurated();
       
-      for(Tag tag: tags)
+      curUser = userService.getCurrentUser(req);
+      
+      if (null != curUser)
       {
-        tag.setInterested(curUser.containTag(tag));
+	      for(Tag tag: tags)
+	      {
+	        tag.setInterested(curUser.containTag(tag));
+	      }
       }
     } catch (SoundException e) {
       logger.error(e);
