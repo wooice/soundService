@@ -368,8 +368,15 @@ public class SoundSocialServiceEndpoint {
   public List<Sound> getRecommandedSounds(@NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<Sound> sounds = new ArrayList<Sound>();
+    User currentUser = null;
     try {
-      sounds.addAll(soundSocialService.recommandSoundsForUser(userService.getCurrentUser(req), pageNum, pageSize));
+      currentUser = userService.getCurrentUser(req);
+      sounds.addAll(soundSocialService.recommandSoundsForUser(currentUser, pageNum, pageSize));
+    
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

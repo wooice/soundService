@@ -54,6 +54,9 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
   RemoteStorageService remoteStorageService;
 
   @Autowired
+  com.sound.service.sound.itf.SoundService soundService;
+  
+  @Autowired
   com.sound.service.user.itf.UserService userService;
 
   @Autowired
@@ -336,7 +339,13 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
 	    users.add(recommendTo);
 	    excludes.put("profile.owner", users);
     }
-    return soundDAO.findTopOnes(number, excludes);
+    List<Sound> sounds = soundDAO.findTopOnes(number, excludes);
+   
+    for (Sound sound : sounds) {
+        soundService.buildSoundSocial(sound);
+   }
+    
+    return sounds;
   }
 
   @Override

@@ -91,6 +91,8 @@ public class SoundServiceEndpoint {
         throw new WebApplicationException(Status.FORBIDDEN);
       }
       
+      sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      
       if (!sound.getProfile().getOwner().equals(currentUser))
       {
         soundSocialService.addVisit(sound, currentUser);
@@ -249,6 +251,10 @@ public class SoundServiceEndpoint {
     try {
       currentUser = userService.getCurrentUser(req);
       sounds = soundService.loadByKeyWords(currentUser, keyword, pageNum, soundsPerPage);
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -267,7 +273,7 @@ public class SoundServiceEndpoint {
     soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
 
     List<Sound> sounds = null;
-    User curUser = null;
+    User currentUser = null;
     try {
       List<Tag> tags = new ArrayList<Tag>();
       Tag tag = new Tag();
@@ -280,15 +286,20 @@ public class SoundServiceEndpoint {
       }
       tags.add(tag);
       
-      curUser = userService.getCurrentUser(req);
+      currentUser = userService.getCurrentUser(req);
       
-      if (null != curUser)
+      if (null != currentUser)
       {
-	      curUser.addTags(tags);
-	      userService.saveUser(curUser);
+    	  currentUser.addTags(tags);
+	      userService.saveUser(currentUser);
       }
       
       sounds = soundService.loadByTags(null, tags, pageNum, soundsPerPage);
+      
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -305,10 +316,14 @@ public class SoundServiceEndpoint {
     soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
 
     List<Sound> sounds = null;
-    User curUser = null;
+    User currentUser = null;
     try {
-      curUser = userService.getCurrentUser(req);
-      sounds = soundService.loadUserHistory(curUser, pageNum, soundsPerPage);
+      currentUser = userService.getCurrentUser(req);
+      sounds = soundService.loadUserHistory(currentUser, pageNum, soundsPerPage);
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -358,6 +373,11 @@ public class SoundServiceEndpoint {
       {
         sounds.addAll(soundSocialService.recommandRandomSounds(currentUser, soundsPerPage-sounds.size()));
       }
+      
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -377,13 +397,20 @@ public class SoundServiceEndpoint {
 
     List<Sound> sounds = null;
     User user = null;
+    User currentUser = null;
     try {
+      currentUser = userService.getCurrentUser(req);
       user = userService.getUserByAlias(userAlias);
       if (null == user) {
         throw new WebApplicationException(Status.NOT_FOUND);
       }
 
-      sounds = soundService.getSoundsByUser(user, userService.getCurrentUser(req), pageNum, soundsPerPage);
+      sounds = soundService.getSoundsByUser(user, currentUser, pageNum, soundsPerPage);
+      
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (WebApplicationException e) {
       throw e;
     } catch (SoundException e) {
@@ -411,6 +438,11 @@ public class SoundServiceEndpoint {
     try {
       currentUser = userService.getCurrentUser(req);
       sounds = soundService.getObservingSounds(currentUser, pageNum, soundsPerPage);
+      
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (SoundException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -479,6 +511,7 @@ public class SoundServiceEndpoint {
     String info = null;
     try {
       Sound sound = soundService.load(null, soundAlias);
+      sound.setUserPrefer(soundService.getUserPreferOfSound(sound, userService.getCurrentUser(req)));
       info = remoteStorageService.getSoundInfo(sound.getProfile().getRemoteId());
     } catch (Exception e) {
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
