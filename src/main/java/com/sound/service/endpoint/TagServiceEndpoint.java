@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -55,6 +56,31 @@ public class TagServiceEndpoint {
   @Context
   HttpServletRequest req;
 
+  @POST
+  @Path("/prepare")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE, Constant.GUEST_ROLE})
+  @ResourceAllowed
+  public Response createTag() {
+    try {
+      Tag tag = new Tag();
+      tag.setLabel("TEST1");
+      tag.setCurated(true);
+      
+      TagCategory category = new TagCategory();
+      category.setName("TEST1");
+      tag.setCategory(category);
+      tag.setCreatedDate(new Date());
+      tagService.get(tag, true);
+    } catch (SoundException e) {
+      logger.error(e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
+
+    return Response.status(Response.Status.CREATED).build();
+  }
+  
   @PUT
   @Path("/{categoryName}/{tag}/create")
   @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})

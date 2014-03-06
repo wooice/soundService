@@ -335,15 +335,15 @@ public class User extends BaseModel {
       this.gender = GenderEnum.getGenderValue(gender);
     }
 
-    public boolean hasAvatar() {
-      return hasAvatar;
-    }
+	public boolean isHasAvatar() {
+		return hasAvatar;
+	}
 
-    public void setHasAvatar(boolean hasAvatar) {
-      this.hasAvatar = hasAvatar;
-    }
+	public void setHasAvatar(boolean hasAvatar) {
+		this.hasAvatar = hasAvatar;
+	}
 
-    @Override
+	@Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;

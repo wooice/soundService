@@ -170,6 +170,11 @@ public class AuthServiceEndpoint {
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
 
+    if (null == user)
+    {
+       throw new WebApplicationException(Status.UNAUTHORIZED);
+    }
+
     return user;
   }
 
