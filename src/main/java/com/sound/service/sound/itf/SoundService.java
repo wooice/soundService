@@ -6,6 +6,7 @@ import java.util.List;
 import com.sound.exception.SoundException;
 import com.sound.model.Sound;
 import com.sound.model.Sound.SoundProfile;
+import com.sound.model.Sound.UserPrefer;
 import com.sound.model.Tag;
 import com.sound.model.User;
 
@@ -53,4 +54,7 @@ public interface SoundService {
   
   public void promoteUser(User user);
   
+  public void buildSoundSocial(Sound sound);
+  
+  public UserPrefer getUserPreferOfSound(Sound sound, User user);
 }

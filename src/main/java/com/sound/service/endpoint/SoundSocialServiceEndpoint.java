@@ -65,15 +65,13 @@ public class SoundSocialServiceEndpoint {
   @ResourceAllowed
   public Map<String, String> play(@NotNull @PathParam("soundId") String soundId) {
     Map<String, String> result = null;
-    User currentUser = null;
     try {
-      currentUser = userService.getCurrentUser(req);
       Sound sound = soundService.loadById(soundId);
       if (null == sound) {
         throw new WebApplicationException(Status.NOT_FOUND);
       }
 
-      result = soundSocialService.play(currentUser, sound);
+      result = soundSocialService.play(userService.getCurrentUser(req), sound);
     } catch (SoundException e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -93,6 +91,10 @@ public class SoundSocialServiceEndpoint {
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
+      if (null == currentUser)
+      {
+    	  throw new WebApplicationException(Status.UNAUTHORIZED);
+      }
       Sound sound = soundService.loadById(soundId);
       if (null == sound) {
         throw new WebApplicationException(Status.NOT_FOUND);
@@ -120,6 +122,10 @@ public class SoundSocialServiceEndpoint {
     User currentUser = null;
     try {
       currentUser = userService.getCurrentUser(req);
+      if (null == currentUser)
+      {
+    	  throw new WebApplicationException(Status.UNAUTHORIZED);
+      }
       Sound sound = soundService.loadById(soundId);
       if (null == sound) {
         throw new WebApplicationException(Status.NOT_FOUND);
@@ -358,7 +364,7 @@ public class SoundSocialServiceEndpoint {
   @GET
   @Path("/recommand/sounds")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
+  @ResourceAllowed
   public List<Sound> getRecommandedSounds(@NotNull @QueryParam("pageNum") Integer pageNum,
       @NotNull @QueryParam("pageSize") Integer pageSize) {
     List<Sound> sounds = new ArrayList<Sound>();
@@ -366,6 +372,11 @@ public class SoundSocialServiceEndpoint {
     try {
       currentUser = userService.getCurrentUser(req);
       sounds.addAll(soundSocialService.recommandSoundsForUser(currentUser, pageNum, pageSize));
+    
+      for (Sound sound: sounds)
+      {
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
     } catch (Exception e) {
       logger.error(e);
       throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

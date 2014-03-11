@@ -87,7 +87,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       queueNodeDAO.updateProperty("fileName", sound.getProfile().getRemoteId(), "status", "deleted");
       remoteStorageService.deleteFile("sound", sound.getProfile().getRemoteId());
       remoteStorageService.deleteFile("image", sound.getProfile().getRemoteId());
-      remoteStorageService.deleteFile("wave", sound.getProfile().getRemoteId());
+      remoteStorageService.deleteFile("wave", sound.getProfile().getRemoteId() + ".png");
 
       soundDAO.delete(sound);
     }
@@ -97,7 +97,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   public void deleteByRemoteId(String remoteId) {
     remoteStorageService.deleteFile("sound", remoteId);
     remoteStorageService.deleteFile("image", remoteId);
-    remoteStorageService.deleteFile("wave", remoteId);
+    remoteStorageService.deleteFile("wave", remoteId + ".png");
     queueNodeDAO.updateProperty("fileName", remoteId, "status", "deleted");
     
     Sound sound = soundDAO.findOne("profile.remoteId", remoteId);
@@ -122,7 +122,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     }
 
     buildSoundSocial(sound);
-    sound.setUserPrefer(getUserPreferOfSound(sound, user));
 
     return sound;
   }
@@ -137,7 +136,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     for (Sound sound : sounds) {
       buildSoundSocial(sound);
-      sound.setUserPrefer(getUserPreferOfSound(sound, user));
     }
 
     return sounds;
@@ -151,7 +149,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     for (Sound sound : sounds) {
       buildSoundSocial(sound);
-      sound.setUserPrefer(getUserPreferOfSound(sound, user));
     }
 
     return sounds;
@@ -177,6 +174,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     SoundProfile profile = sound.getProfile();
     profile.setName(soundProfile.getName());
     profile.setStatus(soundProfile.getStatus());
+
     if (!util.contianInvalidWords(soundProfile.getDescription()))
     {
       profile.setDescription(soundProfile.getDescription());
@@ -192,6 +190,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     profile.setRemoteId(soundProfile.getRemoteId());
     profile.setCommentMode(soundProfile.getCommentMode());
     profile.setRecordType(soundProfile.getRecordType());
+    profile.setUploadType(soundProfile.getUploadType());
 
     SoundPoster poster = new SoundPoster();
     if (null != soundProfile.getPoster()) {
@@ -235,7 +234,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     for (Sound sound : sounds) {
       buildSoundSocial(sound);
-      sound.setUserPrefer(getUserPreferOfSound(sound, owner));
     }
 
     return sounds;
@@ -255,7 +253,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
     for (Sound oneSound : sounds) {
       buildSoundSocial(oneSound);
-      oneSound.setUserPrefer(getUserPreferOfSound(oneSound, user));
     }
 
     return sounds;
@@ -331,6 +328,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
         SoundProfile profile = new SoundProfile();
         profile.setRemoteId(node.getFileName());
         profile.setName(node.getOriginFileName());
+        profile.setUploadType(node.getType());
         sound.setProfile(profile);
         unfinishedSounds.add(sound);
       }
@@ -422,39 +420,24 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     List<Sound> sounds = soundDAO.find(cratiaries);
     for (Sound sound : sounds) {
       buildSoundSocial(sound);
-      sound.setUserPrefer(getUserPreferOfSound(sound, user));
     }
 
     return sounds;
   }
 
-  private String calculateAlias(String soundName) {
-    long sameNames = soundDAO.count("profile.name", soundName);
-
-    int defaultAliasLength = 7;
-    String alias = soundName.replaceAll("\\s+|\\pP", "-");
-
-    if (sameNames > 0) {
-      if (alias.length() > (defaultAliasLength + sameNames)) {
-        alias = alias.substring(0, (int) (defaultAliasLength + sameNames));
-      } else {
-        alias += ("-" + sameNames);
-      }
-    } else {
-      if (alias.length() > defaultAliasLength) {
-        alias = alias.substring(0, defaultAliasLength);
-      }
-    }
-
-    Random random = new Random();
-    while (null != soundDAO.findOne("profile.alias", alias)) {
-      alias += random.nextInt(10);
-    }
-
-    return alias;
+  @Override
+  public void buildSoundSocial(Sound sound) {
+    SoundSocial soundSoical = new SoundSocial();
+    soundSoical.setCommentsCount(sound.getComments().size());
+    soundSoical.setLikesCount(sound.getLikes().size());
+    soundSoical.setPlayedCount(sound.getPlays().size());
+    soundSoical.setReportsCount(sound.getRecords().size() - 1);
+    soundSoical.setVisitsCount(sound.getVisits().size());
+    sound.setSoundSocial(soundSoical);
   }
 
-  private UserPrefer getUserPreferOfSound(Sound sound, User user) {
+  @Override
+  public UserPrefer getUserPreferOfSound(Sound sound, User user) {
     if (null == sound || null == user) {
       return null;
     }
@@ -480,14 +463,30 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     return userPrefer;
   }
 
-  private void buildSoundSocial(Sound sound) {
-    SoundSocial soundSoical = new SoundSocial();
-    soundSoical.setCommentsCount(sound.getComments().size());
-    soundSoical.setLikesCount(sound.getLikes().size());
-    soundSoical.setPlayedCount(sound.getPlays().size());
-    soundSoical.setReportsCount(sound.getRecords().size() - 1);
-    soundSoical.setVisitsCount(sound.getVisits().size());
-    sound.setSoundSocial(soundSoical);
+private String calculateAlias(String soundName) {
+    long sameNames = soundDAO.count("profile.name", soundName);
+
+    int defaultAliasLength = 7;
+    String alias = soundName.replaceAll("\\s+|\\pP", "-");
+
+    if (sameNames > 0) {
+      if (alias.length() > (defaultAliasLength + sameNames)) {
+        alias = alias.substring(0, (int) (defaultAliasLength + sameNames));
+      } else {
+        alias += ("-" + sameNames);
+      }
+    } else {
+      if (alias.length() > defaultAliasLength) {
+        alias = alias.substring(0, defaultAliasLength);
+      }
+    }
+
+    Random random = new Random();
+    while (null != soundDAO.findOne("profile.alias", alias)) {
+      alias += random.nextInt(10);
+    }
+
+    return alias;
   }
 
 }

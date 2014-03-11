@@ -295,6 +295,11 @@ public class Sound extends BaseModel {
      * resing, original
      */
     private String recordType;
+   
+    /**
+     * record, local, sync
+     */
+    private String uploadType;
     
     @Embedded
     private SoundRight soundRight;
@@ -476,7 +481,15 @@ public class Sound extends BaseModel {
       this.duration = duration;
     }
     
-    public boolean isProcessed() {
+    public String getUploadType() {
+		return uploadType;
+	}
+
+	public void setUploadType(String uploadType) {
+		this.uploadType = uploadType;
+	}
+
+	public boolean isProcessed() {
       return processed;
     }
 
@@ -653,6 +666,9 @@ public class Sound extends BaseModel {
     /* live, processed, deleted */
     private String status;
 
+    /* record, local, sync */
+    private String type;
+    
     @JsonIgnore
     public ObjectId getId() {
       return id;
@@ -701,6 +717,14 @@ public class Sound extends BaseModel {
     public void setStatus(String status) {
       this.status = status;
     }
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
   }
   
   public static class SoundFormat {

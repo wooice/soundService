@@ -254,6 +254,10 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
   @Override
   public UserPrefer getUserPrefer(User currentUser, User targetUser) {
+	if (null == currentUser || null == targetUser)
+	{
+		return new UserPrefer();
+	}
     UserPrefer userPrefer = new UserPrefer();
 
     Map<String, Object> cratiaries = new HashMap<String, Object>();
@@ -286,8 +290,16 @@ public class UserService implements com.sound.service.user.itf.UserService {
       profile.setAlias(newProfile.getAlias());
     }
 
-    if (StringUtils.isNotBlank(newProfile.getAvatorUrl()) && newProfile.hasAvatar()) {
-      profile.setAvatorUrl("http://" + storeConfig.getString("IMAGE_DOMAIN") + "/" + newProfile.getAvatorUrl());
+    if (StringUtils.isNotBlank(newProfile.getAvatorUrl()) && profile.isHasAvatar()) {
+      if (newProfile.getAvatorUrl().indexOf("http://") > -1)
+      {
+    	  profile.setAvatorUrl(newProfile.getAvatorUrl());
+      }
+      else
+      {
+    	  profile.setAvatorUrl("http://" + storeConfig.getString("IMAGE_DOMAIN") + "/" + newProfile.getAvatorUrl());
+      }
+      
       profile.setHasAvatar(true);
     }
     else
@@ -769,7 +781,7 @@ public class UserService implements com.sound.service.user.itf.UserService {
 
       userDAO.save(user);
     } else {
-      if (null != user.getProfile().getAvatorUrl() && !exsitingUser.getProfile().hasAvatar()) {
+      if (null != user.getProfile().getAvatorUrl() && !exsitingUser.getProfile().isHasAvatar()) {
         exsitingUser.getProfile().setAvatorUrl(user.getProfile().getAvatorUrl());
       }
       if (null != user.getProfile().getCity()) {

@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.sound.constant.Constant;
 import com.sound.exception.SoundException;
+import com.sound.filter.authentication.ResourceAllowed;
 import com.sound.model.Tag;
 import com.sound.model.Tag.TagCategory;
 import com.sound.model.User;
@@ -36,7 +38,8 @@ import com.sound.service.sound.itf.SoundService;
 
 @Component
 @Path("/tag")
-@RolesAllowed({Constant.ADMIN_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE})
+@RolesAllowed({Constant.ADMIN_ROLE, Constant.GUEST_ROLE, Constant.USER_ROLE, Constant.PRO_ROLE,
+    Constant.SPRO_ROLE})
 public class TagServiceEndpoint {
 
   Logger logger = Logger.getLogger(TagServiceEndpoint.class);
@@ -53,8 +56,34 @@ public class TagServiceEndpoint {
   @Context
   HttpServletRequest req;
 
+  @POST
+  @Path("/prepare")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE, Constant.GUEST_ROLE})
+  @ResourceAllowed
+  public Response createTag() {
+    try {
+      Tag tag = new Tag();
+      tag.setLabel("TEST1");
+      tag.setCurated(true);
+      
+      TagCategory category = new TagCategory();
+      category.setName("TEST1");
+      tag.setCategory(category);
+      tag.setCreatedDate(new Date());
+      tagService.get(tag, true);
+    } catch (SoundException e) {
+      logger.error(e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
+
+    return Response.status(Response.Status.CREATED).build();
+  }
+  
   @PUT
   @Path("/{categoryName}/{tag}/create")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Response createTag(@NotNull @PathParam("tag") String label,
       @NotNull @QueryParam("curated") Boolean curated,
       @PathParam("categoryName") String categoryName) {
@@ -81,6 +110,7 @@ public class TagServiceEndpoint {
   @PUT
   @Path("/sound/{soundAlias}")
   @Consumes(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public List<Tag> attachTagsToSound(@NotNull @PathParam("soundAlias") String soundAlias,
       @NotNull JsonObject inputJsonObj) {
 
@@ -104,6 +134,7 @@ public class TagServiceEndpoint {
 
   @DELETE
   @Path("/sound/{soundAlias}/{tag}")
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public Response detachTagsFromSound(@NotNull @PathParam("soundAlias") String soundAlias,
       @NotNull @PathParam("tag") String tag) {
     User curUser = null;
@@ -125,6 +156,7 @@ public class TagServiceEndpoint {
   @GET
   @Path("/list")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public List<Tag> getTagsContains(@NotNull @QueryParam("term") String term) {
     List<Tag> tags = null;
     try {
@@ -140,6 +172,7 @@ public class TagServiceEndpoint {
   @GET
   @Path("/user/{userAlias}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({Constant.ADMIN_ROLE, Constant.PRO_ROLE, Constant.SPRO_ROLE, Constant.USER_ROLE})
   public List<Tag> getTagsByUser(@NotNull @PathParam("userAlias") String userAlias) {
     List<Tag> tags = null;
     try {
@@ -156,16 +189,21 @@ public class TagServiceEndpoint {
   @GET
   @Path("/list/curated")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public List<Tag> getCuratedTags() {
     List<Tag> tags = null;
     User curUser = null;
     try {
-      curUser = userService.getCurrentUser(req);
       tags = tagService.findCurated();
       
-      for(Tag tag: tags)
+      curUser = userService.getCurrentUser(req);
+      
+      if (null != curUser)
       {
-        tag.setInterested(curUser.containTag(tag));
+	      for(Tag tag: tags)
+	      {
+	        tag.setInterested(curUser.containTag(tag));
+	      }
       }
     } catch (SoundException e) {
       logger.error(e);
@@ -178,6 +216,7 @@ public class TagServiceEndpoint {
   @GET
   @Path("/list/categories")
   @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
   public List<TagCategory> getCategories() {
     List<TagCategory> categories = null;
     try {

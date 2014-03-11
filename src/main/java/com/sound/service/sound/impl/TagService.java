@@ -2,6 +2,7 @@ package com.sound.service.sound.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,11 +55,17 @@ public class TagService implements com.sound.service.sound.itf.TagService {
     if (null != input.getCategory() && null != input.getCategory().getName())
     {
       category = tagCategoryDAO.findOne("name", input.getCategory().getName());
+      
       if (null == category)
       {
-        tagCategoryDAO.save(category);
+    	input.getCategory().setCreatedTime(new Date());
+    	input.getCategory().setCurated(input.isCurated());
+        tagCategoryDAO.save(input.getCategory());
       }
-      input.setCategory(category);
+      else
+      {
+    	 input.setCategory(category);
+      }
     }
 
     tagDAO.save(input);

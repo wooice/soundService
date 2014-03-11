@@ -15,4 +15,8 @@ public interface RemoteStorageService {
   public void uploadFile(String type, String fileKey, String filePath);
 
   public String getSoundInfo(String remoteId);
+  
+  public String generateToken(String urlToGenerate);
+  
+  public String getBucket(String type);
 }
