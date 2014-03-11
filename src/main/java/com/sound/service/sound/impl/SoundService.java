@@ -87,7 +87,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
       queueNodeDAO.updateProperty("fileName", sound.getProfile().getRemoteId(), "status", "deleted");
       remoteStorageService.deleteFile("sound", sound.getProfile().getRemoteId());
       remoteStorageService.deleteFile("image", sound.getProfile().getRemoteId());
-      remoteStorageService.deleteFile("wave", sound.getProfile().getRemoteId());
+      remoteStorageService.deleteFile("wave", sound.getProfile().getRemoteId() + ".png");
 
       soundDAO.delete(sound);
     }
@@ -97,7 +97,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   public void deleteByRemoteId(String remoteId) {
     remoteStorageService.deleteFile("sound", remoteId);
     remoteStorageService.deleteFile("image", remoteId);
-    remoteStorageService.deleteFile("wave", remoteId);
+    remoteStorageService.deleteFile("wave", remoteId + ".png");
     queueNodeDAO.updateProperty("fileName", remoteId, "status", "deleted");
     
     Sound sound = soundDAO.findOne("profile.remoteId", remoteId);
@@ -174,6 +174,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     SoundProfile profile = sound.getProfile();
     profile.setName(soundProfile.getName());
     profile.setStatus(soundProfile.getStatus());
+
     if (!util.contianInvalidWords(soundProfile.getDescription()))
     {
       profile.setDescription(soundProfile.getDescription());
@@ -189,6 +190,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     profile.setRemoteId(soundProfile.getRemoteId());
     profile.setCommentMode(soundProfile.getCommentMode());
     profile.setRecordType(soundProfile.getRecordType());
+    profile.setUploadType(soundProfile.getUploadType());
 
     SoundPoster poster = new SoundPoster();
     if (null != soundProfile.getPoster()) {
@@ -326,6 +328,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
         SoundProfile profile = new SoundProfile();
         profile.setRemoteId(node.getFileName());
         profile.setName(node.getOriginFileName());
+        profile.setUploadType(node.getType());
         sound.setProfile(profile);
         unfinishedSounds.add(sound);
       }

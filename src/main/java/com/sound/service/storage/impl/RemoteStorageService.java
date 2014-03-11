@@ -92,6 +92,88 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     return generateDownUrl(getSound, format);
   }
   
+  public void deleteFile(String type, String fileKey) {
+    RSClient client = new RSClient(mac);
+    if (type.equals("sound")) {
+      client.delete(config.getString("SOUND_BUCKET"), fileKey);
+    } else {
+      if (type.equals("wave"))
+      {
+        client.delete(config.getString("IMAGE_BUCKET"), fileKey);
+      }
+      else
+      {
+        client.delete(config.getString("IMAGE_BUCKET"), fileKey);
+      }
+    }
+  }
+  
+  @Override
+  public void uploadFile(String type, String fileKey, String filePath) {
+    PutPolicy putPolicy = new PutPolicy(config.getString("WAVE_BUCKET"));
+    try {
+      String uptoken = putPolicy.token(mac);
+      PutExtra extra = new PutExtra();
+      IoApi.putFile(uptoken, fileKey, filePath, extra);
+    } catch (AuthException e) {
+      e.printStackTrace();
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public String getSoundInfo(String remoteId) {
+    String infoURL = this.getDownloadURL(remoteId, "sound", "avinfo");
+    try {
+      HttpClient httpClient = new DefaultHttpClient();
+      HttpGet httpget = new HttpGet(infoURL);
+      HttpResponse httpresponse = httpClient.execute(httpget);
+      // 获取返回数据
+      HttpEntity entity = httpresponse.getEntity();
+      return EntityUtils.toString(entity, "UTF-8");
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  //http://developer.qiniu.com/docs/v6/api/reference/security/access-token.html
+  @Override
+  public String generateToken(String urlToGenerate)
+  {
+	  if (null == urlToGenerate)
+	  {
+		  return null;
+	  }
+	  
+	  try {
+		return mac.sign(urlToGenerate.getBytes());
+	} catch (AuthException e) {
+		e.printStackTrace();
+		return null;
+	}
+  }
+  
+  @Override
+  public String getBucket(String type)
+  {
+	  if ("sound".equals(type))
+	  {
+		  return config.getString("SOUND_BUCKET");
+	  }
+	  else
+	  {
+		  if ("image".equals(type))
+		  {
+			  return config.getString("IMAGE_BUCKET");	 
+		  }
+		  else
+		  {
+			  return config.getString("SOUND_BUCKET"); 
+		  }
+	  }
+  }
+  
   private String generateDownUrl(GetSound input, String format) {
     try {
       String baseUrl = null;
@@ -157,49 +239,5 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     }
   
     return null;
-  }
-
-  public void deleteFile(String type, String fileKey) {
-    RSClient client = new RSClient(mac);
-    if (type.equals("sound")) {
-      client.delete(config.getString("SOUND_BUCKET"), fileKey);
-    } else {
-      if (type.equals("wave"))
-      {
-        client.delete(config.getString("IMAGE_BUCKET"), fileKey);
-      }
-      else
-      {
-        client.delete(config.getString("IMAGE_BUCKET"), fileKey);
-      }
-    }
-  }
-  
-  public void uploadFile(String type, String fileKey, String filePath) {
-    PutPolicy putPolicy = new PutPolicy(config.getString("WAVE_BUCKET"));
-    try {
-      String uptoken = putPolicy.token(mac);
-      PutExtra extra = new PutExtra();
-      IoApi.putFile(uptoken, fileKey, filePath, extra);
-    } catch (AuthException e) {
-      e.printStackTrace();
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
-  }
-  
-  @Override
-  public String getSoundInfo(String remoteId) {
-    String infoURL = this.getDownloadURL(remoteId, "sound", "avinfo");
-    try {
-      HttpClient httpClient = new DefaultHttpClient();
-      HttpGet httpget = new HttpGet(infoURL);
-      HttpResponse httpresponse = httpClient.execute(httpget);
-      // 获取返回数据
-      HttpEntity entity = httpresponse.getEntity();
-      return EntityUtils.toString(entity);
-    } catch (Exception e) {
-      return null;
-    }
   }
 }

@@ -212,7 +212,7 @@ public class SoundServiceEndpoint {
     try {
       currentUser = userService.getCurrentUser(req);
 
-      if (soundService.isOwner(currentUser, soundAlias)) {
+      if (soundService.isOwner(currentUser, soundAlias) || currentUser.getUserRoles().contains(Constant.ADMIN_ROLE_OBJ)) {
         soundService.delete(soundAlias);
       } else {
         return Response.status(Status.FORBIDDEN).build();

@@ -66,7 +66,7 @@ public class SoundDAO extends BaseDAO<Sound, ObjectId> {
     query.criteria("records.owner").equal(user);
 
     List<Integer> status = new ArrayList<Integer>();
-    if (null!=curUser && !user.equals(curUser)) {
+    if (!(null!=curUser && user.equals(curUser))) {
       status.add(SoundState.PRIVATE.getStatusId());
     }
     status.add(SoundState.PROCESSING.getStatusId());

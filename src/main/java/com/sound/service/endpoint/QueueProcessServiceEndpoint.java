@@ -105,8 +105,10 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         success = false;
         titile = "声音上传失败";
         // if stream or format info not ready, just ignore it.
-        if ("EMPTY_STREAM".equals(e.getMessage()) || "NO_FORMATINFO".equals(e.getMessage())) {
-          continue;
+        if ("PARSE_FAILED".equals(e.getMessage())) {
+        	message =
+                    "非常抱歉，您上传的音频无法处理，请确认音频无损伤并再次尝试。";
+        	soundService.deleteByRemoteId(node.getFileName());
         }
         if ("TOTAL_LIMIT_ERROR".equals(e.getMessage())) {
           message =
@@ -133,6 +135,7 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         success = false;
         titile = "声音上传失败";
         message = "非常抱歉，您的声音" + node.getOriginFileName() + "上传失败，请稍后再次尝试或联系我们。";
+        soundService.deleteByRemoteId(node.getFileName());
       }
 
       if (success) {
@@ -142,6 +145,7 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
 
       messageService.sendUserMessage(null, owner, titile, message);
     }
+    
     return Response.status(Status.OK).build();
   }
 
