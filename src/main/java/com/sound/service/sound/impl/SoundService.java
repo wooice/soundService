@@ -193,6 +193,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     profile.setUploadType(soundProfile.getUploadType());
 
     SoundPoster poster = new SoundPoster();
+    
     if (null != soundProfile.getPoster()) {
       poster.setUrl(remoteStorageService.getDownloadURL(sound.getProfile().getRemoteId(), "image",
           "imageView/2/w/200/h/200/format/png"));

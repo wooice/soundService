@@ -16,7 +16,6 @@ import org.json.JSONException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.qiniu.api.auth.AuthException;
 import com.qiniu.api.auth.digest.Mac;
 import com.qiniu.api.io.IoApi;
 import com.qiniu.api.io.PutExtra;
@@ -24,6 +23,7 @@ import com.qiniu.api.rs.GetPolicy;
 import com.qiniu.api.rs.PutPolicy;
 import com.qiniu.api.rs.RSClient;
 import com.qiniu.api.rs.URLUtils;
+import com.qiniu.api.auth.AuthException;
 import com.sound.constant.Constant;
 import com.sound.exception.RemoteStorageException;
 
@@ -65,7 +65,9 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     PutSound putSound = new PutSound();
     putSound.key = fileKey;
     putSound.type = "sound";
-    putSound.asyncOps = "avthumb/wav/acodec/pcm_s16le;avthumb/mp3";
+    putSound.asyncOps = "avthumb/wav/acodec/pcm_s16le";
+    putSound.persistentOps = "avthumb/mp3";
+    putSound.persistentNotifyUrl = "http://www.baidu.com";
 
     Map<String, String> uploadInfo = new HashMap<String, String>();
     uploadInfo.put("token", generateUpToken(putSound));
@@ -221,6 +223,8 @@ public class RemoteStorageService implements com.sound.service.storage.itf.Remot
     }
   
     putPolicy.asyncOps = input.asyncOps;
+    putPolicy.persistentOps = input.persistentOps;
+    putPolicy.persistentNotifyUrl = input.persistentNotifyUrl;
     putPolicy.callbackBody = input.callbackBody;
     putPolicy.callbackUrl = input.callbackUrl;
     putPolicy.endUser = input.endUser;

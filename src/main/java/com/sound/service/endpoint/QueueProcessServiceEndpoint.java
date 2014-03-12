@@ -73,7 +73,7 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
             queueService.processSound(owner, downURL, node);
         sound.setOriginName(node.getOriginFileName());
 
-        soundService.promoteUser(owner);
+//        soundService.promoteUser(owner);
       } 
       catch (SoundAuthException authException)
       {
@@ -132,6 +132,8 @@ public class QueueProcessServiceEndpoint extends BaseEndpoint {
         message =
             "非常抱歉，由于您的声音文件格式不正确，您的声音" + ((null == sound) ? "" : node.getOriginFileName()) + "无法完成上传。";
       } catch (Exception e) {
+    	logger.error("Sound Process Exception: " + e.getMessage(), e);
+    	
         success = false;
         titile = "声音上传失败";
         message = "非常抱歉，您的声音" + node.getOriginFileName() + "上传失败，请稍后再次尝试或联系我们。";

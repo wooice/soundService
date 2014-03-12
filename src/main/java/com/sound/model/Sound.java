@@ -728,7 +728,7 @@ public class Sound extends BaseModel {
   }
   
   public static class SoundFormat {
-    private float duration;
+    private float duration = 0L;
     private String performer;
     private int track;
     private String title;
