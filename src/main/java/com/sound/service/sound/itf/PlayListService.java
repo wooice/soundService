@@ -6,9 +6,11 @@ import com.sound.model.Sound;
 import com.sound.model.User;
 
 public interface PlayListService {
-  public void addPlayRecord(User user, Sound sound);
+  public void add(User user, Sound sound);
   
-  public List<Sound> getPlayRecords(User user);
+  public List<Sound> list(User user, Integer pageNum, Integer perPage);
   
-  public void removePlayRecord(User user, Sound sound);
+  public void remove(User user, Sound sound);
+  
+  public void updateStatus(User user, Sound sound, String status);
 }

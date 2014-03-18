@@ -861,6 +861,10 @@ public class User extends BaseModel {
     @Reference(lazy = true)
     private Sound sound;
     
+    private String status;
+    
+    private String createdDate;
+    
     @JsonIgnore
     public ObjectId getId() {
       return id;
@@ -885,6 +889,23 @@ public class User extends BaseModel {
     public void setSound(Sound sound) {
       this.sound = sound;
     }
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(String createdDate) {
+		this.createdDate = createdDate;
+	}
+    
   }
 
   @Override
