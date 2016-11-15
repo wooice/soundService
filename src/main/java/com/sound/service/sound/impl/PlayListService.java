@@ -16,57 +16,69 @@ import com.sound.model.User.PlayRecord;
 
 @Service
 @Scope("singleton")
-public class PlayListService implements com.sound.service.sound.itf.PlayListService {
+public class PlayListService implements
+		com.sound.service.sound.itf.PlayListService {
 
-  @Autowired
-  PlayRecordDAO playRecordDAO;
-  
-  @Override
-  public void addPlayRecord(User user, Sound sound) {
-    PlayRecord record = playRecordDAO.findOne("sound", sound);
+	@Autowired
+	PlayRecordDAO playRecordDAO;
 
-    if (null != record)
-    {
-      return ;
-    }
-    
-    record = new PlayRecord();
-    record.setSound(sound);
-    record.setUser(user);
-    
-    playRecordDAO.save(record);
-  }
+	@Override
+	public void add(User user, Sound sound) {
+		PlayRecord record = playRecordDAO.findOne("sound", sound);
 
-  @Override
-  public void removePlayRecord(User user, Sound sound) {
-    if (null == user && null == sound)
-    {
-      return;
-    }
-    Map<String, Object> cratiaries = new HashMap<String, Object>();
-    if (null != user)
-    {
-      cratiaries.put("user", user);
-    }
-    if (null != sound)
-    {
-      cratiaries.put("sound", sound);
-    }
-    
-    playRecordDAO.deleteByProperties(cratiaries);
-  }
+		if (null != record) {
+			return;
+		}
 
-  @Override
-  public List<Sound> getPlayRecords(User user) {
-    List<PlayRecord> records = playRecordDAO.find("user", user);
-    List<Sound> sounds = new ArrayList<Sound>();
-    
-    for (PlayRecord record: records)
-    {
-      sounds.add(record.getSound());
-    }
-    
-    return sounds;
-  }
+		record = new PlayRecord();
+		record.setSound(sound);
+		record.setUser(user);
+		record.setStatus("live");
+
+		playRecordDAO.save(record);
+	}
+
+	@Override
+	public void remove(User user, Sound sound) {
+		if (null == user && null == sound) {
+			return;
+		}
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
+		if (null != user) {
+			cratiaries.put("user", user);
+		}
+		if (null != sound) {
+			cratiaries.put("sound", sound);
+		}
+
+		playRecordDAO.deleteByProperties(cratiaries);
+	}
+
+	@Override
+	public List<Sound> list(User user, Integer pageNum, Integer perPage) {
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
+		cratiaries.put("user", user);
+		cratiaries.put("status", "live");
+		List<PlayRecord> records = playRecordDAO.findWithRange(cratiaries, (pageNum - 1) * perPage, perPage, "-createdDate");
+		List<Sound> sounds = new ArrayList<Sound>();
+
+		for (PlayRecord record : records) {
+			sounds.add(record.getSound());
+		}
+
+		return sounds;
+	}
+
+	@Override
+	public void updateStatus(User user, Sound sound, String status) {
+		Map<String, Object> cratiaries = new HashMap<String, Object>();
+		
+		if (null != user)
+		{
+			cratiaries.put("user", user);
+		}
+		cratiaries.put("sound", sound);
+		playRecordDAO.updateProperty(cratiaries, "status", status);
+	}
 
 }

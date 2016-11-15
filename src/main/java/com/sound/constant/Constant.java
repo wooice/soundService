@@ -38,7 +38,7 @@ public class Constant {
   
   public static final Integer PRO_ALLOWED_DURATION = 360;
   
-  public static final Integer WEEKLY_ALLOWED_DURATION = 30 * 60;
+  public static final Integer WEEKLY_ALLOWED_DURATION = 20 * 60;
  
   public static final String COMMENT_PUBLIC = "public";
   

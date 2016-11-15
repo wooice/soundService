@@ -82,7 +82,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
           "userSocial.soundDuration", (sound.getProfile().getOwner().getUserSocial()
               .getSoundDuration() - sound.getProfile().getDuration()));
       
-      playListService.removePlayRecord(null, sound);
+      playListService.remove(null, sound);
       
       queueNodeDAO.updateProperty("fileName", sound.getProfile().getRemoteId(), "status", "deleted");
       remoteStorageService.deleteFile("sound", sound.getProfile().getRemoteId());
@@ -108,7 +108,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
               .getSoundDuration() - sound.getProfile().getDuration()));
 
       userDAO.decrease("_id", sound.getProfile().getOwner().getId(), "userSocial.sounds");
-      playListService.removePlayRecord(null, sound);
+      playListService.remove(null, sound);
     }
 
     soundDAO.deleteByProperty("profile.remoteId", remoteId);
@@ -129,7 +129,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
   @Override
   public List<Sound> loadByKeyWords(User user, String keyWord, Integer pageNum,
       Integer soundsPerPage) {
-
     List<User> users = userDAO.findByPattern("profile.alias", keyWord, true);
     List<Sound> sounds =
         soundDAO.findByKeyWord(keyWord, users, (pageNum - 1) * soundsPerPage, soundsPerPage);
@@ -143,7 +142,6 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
 
   @Override
   public List<Sound> loadByTags(User user, List<Tag> tags, Integer pageNum, Integer soundsPerPage) {
-
     List<Sound> sounds =
         soundDAO.findByTag(user, tags, (pageNum - 1) * soundsPerPage, soundsPerPage);
 
@@ -193,6 +191,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     profile.setUploadType(soundProfile.getUploadType());
 
     SoundPoster poster = new SoundPoster();
+    
     if (null != soundProfile.getPoster()) {
       poster.setUrl(remoteStorageService.getDownloadURL(sound.getProfile().getRemoteId(), "image",
           "imageView/2/w/200/h/200/format/png"));
@@ -276,10 +275,19 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
           soundProfile.getDescription());
     }
 
-    if (null != soundProfile.getStatus()) {
-      soundDAO.updateProperty("_id", new ObjectId(id), "profile.status",
-          SoundState.getStateId(soundProfile.getStatus()));
-    }
+		if (null != soundProfile.getStatus()) {
+			Sound sound = soundDAO.get(new ObjectId(id));
+			if (!"private".equals(sound.getProfile().getStatus())
+					&& "private".equals(soundProfile.getStatus())) {
+				playListService.updateStatus(null, sound, "hidden");
+			}
+			if (!"public".equals(sound.getProfile().getStatus())
+					&& "public".equals(soundProfile.getStatus())) {
+				playListService.updateStatus(null, sound, "live");
+			}
+			soundDAO.updateProperty("_id", new ObjectId(id), "profile.status",
+					SoundState.getStateId(soundProfile.getStatus()));
+		}
 
     if (null != soundProfile.getPoster()) {
       soundProfile.getPoster().setUrl(
@@ -433,6 +441,7 @@ public class SoundService implements com.sound.service.sound.itf.SoundService {
     soundSoical.setPlayedCount(sound.getPlays().size());
     soundSoical.setReportsCount(sound.getRecords().size() - 1);
     soundSoical.setVisitsCount(sound.getVisits().size());
+    
     sound.setSoundSocial(soundSoical);
   }
 

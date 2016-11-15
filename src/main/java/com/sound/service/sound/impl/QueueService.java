@@ -72,20 +72,32 @@ public class QueueService implements com.sound.service.sound.itf.QueueService {
 					DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,
 					false);
 			SoundFormat soundFormat = null;
+			float duration = 0L;
 
 			if (null != soundInfoString && soundInfoString.contains("streams")) {
 				try {
 					JsonNode rootNode = mapper.readTree(soundInfoString);
+					
+					if (null != rootNode.findValue("duration"))
+					{
+						duration = (float) rootNode.findValue("duration").asDouble();
+					}
+					
 					JsonNode formatNode = rootNode.path("format").path("tags");
 
 					if (null != formatNode) {
 						soundFormat = mapper.readValue(formatNode,
 								SoundFormat.class);
-						soundFormat.setDuration((float) rootNode.findValue(
-								"duration").asDouble());
 					}
 				} catch (Exception e) {}
 			}
+			
+			if (null == soundFormat)
+			{
+				soundFormat = new SoundFormat();
+			}
+			
+			soundFormat.setDuration(duration);
 
 			// Check total sounds sum
 			List<Sound> sounds = soundDAO.find("profile.owner", user);

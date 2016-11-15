@@ -96,7 +96,7 @@ public class SoundSocialService implements com.sound.service.sound.itf.SoundSoci
     
     if (null != user)
     {
-      playListService.addPlayRecord(user, sound);
+      playListService.add(user, sound);
       userService.saveUser(user);
     }
     

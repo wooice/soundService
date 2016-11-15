@@ -177,7 +177,7 @@ public class SoundServiceEndpoint {
   public List<Sound> getPlayList() {
     User curUser = userService.getCurrentUser(req);
 
-    return playListService.getPlayRecords(curUser);
+    return playListService.list(curUser, 0, 200);//TODO: pagination
   }
   
   @POST
@@ -186,7 +186,7 @@ public class SoundServiceEndpoint {
   public Response addToPlaylist(@NotNull @QueryParam("soundId") String soundId) {
     Sound sound = soundService.loadById(soundId);
     User curUser = userService.getCurrentUser(req);
-    playListService.addPlayRecord(curUser, sound);
+    playListService.add(curUser, sound);
     userService.saveUser(curUser);
 
     return Response.status(Status.OK).build();
@@ -198,7 +198,7 @@ public class SoundServiceEndpoint {
   public Response deleteFromPlaylist(@NotNull @QueryParam("soundId") String soundId) {
     Sound sound = soundService.loadById(soundId);
     User curUser = userService.getCurrentUser(req);
-    playListService.removePlayRecord(curUser, sound);
+    playListService.remove(curUser, sound);
     userService.saveUser(curUser);
 
     return Response.status(Status.OK).build();
@@ -237,6 +237,34 @@ public class SoundServiceEndpoint {
     return Response.status(Status.OK).build();
   }
 
+  @POST
+  @Path("/streams/playlist/{listName}")
+  @Produces(MediaType.APPLICATION_JSON)
+  @ResourceAllowed
+  public List<Sound> listSoundsInList(@NotNull @PathParam("listName") String listName,
+      @QueryParam("pageNum") Integer pageNum, @QueryParam("soundsPerPage") Integer soundsPerPage) {
+    pageNum = (null == pageNum) ? 0 : pageNum;
+    soundsPerPage = (null == soundsPerPage) ? 15 : soundsPerPage;
+
+    List<Sound> sounds = null;
+    User currentUser = null;
+    try {
+      currentUser = userService.getCurrentUser(req);
+      sounds =  playListService.list(currentUser, pageNum, soundsPerPage);
+      
+      for (Sound sound: sounds)
+      {
+    	  soundService.buildSoundSocial(sound);
+    	  sound.setUserPrefer(soundService.getUserPreferOfSound(sound, currentUser));
+      }
+    } catch (Exception e) {
+      logger.error(e);
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    return sounds;
+  }
+  
   @POST
   @Path("/streams/match/{q}")
   @Produces(MediaType.APPLICATION_JSON)

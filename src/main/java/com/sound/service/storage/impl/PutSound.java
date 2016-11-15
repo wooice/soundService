@@ -9,12 +9,16 @@ public class PutSound {
   public String callbackUrl;
   /** 可选 */
   public String callbackBody;
+  
+  public String persistentNotifyUrl;
   /** 可选 */
   public String returnUrl;
   /** 可选 */
   public String returnBody;
   /** 可选 */
   public String asyncOps;
+  
+  public String persistentOps;
   /** 可选 */
   public String endUser;
   /** 可选 */
@@ -36,7 +40,15 @@ public class PutSound {
     this.callbackBody = callbackBody;
   }
 
-  public String getReturnUrl() {
+  public String getPersistentNotifyUrl() {
+	return persistentNotifyUrl;
+  }
+
+  public void setPersistentNotifyUrl(String persistentNotifyUrl) {
+	this.persistentNotifyUrl = persistentNotifyUrl;
+  }
+
+public String getReturnUrl() {
     return returnUrl;
   }
 
@@ -60,7 +72,15 @@ public class PutSound {
     this.asyncOps = asyncOps;
   }
 
-  public String getEndUser() {
+	public String getPersistentOps() {
+		return persistentOps;
+	}
+
+	public void setPersistentOps(String persistentOps) {
+		this.persistentOps = persistentOps;
+	}
+
+public String getEndUser() {
     return endUser;
   }
 

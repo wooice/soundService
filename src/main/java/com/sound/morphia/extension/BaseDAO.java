@@ -105,6 +105,16 @@ public class BaseDAO<T, PK> extends BasicDAO<T, PK> {
     this.update(updateQuery, ops);
   }
 
+  public void updateProperty(Map<String, Object> cratiaries, String property, Object object) {
+	    Query<T> updateQuery = this.ds.createQuery(clazz);
+
+	    for (String key : cratiaries.keySet()) {
+	    	updateQuery.field(key).equal(cratiaries.get(key));
+	    }
+	    UpdateOperations<T> ops = ds.createUpdateOperations(this.clazz).set(property, object);
+	    this.update(updateQuery, ops);
+  }
+  
   public List<T> fetchEntitiesPropertyContains(String property, Object target) {
     List<T> result = new ArrayList<T>();
     Query<T> query = createQuery().field(property).hasThisOne(target);
